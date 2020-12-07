@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-03-17 15:39:23
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-05 21:58:16
+ * @Last Modified Time: 2020-12-07 17:11:21
  */
 
 #include "taxtree.h"
@@ -103,14 +103,12 @@ void Node::updateRootedTree() {
   theInfo("This tree is a rooted treee, keep as it is");
 
   // set branch lineage: type, fullname,  taxLevel
-  checkUnclassified();
-  setBranchLineage();
+  setAllBranches();
 }
 
-Node *Node::rootingDirect(){
-  Node* theTree = _forceRooting(this);
-  theTree->checkUnclassified();
-  theTree->setBranchLineage();
+Node *Node::rootingDirect() {
+  Node *theTree = _forceRooting(this);
+  theTree->setAllBranches();
   return theTree;
 };
 
@@ -126,8 +124,7 @@ Node *Node::rootingByOutgrp(const string &str) {
   theTree = _forceRooting(theTree);
 
   // set branch lineage: type, fullname,  taxLevel
-  theTree->checkUnclassified();
-  theTree->setBranchLineage();
+  theTree->setAllBranches();
   return theTree;
 };
 
@@ -135,8 +132,7 @@ Node *Node::rootingByTaxa() {
 
   // preset the branch attraction
   Node *theTree = this;
-  theTree->checkUnclassified();
-  theTree->setBranchLineage();
+  theTree->setAllBranches();
 
   // find the candidate of outgroup
   vector<Node *> clades;
@@ -160,8 +156,7 @@ Node *Node::rootingByTaxa() {
     // rearrange the tree (still unroot tree)
     theTree = resetroot(outgrp);
     // renew the update branch
-    chgBranch->checkUnclassified();
-    chgBranch->setBranchLineage();
+    chgBranch->setAllBranches();
 
     // find a good outgroup (the last item of children)
     // by higest rank of common lineage or longest branch length
@@ -200,22 +195,12 @@ Node *Node::rootingByTaxa() {
   theTree = _forceRooting(theTree);
 
   // renew the added node and the root
-  theTree->children.back()->_renewNode();
-  theTree->_renewNode();
+  theTree->children.front()->_setOneBranch();
+  theTree->children.back()->_setOneBranch();
+  theTree->_setOneBranch();
 
   return theTree;
 };
-
-void Node::_renewNode() {
-  nxleaf = 0;
-  nleaf = 0;
-  for (auto &nd : children) {
-    nxleaf += nd->nxleaf;
-    nleaf += nd->nleaf;
-  }
-  if (nleaf == 0)
-    unclassified = true;
-}
 
 bool Node::_getOutgrpCandidates(vector<Node *> &clades) {
   if (unclassified) {
@@ -238,7 +223,7 @@ bool Node::_getOutgrpCandidates(vector<Node *> &clades) {
 Node *Node::_forceRooting(Node *root) {
 
   // testing whether a rooted tree
-  if(root->children.size()==2){
+  if (root->children.size() == 2) {
     theInfo("This is a rooted tree");
     return root;
   }
@@ -250,11 +235,11 @@ Node *Node::_forceRooting(Node *root) {
   Node *outgrp = root->children.back();
   // the branch length are divided equally to two branch
   outgrp->length *= 0.5;
-  theRoot->children.push_back(outgrp); // outgrp at front
+  theRoot->addChild(outgrp); // outgrp at front  
   root->children.pop_back();
 
   // the origal node as another child of the Root
-  theRoot->children.push_back(root);
+  theRoot->addChild(root);
   root->length = outgrp->length;
 
   return theRoot;
@@ -780,6 +765,55 @@ void Node::getUndefineNames(vector<string> &names) {
  * @brief set the lineage and annotate taxonomy of tree
  *
  ********************************************************************************/
+void Node::setOneLeaf(const Lineage& lng){
+    if(lng.def){
+      nleaf = 1;
+      unclassified = false;
+    }else{
+      nxleaf = 1;
+      unclassified = true;
+    }
+    name = lng.name;
+    taxLevel = nRanks(lng.name);
+};
+
+void Node::_setOneBranch() {
+
+  nxleaf = 0;
+  nleaf = 0;
+  vector<Node *> defNode;
+  vector<Node *> undefNode;
+  for (auto &nd : children) {
+    nxleaf += nd->nxleaf;
+    nleaf += nd->nleaf;
+    if (nd->unclassified) {
+      undefNode.emplace_back(nd);
+    } else {
+      defNode.emplace_back(nd);
+    }
+  }
+
+  // set unclassified and name
+  if (nleaf == 0) {
+    // for unclassified node
+    unclassified = true;
+    name = _getBranchName(undefNode);
+  } else {
+    // for defined node
+    name = _getBranchName(defNode);
+  }
+
+  // set tax level
+  taxLevel = nRanks(name);
+}
+
+void Node::setAllBranches(){
+  if(!isLeaf()){
+    for (auto &child : children) 
+      child->setAllBranches();
+    _setOneBranch();
+  }
+}
 
 void Node::setBranchLineage() {
   if (!isLeaf()) {
@@ -803,11 +837,7 @@ void Node::setBranchLineage() {
   }
 
   // set tax level
-  taxLevel = 0;
-  for (auto c : name) {
-    if (c == '<')
-      taxLevel++;
-  }
+  taxLevel = nRanks(name);
 };
 
 string Node::_getBranchName(const vector<Node *> &nds) {
@@ -832,7 +862,7 @@ string Node::_getBranchName(const vector<Node *> &nds) {
 
 int Node::nClade() {
   if (parent == NULL) {
-    return 1;
+    return taxLevel;
   } else {
     size_t pTaxLevel = parent->taxLevel;
     if (unclassified && !parent->unclassified)

@@ -7,17 +7,27 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-09-01 13:03:04
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-05 22:51:04
+ * @Last Modified Time: 2020-12-07 15:35:52
  */
 
 #include "lineage.h"
-extern Info theInfo;
 
-/****************************************
- **** basic option of Lineage**********/
-LineageHandle::LineageHandle(const string &taxfile) : taxfile(taxfile){};
+/********************************************************************************
+ * @brief Construct a new Lineage Handle:: Lineage Handle object.
+ *        basic option of Lineage
+ * @param taxfile 
+ ********************************************************************************/
+LineageHandle::LineageHandle(const string &taxfile) : taxfile(taxfile){
+  setOutRankByTaxfile();
+  setOutRank();
+};
+
 LineageHandle::LineageHandle(const string &taxfile, const string &revfile)
-    : taxfile(taxfile), revfile(revfile){};
+    : taxfile(taxfile), revfile(revfile) {
+  setOutRankByTaxfile();
+  setOutRank();
+};
+
 LineageHandle::LineageHandle(const string &taxfile, const string &revfile,
                              const string &abfile, const string &abtype)
     : taxfile(taxfile), revfile(revfile) {
@@ -61,6 +71,7 @@ void LineageHandle::setRankByFile(const string &file) {
   }
 };
 
+
 void LineageHandle::setOutRank() {
 
   map<char, string> abmap;
@@ -93,8 +104,7 @@ void LineageHandle::setOutRankByTaxfile() {
       trim(line);
     } while (line.empty());
 
-    regex reg("<[A-z]>");
-    sregex_iterator iter(line.begin(), line.end(), reg);
+    sregex_iterator iter(line.begin(), line.end(), prefix);
     sregex_iterator iterEnd;
     for (; iter != iterEnd; ++iter) {
       outRankStr += iter->str().at(1);
@@ -106,42 +116,11 @@ void LineageHandle::setOutRankByTaxfile() {
   }
 };
 
-void LineageHandle::format(string &atax) {
-
-  string str = atax;
-  atax.clear();
-  for (const auto &t : outrank) {
-    string tlab = "<";
-    tlab += t.second;
-    tlab += ">";
-    auto bpos = str.find(tlab);
-    if (bpos == string::npos) {
-      atax += tlab;
-      atax += undefStr;
-    } else {
-      auto epos = str.find_first_of('<', bpos + 1);
-      atax += str.substr(bpos, epos - bpos);
-    }
-  }
-
-  // for the strain name
-  auto bpos = str.rfind("<T>");
-  if (bpos == string::npos) {
-    // don't find <T> label
-    atax += "<T>";
-    bpos = str.find_last_of('>');
-    bpos = (bpos == string::npos) ? 0 : bpos + 1;
-  }
-
-  auto epos = str.find_first_of('<', bpos + 1);
-  if (epos == string::npos) {
-    atax += str.substr(bpos);
-  } else {
-    atax += str.substr(bpos, epos - bpos);
-  }
-};
-
-// the search entry
+/********************************************************************************
+ * @brief obtained the lineage string from the taxfile
+ * 
+ * @param lngs a list of lineage for query and retrun
+ ********************************************************************************/
 void LineageHandle::getLineage(vector<Lineage> &lngs) {
 
   // use the cache file
@@ -183,41 +162,7 @@ void LineageHandle::getLineage(vector<Lineage> &lngs) {
   }
 };
 
-void LineageHandle::checkRepeats(vector<Lineage> &lngs) {
-
-  map<string, int> nameMap;
-  for (auto &nm : lngs) {
-    if (nameMap.find(nm.name) == nameMap.end()) {
-      nameMap[nm.name] = 1;
-    } else {
-      theInfo("repeat strain: " + nm.name);
-      nm.name += ".repeat-" + to_string(++nameMap[nm.name]);
-    }
-  }
-}
-
-string LineageHandle::lineageString(const vector<RankName> &lngs) const {
-  string lineStr("");
-  for (auto &lng : lngs) {
-    lineStr += lineageString(lng);
-  }
-  return lineStr;
-}
-
-string LineageHandle::lineageString(const RankName &lng) const {
-  string lineStr("");
-  if (rankmap.find(lng.first) != rankmap.end()) {
-    lineStr += "<";
-    lineStr += rankmap.find(lng.first)->second;
-    lineStr += ">";
-    lineStr += lng.second;
-  }
-  return lineStr;
-}
-
-/**************************************************
- **** lineage by input taxon file *****************/
-
+// read lineage string from input taxon file
 void LineageHandle::readTaxFile(TaxMap &taxmap) {
 
   // get lineage map from file
@@ -248,24 +193,84 @@ void LineageHandle::readTaxFile(TaxMap &taxmap) {
   tax.close();
 };
 
-void LineageHandle::writeTaxFile(TaxMap &taxmap) {
+// format the lineage string according to outRank
+void LineageHandle::format(string &atax) {
 
-  if (!taxfile.empty()) {
-    // get lineage map from file
-    ofstream tax(taxfile);
-    if (tax) {
-      for (auto &item : taxmap) {
-        if (item.second != "")
-          tax << item.first << " " << item.second << endl;
-      }
+  string str = atax;
+  atax.clear();
+  for (const auto &t : outrank) {
+    string tlab = "<";
+    tlab += t.second;
+    tlab += ">";
+    auto bpos = str.find(tlab);
+    if (bpos == string::npos) {
+      atax += tlab;
+      atax += undefStr;
     } else {
-      cerr << "\nWrite lineage cache file " << taxfile << " failed!" << endl;
+      auto epos = str.find_first_of('<', bpos + 1);
+      atax += str.substr(bpos, epos - bpos);
     }
-    tax.close();
   }
+
+  // for the strain name
+  auto bpos = str.rfind("<T>");
+  if (bpos == string::npos) {
+    // don't find <T> label
+    atax += "<T>";
+    bpos = str.find_last_of('>');
+    bpos = (bpos == string::npos) ? 0 : bpos + 1;
+  }
+
+  auto epos = str.find_first_of('<', bpos + 1);
+  if (epos == string::npos) {
+    atax += str.substr(bpos);
+  } else {
+    atax += str.substr(bpos, epos - bpos);
+  }
+
+  // for replace domain name to the missing kingdom name
+  atax = regex_replace(atax, misKingdom, "<D>$1<K>$1");
 };
 
-// ..... Option on the full taxon name
+
+// check the repeat items
+void LineageHandle::checkRepeats(vector<Lineage> &lngs) {
+  map<string, int> nameMap;
+  for (auto &nm : lngs) {
+    if (nameMap.find(nm.name) == nameMap.end()) {
+      nameMap[nm.name] = 1;
+    } else {
+      theInfo("repeat strain: " + nm.name);
+      nm.name += ".repeat-" + to_string(++nameMap[nm.name]);
+    }
+  }
+}
+
+/********************************************************************************
+ * @brief convert the taxa to lineage string
+ * 
+ * @param lngs taxon level and taxon name
+ * @return string a abbrivated string for the taxon
+ ********************************************************************************/
+string LineageHandle::lineageString(const vector<RankName> &lngs) const {
+  string lineStr("");
+  for (auto &lng : lngs) {
+    lineStr += lineageString(lng);
+  }
+  return lineStr;
+}
+
+string LineageHandle::lineageString(const RankName &lng) const {
+  string lineStr("");
+  if (rankmap.find(lng.first) != rankmap.end()) {
+    lineStr += "<";
+    lineStr += rankmap.find(lng.first)->second;
+    lineStr += ">";
+    lineStr += lng.second;
+  }
+  return lineStr;
+}
+
 /********************************************************************************
  * @brief functions for the option on lineages
  *

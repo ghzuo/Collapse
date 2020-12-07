@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-03-17 15:39:23
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-04 21:58:08
+ * @Last Modified Time: 2020-12-07 16:46:50
  */
 
 #ifndef TREE_H
@@ -64,6 +64,9 @@ struct Node {
   void getUndefineNames(vector<string> &);
   void chkLeafsName(vector<string> &, vector<string> &);
 
+  void setOneLeaf(const Lineage&);
+  void _setOneBranch();
+  void setAllBranches();
   void setBranchLineage();
   string _getBranchName(const vector<Node *> &);
   int nClade();
@@ -80,7 +83,6 @@ struct Node {
   Node *rootingByOutgrp(const string &);
   Node *rootingByTaxa();
   bool _getOutgrpCandidates(vector<Node *> &);
-  void _renewNode();
   Node *_forceRooting(Node *);
 
   void _outnwk(ostream &);

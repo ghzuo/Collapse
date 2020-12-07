@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-09-01 12:54:33
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-04 21:53:29
+ * @Last Modified Time: 2020-12-07 16:52:33
  */
 
 #include "collapse.h"
@@ -42,9 +42,7 @@ int main(int argc, char *argv[]) {
    *********** set lineage of Nodes and rooting unrooted tree **************/
   // set lineage of leaf
   for (int i = 0; i < allLeafs.size(); ++i) {
-    auto &nd = allLeafs[i];
-    nd->unclassified = !lngs[i].def;
-    nd->name = lngs[i].name;
+    allLeafs[i]->setOneLeaf(lngs[i]);
   }
 
   if (aTree->children.size() == 2) {

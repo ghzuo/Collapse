@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-07-21 11:48:01
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-05 22:47:15
+ * @Last Modified Time: 2020-12-07 14:28:28
  */
 
 #ifndef LINEAGE_H
@@ -38,6 +38,9 @@ struct Lineage {
 
 struct LineageHandle {
   const string undefStr{"Unclassified"};
+  regex misKingdom{"<D>([A-Za-z]+)<K>"+undefStr};
+  regex prefix{"<[A-Za-z]>"};
+
   string taxfile;
   string revfile;
   map<string, char> rankmap{
@@ -74,9 +77,6 @@ struct LineageHandle {
   // convert linage style
   string lineageString(const RankName &) const;
   string lineageString(const vector<RankName> &) const;
-
-  /// for set lineage by input taxon file
-  void writeTaxFile(TaxMap &);
 };
 
 size_t parseLineage(const string &, vector<string> &);
