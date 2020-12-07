@@ -7,17 +7,26 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-12-05 15:07:07
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-06 17:11:08
+ * @Last Modified Time: 2020-12-07 13:50:22
  */
 
 #include "taxadb.h"
-
+/********************************************************************************
+ * @brief for a node of taxonomy system
+ *
+ ********************************************************************************/
 ostream &operator<<(ostream &os, const TaxonNode &tax) {
   os << tax.taxid << "\t" << tax.level << "\t" << tax.name << "\t"
      << tax.lineage;
   return os;
 };
 
+/********************************************************************************
+ * @brief Construct a new TaxaDB:: TaxaDB object
+ *
+ * @param fnode path of nodes.dmp
+ * @param fname path of names.dmp
+ ********************************************************************************/
 TaxaDB::TaxaDB(const string &fnode, const string &fname) {
   _readNodeDump(fnode);
   _readNameDump(fname);
@@ -72,6 +81,7 @@ void TaxaDB::_readNameDump(const string &file) {
       if (nm.back() == '_')
         nm.pop_back();
       taxlist.at(tid).name = nm;
+      taxlist.at(tid).lowerName = toLower(nm);
     }
   }
 
@@ -81,14 +91,19 @@ void TaxaDB::_readNameDump(const string &file) {
 // set rank name map
 void TaxaDB::resetRankMap(const string &file) { hdl.setRankByFile(file); };
 
-// for query
-string TaxaDB::search(const string &qry) {
+/********************************************************************************
+ * @brief search the lineage of the query name
+ *
+ * @param qry name of query
+ * @return string return the lineage string
+ ********************************************************************************/
+string TaxaDB::search(string qry) {
 
-  // directly search the name
-  TaxonNode tax = getLineage(qry);
-  if (tax.taxid != 0) {
-    return tax.lineage;
-  }
+  // format the query
+  qry = regex_replace(qry, nonWord, "_");
+  if (qry.back() == '_')
+    qry.pop_back();
+  qry = toLower(qry);
 
   // query the lineage by Taxid
   smatch matchs;
@@ -100,42 +115,35 @@ string TaxaDB::search(const string &qry) {
     }
   }
 
-  // query the lineage by specie name
-  regex_search(qry, matchs, regSpeciesName);
-  if (!matchs.empty()) {
-    TaxonNode tax = getLineage(matchs[1].str());
+  // query the lineage by subname  
+  size_t pos;
+  do {
+    TaxonNode tax = getLineage(qry);
     if (tax.taxid != 0) {
       return tax.lineage;
     }
-  }
-
-  // query the lineage by other taxon name
-  regex_search(qry, matchs, regGenusName);
-  if (!matchs.empty()) {
-    TaxonNode tax = getLineage(matchs[1].str());
-    if (tax.taxid != 0) {
-      return tax.lineage;
-    }
-  }
+    pos = qry.rfind("_");
+    qry = qry.substr(0, pos);
+  } while (pos != string::npos);
 
   theInfo("Cannot find the lineage for " + qry);
   return "";
 };
 
-// get lineage
+// get lineage by taxid
 TaxonNode TaxaDB::getLineage(size_t id) {
   _getlng(id);
   return taxlist[id];
 };
 
+// get lineage by name
 TaxonNode TaxaDB::getLineage(const string &nm) {
   for (auto &tax : taxlist) {
-    if (tax.name == nm) {
+    if (tax.lowerName == nm) {
       _getlng(tax.taxid);
       return tax;
     }
   }
-  theInfo("Cannot find a taxon named as " + nm);
   return taxlist.front();
 };
 
@@ -149,6 +157,7 @@ void TaxaDB::exportLineage(ostream &os) {
   }
 };
 
+// recursively get the lineage string
 string TaxaDB::_getlng(size_t tid) {
   auto &tax = taxlist[tid];
   if (tax.taxid == tax.parent) {
