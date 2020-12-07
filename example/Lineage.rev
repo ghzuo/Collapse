@@ -1,0 +1,81 @@
+#######################################################################################################################################
+# This is a Lineage Modification example file accompanying our CVTree3 paper as Supplementary information                       #######     
+#######################################################################################################################################
+
+# Phylum A2 Euryarchaeota (see our paper: Life 2015, 5: 949-968)
+<C>Unclassified<O>Unclassified<F>Unclassified<G>Aciduliprofundum  <C>Thermococci<O>Unclassified<F>Unclassified<G>Aciduliprofundum
+<C>Unclassified<O>Unclassified<F>Unclassified<G>Candidatus_Methanomethylophilus <C>NewEuryClass<O>Unclassified<F>Unclassified<G>Candidatus_methanomethylophilus
+<C>Thermoplasmata<O>Thermoplasmatales<F>Unclassified<G>Thermoplasmatales<S>Thermoplasmatales_archaeon <C>NewEuryClass<O>NewMethanogenOrder<F>Unclassified<G>Thermoplasmatales<S>Thermoplasmatales_archaeon
+<C>Unclassified<O>Unclassified<F>Unclassified<G>Unclassified<S>Unclassified<T>Thermoplasmata <C>NewEuryClass<O>Unclassified<F>Unclassified<G>Unclassified<S>Thermoplasmata_archaeon<T>Thermoplasmata
+<C>Methanomicrobia<O>Unclassified<F>Unclassified<G>Methanomassiliicoccus <C>NewEuryClass<O>Unclassified<F>Unclassified<G>Methanomassiliicoccus
+<P>Unclassified<C>Unclassified<O>Unclassified<F>Unclassified<G>Halophilic <P>Euryarchaeota<C>Halobacteria<O>Halobacteriales<F>Halobacteriaceae<G>Halophilic
+<G>Halorubrum<S>Halorubrum_sp_J07HR59 <G>Unclassified<S>Halorubrum_sp_J07HR59
+<G>Unclassifed<S>Unclassified<T>Halophilic_archaeon_J07HB67 <G>Halophilic<S>Halophilic_archaeon<T>Halophilic_archaeon_J07HB67
+<O>Unclassified<F>Unclassified<G>Unclassified<S>Unclassified<T>Halophilic_archaeon_A07HB70 <O>Halobateriales<F>Halobacteriaceae<G>Halophilic<S>Halophilic_archaeon<T>Halophilic_archaeon_A07HB70
+<O>Unclassified<F>Unclassified<G>Unclassified<S>Unclassified<T>Uncultured_archaeon_A07HR67 <O>Halobacteriales<F>Halobacteriaceae<G>Halorubrum<S>Halophilic_archaeon<T>Unclutured_archaeon_A07HR67
+<F>Unclassified<G>Unclassified<S>Unclassified<T>halophilic_archaeon_True <F>Halobacteriaceae<G>Halonotius<S>halophilic_archaeon<T>halophilic_archaeon_True
+<O>Unclassified<F>Unclassified<G>Unclassified<S>Unclassified<T>Uncultured_archaeon_A07HN63 <O>Halobacteriales<F>Halobacteriaceae<G>Halonotius<S>Unclutured_archaeon<T>Unclutured_archaeon_A07HN63
+
+# Phylum Ignavibacteriae IJSEM 2014, 64: 8-10
+
+<P>Chlorobi<C>Ignavibacteria <P>Ignavibacteriae<C>Ignavibacteriae
+
+# Phylum B8 Nitrospirae
+
+<P>Unclassified<C>Unclassified<O>Unclassified<F>Unclassified<G>Candidatus_Methylomirabilis <P>Nitrospirae<C>Nitrospira<O>Nitrospirales<F>Nitrospiraceae<G>Candidatus_Methylomirabilis     #  CVTree
+<P>Nitrospirae<C>Nitrospira<O>Nitrospirales<F>Nitrospiraceae<G>Thermodesulfovibrio <P>Thermodesulfobacteria<C>Thermodesulfobacteria<O>Thermodesulfobacteriales<F>Thermodesulfobacteriaceae<G>Thermodesulfovibrio  # CVTree
+
+
+# Phylum B11 Chloroflexi
+
+<P>Chloroflexi<C>Dehalococcoidia <P>Dehalococcoidia<C>Dehalococcoidia
+ # phylum status according to CVTree
+<P>Unclassified<C>Unclassified<O>Unclassified<F>Unclassified<G>Thermobaculum <P>Chloroflexi<C>Thermomicrobia<O>Thermobaculum<F>Thermobaculum<G>Thermobaculum # IJSEM 2011, 61, 1944-1953
+
+# Phlum B12 Proteobacteria
+
+# Phylum B12 Class 1 Alphaproteobacteria
+<O>Rhodobacterales<F>Rhodobacteraceae<G>Pseudovibrio <O>Rhizobiales<F>Rhizobiaceae<G>Pseudovibrio  #  CVTree
+<O>Rhizobiales<F>Bartonellaceae <O>Bartonellales<F>Bartonellaceae   #  CVTree
+<O>Unclassified<F>Unclassified<G>Endolissoclinum <O>Bartonellales<F>Bartonellaceae<G>Candidatus_Endolissoclinum # CVtree
+<O>Unclassified<F>Unclassified<G>Candidatus_Puniceispirillum <O>Bartonellales<F>Bartonellaceae<G>Candidatus_Puniceispirillum # CVtree
+<O>Rhodospirillales<F>Rhodospirillaceae<G>Candidatus_Endolissoclinum <O>Bartonellales<F>Bartonellaceae<G>Candidatus_Endolissoclinum #  CVTree
+<O>Rhizobiales<F>Rhizobiaceae<G>Candidatus_Liberibacter <O>Bartonellales<F>Bartonellaceae<G>Candidatus_Liberibacter #  CVTree
+
+# Phylum B12 Class 2 Betaproteobacteria
+<C>Betaproteobacteria<O>Unclassified<F>Unclassified<G>Candidatus_Profftella <C>Gammaproteobacteria<O>Enterobacteriales<F>Enterobacteriaceae<G>Candidatus_Profftella  #  CVTree
+
+# Phylum B12 Class 3 Gammaproteobacteria
+<P>Firmicutes<C>Bacilli<O>Lactobacillales<F>Enterococcaceae<G>Enterococcus<S>Enterococcus_gallinarum<T>Enterococcus_gallinarum_EGD <P>Proteobacteria<C>Gammaproteobacteria<O>Enterobacteriales<F>Enterobacteriaceae<G>Klebsiella<S>Enterococcus_gallinarum<T>Enterococcus_gallinarum_EGD   # Assignment corrected according to CVTree
+<G>Enterobacteriaceae <G>Enterobacter   #  According to CVTree
+<P>Unclassified<C>Unclassified<O>Unclassified<F>Unclassified<G>Halyomorpha <P>Proteobacteria<C>Gammaproteobacteria<O>Enterobacteriales<F>Enterobacteriaceae<G>Halyomorpha  #  CVTree
+
+# Phylum B13 Firmicutes
+
+<F>Erysipelotrichaceae<G>Eubacterium <F>Erysipelotrichaceae<G>Erysipelothrix   # CVTree 
+<P>Firmicutes<C>Erysipelotrichia <P>Tenericutes<C>Erysipelotrichia  # CVTree
+
+<F>Unclassified<G>Exiguobacterium <F>Bacillaceae<G>Exiguobacterium   # CVTree
+<F>Planococcaceae<G>Solibacillus <F>Bacillaceae<G>Solibacillus  #   NCBI taxonomy -> LPSN
+<S>Bacillus_sp_JS <S>Bacillus_subtilis  # CVTree
+
+# Elevate Coprothermobacter to a separate phylum
+<P>Firmicutes<C>Clostridia<O>Thermoanaerobacterales<F>Thermodesulfobiaceae<G>Coprothermobacter <P>Coprothermobacter<C>Coprothermobacter<O>Coprothermobacter<F>Coprothermobacter<G>Coprothermobacter
+
+# Phylum B14 Bacteroidetes
+
+<G>Sphingobacterium<S>Sphingobacterium_sp_21 <G>Pedobacter<S>Sphingobacterium_sp_21  # cf. IJSEM 2014, 64, 863-868
+
+<O>Actinomycetales<F>Nakamurellaceae <O>Nakamurellales<F>Nakamurellaceae  # IJSEM 2014, 64, 3821-3832
+<O>Actinomycetales<F>Frankiaceae <O>Frankiales<F>Frankiaceae              # IJSEM 2014, 64, 3821-3832
+<O>Actinomycetales<F>Geodermatophilaceae <O>Geodermatophilales<F>Geodermatophilaceae # as above
+<O>Actinomycetales<F>Acidothermaceae <O>Acidothermales<F>Acidothermaceae  # as above
+
+<P>Bacteroidetes<C>Bacteroidetes<O>Bacteroidetes_Order_II <P>Chlorobi<C>Unclassified<O>Bacteroidetes_Order_II #CVTree
+<P>Bacteroidetes<C>Unclassified<O>Bacteroidetes_Order_II <P>Chlorobi<C>Unclassified<O>Bacteroidetes_Order_II #CVTree
+
+# New Phylum Synergistetes
+
+<C>Synergistetes <C>Synergistia
+
+          
