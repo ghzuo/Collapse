@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-12-05 15:05:30
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-07 13:55:35
+ * @Last Modified Time: 2020-12-07 20:22:24
  */
 
 #ifndef TAXADB_H
@@ -52,7 +52,7 @@ struct TaxaDB {
   TaxaDB() = default;
 
   // build from dump files
-  TaxaDB(const string &, const string &);
+  TaxaDB(const string &);
   void _readNodeDump(const string &);
   void _readNameDump(const string &);
 

@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-12-05 15:07:07
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-07 13:50:22
+ * @Last Modified Time: 2020-12-07 20:54:00
  */
 
 #include "taxadb.h"
@@ -25,13 +25,17 @@ ostream &operator<<(ostream &os, const TaxonNode &tax) {
  * @brief Construct a new TaxaDB:: TaxaDB object
  *
  * @param fnode path of nodes.dmp
- * @param fname path of names.dmp
  ********************************************************************************/
-TaxaDB::TaxaDB(const string &fnode, const string &fname) {
+TaxaDB::TaxaDB(const string &path) {
+  string dbpath = path;
+  addsuffix(dbpath, '/');
+  string fnode = dbpath + "nodes.dmp";
+  string fname = dbpath + "names.dmp";
+
   _readNodeDump(fnode);
   _readNameDump(fname);
 
-  theInfo("INITIAL Section: initial database by " + fnode + " and " + fname);
+  theInfo("INITIAL Section: initial database by files in " + dbpath);
 };
 
 void TaxaDB::_readNodeDump(const string &file) {
