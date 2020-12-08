@@ -7,14 +7,13 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-11-15 20:20:23
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-08 11:51:03
+ * @Last Modified Time: 2020-12-08 14:57:55
  */
 
 #ifndef STRINGOPT_H
 #define STRINGOPT_H
 
 #include <cctype>
-#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <set>
@@ -140,22 +139,6 @@ template <class T> void uniqueWithOrder(vector<T> &list) {
   }
   tmpVector.shrink_to_fit();
   list.swap(tmpVector);
-};
-
-/********************************************************************************
- * @brief the timer
- ********************************************************************************/
-struct Timer {
-  std::chrono::system_clock::time_point start;
-
-  Timer() : start(std::chrono::system_clock::now()){};
-
-  double elapsed() {
-    auto now = std::chrono::system_clock::now();
-    double time=std::chrono::duration_cast<std::chrono::milliseconds>(now - start)
-        .count();
-    return time/1000.0;
-  };
 };
 
 /********************************************************************************
