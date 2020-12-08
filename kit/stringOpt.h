@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-11-15 20:20:23
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2018-04-26 19:47:16
+ * @Last Modified Time: 2020-12-07 18:10:47
  */
 
 #ifndef STRINGOPT_H
@@ -64,6 +64,8 @@ bool fileExists(const string &);
 //    }
 //    return res;
 // };
+
+size_t nColumns(const string&);
 
 template <class T>
 void readlist(const string &file, vector<T> &list, int ncol = 0) {

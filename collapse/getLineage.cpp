@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-11-27 09:59:06
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-06 15:05:02
+ * @Last Modified Time: 2020-12-07 20:30:53
  */
 
 #include "getLineage.h"
@@ -18,44 +18,51 @@ int main(int argc, char *argv[]) {
   Args myargs(argc, argv);
 
   // Initial the taxadb by the dump files
-  TaxaDB tdb(myargs.nodefile, myargs.namefile);
+  TaxaDB taxdb(myargs.dbpath);
 
   // reset the rank abbrivation map
   if (!myargs.rankfile.empty())
-    tdb.resetRankMap(myargs.rankfile);
+    taxdb.resetRankMap(myargs.rankfile);
 
-
+  // do search lineage
   ofstream ofs(myargs.outfile);
-  if (myargs.qlist.empty()) {
-    tdb.exportLineage(ofs);
+  if (myargs.queryfile.empty()) {
+    taxdb.exportLineage(ofs);
   } else {
-    for (auto &q : myargs.qlist) {
-      ofs << q << "\t" << tdb.search(q) << endl;
+    smatch matchs;
+    regex_search(myargs.queryfile, matchs, regex("([^:]+):([0-9]+),([0-9]+)"));
+    if (!matchs.empty()) {
+      string fname = matchs[1].str();
+      int ncName = stoi(matchs[2].str());
+      int ncTaxid = stoi(matchs[3].str());
+      multiColumns(taxdb, fname, ofs, ncName, ncTaxid);
+    } else {
+      regex_search(myargs.queryfile, matchs, regex("([^:]+):([0-9]+)"));
+      if (!matchs.empty()) {
+        string fname = matchs[1].str();
+        int ncName = stoi(matchs[2].str());
+        oneColumn(taxdb, fname, ofs, ncName);
+      } else if (nColumns(myargs.queryfile) > 1) {
+        multiColumns(taxdb, myargs.queryfile, ofs);
+      } else {
+        oneColumn(taxdb, myargs.queryfile, ofs);
+      }
     }
   }
   ofs.close();
 }
 
 Args::Args(int argc, char **argv)
-    : indir("./"), outfile("Lineage.list"), program(argv[0]) {
-
-  string queryfile;
+    : dbpath("./taxdump"), outfile("Lineage.list"), program(argv[0]) {
 
   char ch;
-  while ((ch = getopt(argc, argv, "i:n:d:o:r:qh")) != -1) {
+  while ((ch = getopt(argc, argv, "i:d:o:r:qh")) != -1) {
     switch (ch) {
     case 'd':
-      indir = optarg;
-      addsuffix(indir, '/');
+      dbpath = optarg;
       break;
     case 'i':
       queryfile = optarg;
-      break;
-    case 'n':
-      nodefile = optarg;
-      break;
-    case 'm':
-      namefile = optarg;
       break;
     case 'o':
       outfile = optarg;
@@ -72,27 +79,38 @@ Args::Args(int argc, char **argv)
       usage(program);
     }
   }
-
-  if (nodefile.empty())
-    nodefile = indir + "nodes.dmp";
-  if (namefile.empty())
-    namefile = indir + "names.dmp";
-
-  if (!queryfile.empty())
-    readlist(queryfile, qlist);
 }
 
 void Args::usage(string &program) {
   cerr << "\nProgram Usage: \n"
        << program << "\n"
-       << " [ -d ./ ]           the directory of the dump files directory\n"
-       << " [ -i qfile ]        the query list file"
-       << " [ -n nodes.dmp ]    the file of nodes.dmp\n"
-       << " [ -m names.dmp ]    the file of names.dmp\n"
-       << " [ -o <outfile>]     output file, default: stdout\n"
-       << " [ -r rankfile ]     Rank mapping file\n"
+       << " [ -i qfile ]        The query list file defalut: blank, \n"
+       << "                     output all items of database \n"
+       << " [ -d ./taxdump ]    The dump of NCBI taxonomy database\n"
+       << " [ -o Lineage.list ] Output file, default: stdout\n"
+       << " [ -r <rankfile> ]   Rank mapping file\n"
        << " [ -q ]              Run command in quiet mode\n"
        << " [ -h ]              display this information\n"
        << endl;
   exit(1);
 }
+
+void multiColumns(TaxaDB &taxdb, const string &fname, ostream &os, int ncName,
+                  int ncTaxid) {
+  // for two column file
+  vector<string> nmlist;
+  vector<size_t> tidlist;
+  readlist(fname, nmlist, ncName);
+  readlist(fname, tidlist, ncTaxid);
+  for (size_t i = 0; i < nmlist.size(); ++i) {
+    os << nmlist[i] << "\t" << taxdb.getLineage(tidlist[i]).lineage << endl;
+  }
+}
+
+void oneColumn(TaxaDB &taxdb, const string &fname, ostream &os, int ncName) {
+  vector<string> qlist;
+  readlist(fname, qlist, ncName);
+  for (auto &q : qlist) {
+    os << q << "\t" << taxdb.search(q) << endl;
+  }
+};

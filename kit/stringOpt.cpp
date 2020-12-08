@@ -7,13 +7,13 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-09-01 13:03:04
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2018-04-26 19:52:20
+ * @Last Modified Time: 2020-12-07 18:04:50
  */
 
 #include "stringOpt.h"
 
 /// separate Word
-int separateWord(vector<string> &w, string t, const string& sep) {
+int separateWord(vector<string> &w, string t, const string &sep) {
 
   w.clear();
   // convert all unvisible charater into space;
@@ -110,4 +110,20 @@ long getFileSize(const string &filename) {
 bool fileExists(const string &filename) {
   struct stat buffer;
   return (stat(filename.c_str(), &buffer) == 0);
+};
+
+size_t nColumns(const string &file) {
+  ifstream infile(file);
+  if (!infile) {
+    cerr << "\nCannot found the input file " << file << endl;
+    exit(1);
+  }
+
+  string line;
+  getline(infile, line);
+  infile.close();
+  line = trim(line);
+  vector<string> items;
+  separateWord(items, line);
+  return items.size();
 };

@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-11-27 09:59:06
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-06 12:38:29
+ * @Last Modified Time: 2020-12-07 20:24:06
  */
 
 #ifndef GETLINEAGE_H
@@ -15,26 +15,23 @@
 
 #include "taxadb.h"
 #include <string>
+#include <regex>
 
 using namespace std;
 
 struct Args {
   string program;
-  string indir;
-  string namefile;
-  string nodefile;
+  string dbpath;
   string outfile;
   string rankfile;
-  vector<string> qlist;
+  string queryfile;
 
   Args(int, char **);
   void usage(string &);
 };
 
-regex regTaxID{"taxid([0-9]+)"};
-regex regBinomial{"^([A-Z][a-z]+_[a-z]+)[_.]"};
-regex regUnitName{"^([A-Z][a-z]+)"};
-
-string searchLineage(const string &);
+void multiColumns(TaxaDB &, const string &, ostream &, int ncName = 1,
+                  int ncTaxid = 2);
+void oneColumn(TaxaDB &, const string &, ostream &, int ncName = 1);
 
 #endif // !GETLINEAGE_H
