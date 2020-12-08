@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-03-17 15:39:23
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-07 17:11:21
+ * @Last Modified Time: 2020-12-08 16:11:20
  */
 
 #include "taxtree.h"
@@ -250,7 +250,7 @@ Node *Node::resetroot(const string &str) {
   getLeafs(leafs);
   Node *outgrp = NULL;
   for (Node *nd : leafs) {
-    if (_lastName(nd->name) == str) {
+    if (lastNameNoRank(nd->name) == str) {
       outgrp = nd;
       break;
     }
@@ -687,10 +687,6 @@ void Node::renewId(const unordered_map<string, size_t> &mgi) {
  *
  * @param file
  ********************************************************************************/
-string Node::getStrainName() {
-  return name.substr(name.find_last_of('>') + 1);
-};
-
 void Node::outPrediction(const string &file) {
   ofstream os(file);
   if (!os) {
@@ -709,7 +705,7 @@ void Node::outPrediction(ostream &os) {
     if ((*nd).unclassified) {
       string p;
       (*nd)._getPrediction(p);
-      os << (*nd).getStrainName() << "\t" << p << endl;
+      os << lastNameNoRank(nd->name) << "\t" << p << endl;
     }
   }
 };

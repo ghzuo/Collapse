@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-09-01 13:03:04
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-07 15:35:52
+ * @Last Modified Time: 2020-12-08 15:19:22
  */
 
 #include "lineage.h"
@@ -304,7 +304,7 @@ string lastName(const string &str) {
   return str.substr(str.find_last_of('<'));
 };
 
-string _lastName(const string &str) {
+string lastNameNoRank(const string &str) {
   size_t pos = str.find_last_of('>');
   if (pos == string::npos)
     return str;

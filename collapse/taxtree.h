@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-03-17 15:39:23
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-07 16:46:50
+ * @Last Modified Time: 2020-12-08 16:15:26
  */
 
 #ifndef TREE_H
@@ -22,9 +22,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "info.h"
+#include "kit.h"
 #include "lineage.h"
-#include "stringOpt.h"
 using namespace std;
 
 typedef pair<string, string> str2str;
@@ -71,7 +70,6 @@ struct Node {
   string _getBranchName(const vector<Node *> &);
   int nClade();
 
-  string getStrainName();
   void _getPrediction(string &);
   void outPrediction(ostream &);
   void outPrediction(const string &);

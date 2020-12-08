@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-07-21 11:48:01
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-07 14:28:28
+ * @Last Modified Time: 2020-12-08 15:47:18
  */
 
 #ifndef LINEAGE_H
@@ -27,32 +27,33 @@
 typedef unordered_map<string, string> TaxMap;
 typedef pair<string, string> RankName;
 
-// the lineage 
+// the lineage
 struct Lineage {
   bool def = true;
   string name;
 
   Lineage() = default;
-  Lineage(const string& str) : name(str){};
+  Lineage(const string &str) : name(str){};
 };
 
 struct LineageHandle {
   const string undefStr{"Unclassified"};
-  regex misKingdom{"<D>([A-Za-z]+)<K>"+undefStr};
+  regex misKingdom{"<D>([A-Za-z]+)<K>" + undefStr};
   regex prefix{"<[A-Za-z]>"};
 
   string taxfile;
   string revfile;
   map<string, char> rankmap{
-      {"superkingdom", 'D'}, {"kingdom", 'K'},     {"phylum", 'P'},
-      {"subphylum", 'p'},    {"superphylum", 'h'}, {"class", 'C'},
-      {"subclass", 'c'},     {"superClass", 'l'},  {"order", 'O'},
-      {"suborder", 'o'},     {"superorder", 'r'},  {"family", 'F'},
-      {"subfamily", 'f'},    {"superfamly", 'a'},  {"genus", 'G'},
-      {"subgenus", 'g'},     {"supergenus", 'e'},  {"species", 'S'},
-      {"subspecies", 's'},   {"varietas", 'V'},    {"subvariety", 'v'},
-      {"tribe", 'B'},        {"subtribe", 'b'},    {"section", 'n'},
-      {"serotype", 'Y'},     {"isolate", 't'},     {"clade", 'd'}};
+      {"superkingdom", 'D'}, {"kingdom", 'K'},    {"subkingdom", 'k'},
+      {"phylum", 'P'},       {"subphylum", 'p'},  {"class", 'C'},
+      {"subclass", 'c'},     {"order", 'O'},      {"suborder", 'o'},
+      {"family", 'F'},       {"subfamily", 'f'},  {"genus", 'G'},
+      {"subgenus", 'g'},     {"species", 'S'},    {"subspecies", 's'},
+      {"varietas", 'V'},     {"subvariety", 'v'}, {"tribe", 'R'},
+      {"subtribe", 'r'},     {"section", 'E'},    {"subsection", 'E'},
+      {"serotype", 'Y'},     {"isolate", 'I'},    {"superphylum", 'Q'},
+      {"superclass", 'L'},   {"superorder", 'W'}, {"superfamly", 'M'},
+      {"infraorder", 'i'},   {"biotype", 'B'},      {"genotype", 'N'}};
   vector<pair<string, char>> outrank;
   string outRankStr{"DKPCOFGS"};
 
@@ -60,7 +61,7 @@ struct LineageHandle {
   LineageHandle() = default;
   LineageHandle(const string &);
   LineageHandle(const string &, const string &);
-  LineageHandle(const string &, const string &, const string &, const string&);
+  LineageHandle(const string &, const string &, const string &, const string &);
 
   // set lineage handle
   void setRankByFile(const string &);
@@ -82,9 +83,9 @@ struct LineageHandle {
 size_t parseLineage(const string &, vector<string> &);
 size_t separateLineage(const string &, vector<string> &);
 string lastName(const string &);
-string _lastName(const string &);
+string lastNameNoRank(const string &);
 string commonLineage(const string &, const string &);
-string commonLineage(const vector<string>&);
-size_t nRanks(const string&);
+string commonLineage(const vector<string> &);
+size_t nRanks(const string &);
 
 #endif
