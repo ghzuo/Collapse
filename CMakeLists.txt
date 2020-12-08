@@ -7,7 +7,7 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2020-12-07 09:06:29
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2020-12-07 09:37:48
+# @Last Modified Time: 2020-12-08 15:03:55
 ###
 
 cmake_minimum_required(VERSION 3.0)
@@ -23,6 +23,18 @@ LINK_DIRECTORIES(${LIBRARY_OUTPUT_PATH})
 SET(CMAKE_VERBOSE_MAKEFILE on)
 ADD_DEFINITIONS("-O3 -std=c++11")
 #set(CMAKE_FIND_LIBRARY_SUFFIXES .a .tbd .dylib .so)
+
+### Check required LIABRARIES
+set(REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} z)
+foreach(LIB ${REQUIRED_LIBRARIES})
+  find_library(THE${LIB} ${LIB})
+  if(THE${LIB})
+    message("-- Found library " ${LIB} ": " ${THE${LIB}})
+    LINK_LIBRARIES(${LIB})
+  else()
+    message(FATAL_ERROR ${LIB} " library not found!")
+  endif()
+endforeach()
 
 ## include subdirectories
 ADD_SUBDIRECTORY(kit)

@@ -52,11 +52,15 @@ to install it. After install docker, basic usages for CVTree are:
 
 If this is the first time you use Collapse package, please go to the
 "example" folder. Run the cvtree command to get an annotated phylogenetic
- tree and monophyly status by:
+tree and monophyly status by:
 
-    ../build/collapse 
+    ../build/collapse
 
 More detail of the command usage can be obtaion by `-h` option.
+
+## TODO
+
+1. input and output sqlite file for taxon database
 
 ## Reference
 
