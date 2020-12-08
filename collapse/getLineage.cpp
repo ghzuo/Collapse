@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-11-27 09:59:06
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-07 20:30:53
+ * @Last Modified Time: 2020-12-08 10:24:26
  */
 
 #include "getLineage.h"
@@ -25,10 +25,10 @@ int main(int argc, char *argv[]) {
     taxdb.resetRankMap(myargs.rankfile);
 
   // do search lineage
-  ofstream ofs(myargs.outfile);
   if (myargs.queryfile.empty()) {
-    taxdb.exportLineage(ofs);
+    taxdb.writeTable(myargs.outfile);
   } else {
+    ofstream ofs(myargs.outfile);
     smatch matchs;
     regex_search(myargs.queryfile, matchs, regex("([^:]+):([0-9]+),([0-9]+)"));
     if (!matchs.empty()) {
@@ -48,8 +48,8 @@ int main(int argc, char *argv[]) {
         oneColumn(taxdb, myargs.queryfile, ofs);
       }
     }
+    ofs.close();
   }
-  ofs.close();
 }
 
 Args::Args(int argc, char **argv)

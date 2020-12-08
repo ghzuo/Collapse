@@ -7,12 +7,16 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-09-01 13:03:04
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-07 18:04:50
+ * @Last Modified Time: 2020-12-08 11:55:18
  */
 
 #include "stringOpt.h"
 
-/// separate Word
+/********************************************************************************
+ * @brief string options
+ * 
+ * @return string 
+ ********************************************************************************/
 int separateWord(vector<string> &w, string t, const string &sep) {
 
   w.clear();
@@ -58,27 +62,6 @@ string Rtrim(const string &str) {
 
 string trim(const string &str) { return Ltrim(Rtrim(str)); }
 
-/// output the suffix of filename
-
-string chgsuffix(const string &nm, const string &suf) {
-  return nm.substr(0, nm.find_last_of('.') + 1) + suf;
-}
-
-string getsuffix(const string &nm) {
-  return nm.substr(nm.find_last_of('.') + 1);
-}
-
-string delsuffix(const string &nm) {
-  return nm.substr(0, nm.find_last_of('.'));
-}
-
-/// change string to number
-int str2int(const string &str) { return stoi(trim(str)); }
-
-float str2float(const string &str) { return stof(trim(str)); }
-
-double str2double(const string &str) { return stod(trim(str)); }
-
 /// upping and lower the charater
 string toUpper(const string &s) {
   string ss(s);
@@ -94,25 +77,62 @@ string toLower(const string &s) {
   return ss;
 }
 
+/********************************************************************************
+ * @brief option on the suffix of file name
+ * 
+ ********************************************************************************/
+string chgsuffix(const string &nm, const string &suf) {
+  return nm.substr(0, nm.find_last_of('.') + 1) + suf;
+}
+
+string getsuffix(const string &nm) {
+  return nm.substr(nm.find_last_of('.') + 1);
+}
+
+string delsuffix(const string &nm) {
+  return nm.substr(0, nm.find_last_of('.'));
+}
+
 void addsuffix(string &str, char c) {
   string::iterator iter = str.end();
   if (*(--iter) != c)
     str += c;
 }
 
-long getFileSize(const string &filename) {
-  struct stat fileInfo;
-  if (stat(filename.c_str(), &fileInfo) != 0)
-    return -1;
-  return fileInfo.st_size;
-}
-
-bool fileExists(const string &filename) {
-  struct stat buffer;
-  return (stat(filename.c_str(), &buffer) == 0);
+string addsuffix(const string& str, char c){
+  if(str.back() != c){
+    return str + c;
+  }else{
+    return str;
+  }
 };
 
-size_t nColumns(const string &file) {
+string addsuffix(const string& str, const string& suff){
+  size_t pos = str.rfind(suff);
+  if(pos + suff.size() == str.size()){
+    return str;
+  }else{
+    return str + suff;
+  }
+};
+
+
+/********************************************************************************
+ * @brief option on convert string to number
+ * 
+ ********************************************************************************/
+int str2int(const string &str) { return stoi(trim(str)); }
+
+float str2float(const string &str) { return stof(trim(str)); }
+
+double str2double(const string &str) { return stod(trim(str)); }
+
+
+/********************************************************************************
+ * @brief options on read columns file
+ * 
+ ********************************************************************************/
+int nColumns(const string &file) {
   ifstream infile(file);
   if (!infile) {
     cerr << "\nCannot found the input file " << file << endl;
@@ -126,4 +146,29 @@ size_t nColumns(const string &file) {
   vector<string> items;
   separateWord(items, line);
   return items.size();
+};
+
+/********************************************************************************
+ * @brief Functions by sys state for file state
+ * @param filename
+ ********************************************************************************/
+long getFileSize(const string &filename) {
+  struct stat fileInfo;
+  if (stat(filename.c_str(), &fileInfo) != 0)
+    return -1;
+  return fileInfo.st_size;
+}
+
+bool fileExists(const string &filename) {
+  struct stat buffer;
+  return (stat(filename.c_str(), &buffer) == 0);
+};
+
+bool isDirectory(const string & filename){
+  struct stat fileInfo;
+  if (stat(filename.c_str(), &fileInfo) != 0){
+    cerr << "Cannot find the file/dirctory "<< filename << endl;
+    exit(6);
+  }
+  return fileInfo.st_mode & S_IFDIR;
 };

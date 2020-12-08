@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-12-05 15:05:30
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-07 20:22:24
+ * @Last Modified Time: 2020-12-08 10:13:11
  */
 
 #ifndef TAXADB_H
@@ -16,6 +16,7 @@
 #include <regex>
 #include <string>
 #include <vector>
+#include <zlib.h>
 
 #include "info.h"
 #include "lineage.h"
@@ -56,6 +57,10 @@ struct TaxaDB {
   void _readNodeDump(const string &);
   void _readNameDump(const string &);
 
+  // read/write gzip database file
+  void readTable(const string &);
+  void writeTable(const string &);
+
   // set lineage map
   void resetRankMap(const string &);
 
@@ -63,7 +68,6 @@ struct TaxaDB {
   string search(string);
   TaxonNode getLineage(size_t);
   TaxonNode getLineage(const string &);
-  void exportLineage(ostream &os);
   string _getlng(size_t);
 };
 
