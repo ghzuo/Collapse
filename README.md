@@ -1,14 +1,16 @@
 # Collapse
 
-A tool to compare the phylogenetic tree and taxonomy.
+A tool to annotate phylogenetic tree by lineage and measure their differences in toplogy by Shannon entropy.
 
 ## Main Programs
 
-- collapse: the main program, annotate the tree (newick format) by lineage string file,
+- collapse: the main program, annotate the tree (newick format) by lineage,
   and statistics.
-- getlng: A tool to convert the NCBI taxonomy database dump file (download from:  
+- getdb: A tool to convert the NCBI taxonomy database dump file (download from:  
   [NCBI Taxonomy dump](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz)
   to an input lineage string file
+- getlng: Query the lineage of genome names/taxids from the database.
+- getname: Obtain the leafs name list of a phylogenetic tree (in Newick form).
 
 ## Installation
 
@@ -18,6 +20,7 @@ A tool to compare the phylogenetic tree and taxonomy.
 
 - cmake >= 3.0
 - compiler supporting C++11 standard
+- require library: libz
 
 #### Compiling
 
@@ -51,7 +54,7 @@ to install it. After install docker, basic usages for CVTree are:
 ## Run Programs with Example
 
 If this is the first time you use Collapse package, please go to the
-"example" folder. Run the cvtree command to get an annotated phylogenetic
+"example" folder. Run the collapse command to get an annotated phylogenetic
 tree and monophyly status by:
 
     ../build/collapse
@@ -60,7 +63,11 @@ More detail of the command usage can be obtaion by `-h` option.
 
 ## TODO
 
-1. input and output sqlite file for taxon database
+1. detail usage
+2. read the multi-compress file of NCBI dump files directly
+3. access lineage by accession number
+4. package database by sqlite
+5. UI interface program by Electron
 
 ## Reference
 
