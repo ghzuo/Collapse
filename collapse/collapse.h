@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-09-01 15:53:05
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-11-27 21:40:49
+ * @Last Modified Time: 2020-12-10 12:01:04
  */
 
 #ifndef COLLAPSE_H
@@ -16,8 +16,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "info.h"
-#include "reviseList.h"
+#include "kit.h"
 #include "taxsys.h"
 #include "taxtree.h"
 using namespace std;
@@ -26,7 +25,7 @@ using namespace std;
 struct Args {
   string program;
   string infile;
-  string taxfile, taxrev;
+  string taxadb, taxfile, taxrev, lngfile;
   string abfile, abtype;
   string outPref, treeSuff;
   string outgrp;
@@ -36,5 +35,5 @@ struct Args {
   void usage();
 };
 
-void output(Taxa &, Node *, Args &);
+void output(Taxa &, Node *, vector<Lineage>&, Args &);
 #endif

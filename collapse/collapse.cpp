@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-09-01 12:54:33
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-07 16:52:33
+ * @Last Modified Time: 2020-12-10 12:39:28
  */
 
 #include "collapse.h"
@@ -24,8 +24,9 @@ int main(int argc, char *argv[]) {
 
   /**********************************************************************
    ********* set for the lineage system and get lineage *****************/
-  LineageHandle lngHandle(myargs.taxfile, myargs.taxrev, myargs.abfile,
-                          myargs.abtype);
+  TaxaRank *rank = TaxaRank::create();
+  rank->initial(myargs.taxfile, myargs.abfile, myargs.abtype);
+  LineageHandle lngHandle(myargs.taxadb, myargs.taxfile, myargs.taxrev);
 
   // get the leafs lineage
   vector<Node *> allLeafs;
@@ -34,6 +35,8 @@ int main(int argc, char *argv[]) {
   for (auto nd : allLeafs) {
     lngs.emplace_back(nd->name);
   }
+  theInfo("There are " + to_string(allLeafs.size()) +
+          " leafs in the phylogenetic tree");
 
   // set lineage of leafs
   lngHandle.getLineage(lngs);
@@ -42,9 +45,10 @@ int main(int argc, char *argv[]) {
    *********** set lineage of Nodes and rooting unrooted tree **************/
   // set lineage of leaf
   for (int i = 0; i < allLeafs.size(); ++i) {
-    allLeafs[i]->setOneLeaf(lngs[i]);
+    allLeafs[i]->setOneLeaf(lngs[i].name, lngs[i].def);
   }
 
+  // annotate the branches
   if (aTree->children.size() == 2) {
     // update the rooted tree
     aTree->updateRootedTree();
@@ -62,27 +66,29 @@ int main(int argc, char *argv[]) {
     aTree = aTree->rootingByTaxa();
   }
 
+  theInfo("Annotated all nodes of tree by lineages");
+
   /**************************************************************************
    ************ get the statistic of Taxonomy and annotate tree *************/
-  TaxSys::setDivision(lngHandle.outrank);
-
   // get the statics of the two taxa system (defined and undefined)
   Taxa aTaxa(lngs);
 
   // annotate taxonomy of nodes
   aTaxa.annotate(aTree);
 
+  theInfo("Done statistics of the taxonomy");
+
   /***************************************************************************
    *********  output data ****************************************************/
-  output(aTaxa, aTree, myargs);
+  output(aTaxa, aTree, lngs, myargs);
 }
 /****************************************************************************
  ******************************  End main program ***************************
  ****************************************************************************/
 
 Args::Args(int argc, char **argv)
-    : infile(""), taxrev(""), outgrp(""), taxfile(""), forWeb(false),
-      predict(true) {
+    : infile(""), taxrev(""), outgrp(""), taxfile(""), lngfile(""),
+      forWeb(false), predict(true) {
 
   program = argv[0];
   string outname("collapsed");
@@ -90,13 +96,16 @@ Args::Args(int argc, char **argv)
   string kstr;
 
   char ch;
-  while ((ch = getopt(argc, argv, "i:d:o:r:t:s:T:L:O:WPqh")) != -1) {
+  while ((ch = getopt(argc, argv, "i:d:D:o:r:t:s:T:L:R:O:WPqh")) != -1) {
     switch (ch) {
     case 'i':
       infile = optarg;
       break;
     case 'd':
       supdir = optarg;
+      break;
+    case 'D':
+      taxadb = optarg;
       break;
     case 'o':
       outname = optarg;
@@ -107,8 +116,11 @@ Args::Args(int argc, char **argv)
     case 't':
       abtype = optarg;
       break;
-    case 'L':
+    case 'R':
       abfile = optarg;
+      break;
+    case 'L':
+      lngfile = optarg;
       break;
     case 'O':
       outgrp = optarg;
@@ -150,22 +162,39 @@ Args::Args(int argc, char **argv)
   treeSuff = ".tree";
   if (infile.find(treeSuff) + treeSuff.size() == infile.size())
     treeSuff = ".nwk";
+
+  // for the default
+  if (taxadb.empty()) {
+    taxadb = supdir + "taxadb.gz";
+    if (!fileExists(taxadb)) {
+      taxadb = supdir + "taxdump";
+    }
+  }
 }
 
 void Args::usage() {
   cerr << "\nProgram Usage: \n\n"
        << program << "\n"
-       << " [ -d ./ ]           The work directory, default: ./\n"
-       << " [ -i Tree.nwk ]     Input cv file list, default: Tree.nwk\n"
-       << " [ -o collpsed ]     Output dist: default: collapsed\n"
-       << " [ -r Lineage.rev ]  Lineage revise file: default: Lineage.rev\n"
-       << " [ -L abfile ]       Unusual abbravition list for taxon level name\n"
-       << " [ -t DKPCOFGS ]     Abbreviation of taxonomy level, default: "
-          "DKPCOFGS\n"
-       << " [ -O <Outgroup> ]   Set the outgroup for the unroot tree.\n"
-       << " [ -T taxlist ]      Taxonomy map files, default: None\n"
-       << " [ -q ]              Run command in quiet mode\n"
-       << " [ -h ]              Display this information\n"
+       << " [ -d ./ ]            The work directory, default: ./\n"
+       << " [ -i Tree.nwk ]      Input newick tree file, default: Tree.nwk\n"
+       << " [ -o collpsed ]      Output prefix name: default: collapsed\n"
+       << " [ -r Lineage.rev ]   Lineage revise file for batch edit,\n"
+       << "                      default: Lineage.rev\n"
+       << " [ -T Lineage.list ]  Lineage file for leafs of tree, \n"
+       << "                      default: Lineage.list\n"
+       << " [ -D taxadb.gz ]     Taxa database file or directory,\n"
+       << "                      default: taxadb.gz or taxdump/\n"
+       << " [ -L <None> ]        Output lineage of all leafs:\n"
+       << "                      default: don't output lineages\n"
+       << " [ -R <None> ]        Abbravition list for taxon rank name,\n"
+       << "                      default: by program\n"
+       << " [ -t DKPCOFGS ]      Abbreviation of output taxon rank,\n"
+       << "                      default: DKPCOFGS\n"
+       << " [ -O <Outgroup> ]    Set the outgroup for the unroot tree.\n"
+       << "                      default: None, rearranged by taxonomy\n"
+       << " [ -P ]               Output the prediction for undefined leafs\n"
+       << " [ -q ]               Run command in quiet mode\n"
+       << " [ -h ]               Display this information\n"
        << endl;
   exit(1);
 }
@@ -177,7 +206,7 @@ void Args::usage() {
  * @param aTree the tree
  * @param myargs the output file name and switches
  ***************************************************************************/
-void output(Taxa &aTaxa, Node *aTree, Args &myargs) {
+void output(Taxa &aTaxa, Node *aTree, vector<Lineage> &lngs, Args &myargs) {
 
   /// output the monophyly
   aTaxa.outStatitics(myargs.outPref + ".unit");
@@ -211,5 +240,14 @@ void output(Taxa &aTaxa, Node *aTree, Args &myargs) {
     if (myargs.predict) {
       aTree->outPrediction(myargs.outPref + ".predict");
     }
+  }
+
+  // output lineage of leaf;
+  if (!myargs.lngfile.empty()) {
+    ofstream leaf(myargs.lngfile);
+    for (auto &lng : lngs) {
+      leaf << lng.name << endl;
+    }
+    leaf.close();
   }
 };

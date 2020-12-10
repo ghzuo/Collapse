@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2018-01-03 21:03:33
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-02 10:08:27
+ * @Last Modified Time: 2020-12-10 12:00:48
  */
 
 #ifndef TAXSYS_H
@@ -25,8 +25,7 @@
 #include <tuple>
 #include <vector>
 
-#include "info.h"
-#include "stringOpt.h"
+#include "kit.h"
 #include "lineage.h"
 #include "taxtree.h"
 
@@ -62,8 +61,6 @@ struct TaxonState {
  ********************************************************************************/
 struct TaxSys {
   const static string rootTaxon;
-  static Abbr division;
-  static void setDivision(const Abbr &);
 
   size_t nStrain;
   map<string, TaxonState> state;
@@ -82,6 +79,7 @@ struct TaxSys {
  ********************************************************************************/
 struct Taxa {
   TaxSys def, undef;
+  TaxaRank* rank;
   Taxa(const vector<Lineage> &);
 
   void annotate(Node*);

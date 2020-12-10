@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-03-17 15:39:23
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-08 16:15:26
+ * @Last Modified Time: 2020-12-10 11:55:39
  */
 
 #ifndef TREE_H
@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "kit.h"
-#include "lineage.h"
+#include "taxarank.h"
 using namespace std;
 
 typedef pair<string, string> str2str;
@@ -63,7 +63,7 @@ struct Node {
   void getUndefineNames(vector<string> &);
   void chkLeafsName(vector<string> &, vector<string> &);
 
-  void setOneLeaf(const Lineage&);
+  void setOneLeaf(const string&, bool);
   void _setOneBranch();
   void setAllBranches();
   void setBranchLineage();

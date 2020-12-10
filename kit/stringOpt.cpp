@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-09-01 13:03:04
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-08 11:55:18
+ * @Last Modified Time: 2020-12-09 10:48:06
  */
 
 #include "stringOpt.h"
@@ -129,7 +129,7 @@ double str2double(const string &str) { return stod(trim(str)); }
 
 
 /********************************************************************************
- * @brief options on read columns file
+ * @brief options on read file
  * 
  ********************************************************************************/
 int nColumns(const string &file) {
@@ -148,6 +148,19 @@ int nColumns(const string &file) {
   return items.size();
 };
 
+// get line from gz file
+int gzline(gzFile &fp, string &line) {
+  line.clear();
+  char ch = gzgetc(fp);
+  for (; ch != -1; ch = gzgetc(fp)) {
+    if (ch == '\n') {
+      return ch;
+    } else {
+      line += ch;
+    }
+  }
+  return ch;
+};
 /********************************************************************************
  * @brief Functions by sys state for file state
  * @param filename

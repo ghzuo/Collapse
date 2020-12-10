@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-09-01 13:03:04
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-05 09:06:59
+ * @Last Modified Time: 2020-12-10 10:03:47
  */
 
 #include "reviseList.h"
@@ -43,13 +43,15 @@ Revision::Revision(const string &file) {
       }
     }
     is.close();
-  }
 
-  if (chglist.empty()) {
-    theInfo("There are no revsion on lineage in file " + file);
+    if (chglist.empty()) {
+      theInfo("There are no revsion on lineage in file " + file);
+    } else {
+      theInfo("There are " + to_string(chglist.size()) +
+              " revsions on lineages in file " + file);
+    }
   } else {
-    theInfo("There are " + to_string(chglist.size()) +
-            " revsions on lineages in file " + file);
+    theInfo("Open file " + file + ", no revsion on lineage");
   }
 }
 

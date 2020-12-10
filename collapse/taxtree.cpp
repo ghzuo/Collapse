@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-03-17 15:39:23
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-08 16:11:20
+ * @Last Modified Time: 2020-12-10 11:57:05
  */
 
 #include "taxtree.h"
@@ -761,16 +761,16 @@ void Node::getUndefineNames(vector<string> &names) {
  * @brief set the lineage and annotate taxonomy of tree
  *
  ********************************************************************************/
-void Node::setOneLeaf(const Lineage& lng){
-    if(lng.def){
+void Node::setOneLeaf(const string& nm, bool def){
+    if(def){
       nleaf = 1;
       unclassified = false;
     }else{
       nxleaf = 1;
       unclassified = true;
     }
-    name = lng.name;
-    taxLevel = nRanks(lng.name);
+    name = nm;
+    taxLevel = nRanks(nm);
 };
 
 void Node::_setOneBranch() {
@@ -839,11 +839,7 @@ void Node::setBranchLineage() {
 string Node::_getBranchName(const vector<Node *> &nds) {
   string nodeName;
   if (nds.size() == 1) {
-    nodeName = nds.front()->name;
-    size_t npos = nodeName.find("<T>");
-    if (npos != string::npos) {
-      nodeName = nodeName.substr(0, npos);
-    }
+    nodeName = delStrain(nds.front()->name);
   } else {
     auto iter = nds.begin();
     nodeName = (*iter++)->name;

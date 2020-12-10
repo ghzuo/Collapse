@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-12-05 15:05:30
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-08 10:13:11
+ * @Last Modified Time: 2020-12-09 22:33:02
  */
 
 #ifndef TAXADB_H
@@ -16,23 +16,21 @@
 #include <regex>
 #include <string>
 #include <vector>
-#include <zlib.h>
 
-#include "info.h"
-#include "lineage.h"
-#include "stringOpt.h"
+#include "kit.h"
+#include "taxarank.h"
 
 using namespace std;
 /********************************************************************************
  * @brief class for a taxon node
- * 
+ *
  ********************************************************************************/
 struct TaxonNode {
   size_t parent = 0;
   size_t taxid = 0;
-  string name;
-  string lowerName;
   string level;
+  string name;
+  vector<string> nicks;
   string lineage;
 
   friend ostream &operator<<(ostream &, const TaxonNode &);
@@ -40,20 +38,22 @@ struct TaxonNode {
 
 /********************************************************************************
  * @brief class for the taxonomy system
- * 
+ *
  ********************************************************************************/
 struct TaxaDB {
   vector<TaxonNode> taxlist;
-  LineageHandle hdl;
+  map<string, size_t> nmlist;
+  TaxaRank* rank;
 
   // the regex for name
   regex nonWord{"[^A-Za-z0-9]+"};
   regex regTaxID{"taxid([0-9]+)"};
 
-  TaxaDB() = default;
 
   // build from dump files
   TaxaDB(const string &);
+  string goodname(const string&);
+  string idname(const string&);
   void _readNodeDump(const string &);
   void _readNameDump(const string &);
 
@@ -61,14 +61,20 @@ struct TaxaDB {
   void readTable(const string &);
   void writeTable(const string &);
 
-  // set lineage map
-  void resetRankMap(const string &);
-
   // search lineage
-  string search(string);
+  string search(size_t);
+  string search(const string &);
   TaxonNode getLineage(size_t);
-  TaxonNode getLineage(const string &);
+  size_t _name2id(const string&);
+  size_t _candidateQuery(const string&, vector<string>&);
   string _getlng(size_t);
+  void _initNameMap();
+
+  // query full lineage node
+  void query(size_t, vector<TaxonNode>&);
+  void query(const string&, vector<TaxonNode>&);
+  bool getFullLineage(size_t, vector<TaxonNode>&);
+  void _reQuery(size_t, vector<TaxonNode>&);
 };
 
 #endif // !TAXADB_H

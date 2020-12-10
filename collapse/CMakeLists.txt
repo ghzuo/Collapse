@@ -7,7 +7,7 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2017-09-01 15:54:30
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2020-12-07 10:32:44
+# @Last Modified Time: 2020-12-09 16:46:30
 ###
 
 INCLUDE_DIRECTORIES("../kit")
@@ -20,10 +20,11 @@ SET(LIBTAXSYS_SRC
     lineage.cpp lineage.h
     taxtree.cpp taxtree.h
     taxadb.cpp taxadb.h
+    taxarank.cpp taxarank.h
 )
 
 SET(TAXHEADS taxsys.h reviseList.h lineage.h 
-    taxtree.h taxadb.h)
+    taxtree.h taxadb.h taxarank.h)
 
 SET(COLLAPSE_SRC ${KITHEADS} ${TAXHEADS}
     collapse.cpp  collapse.h
@@ -33,6 +34,15 @@ SET(GETLNG_SRC ${KITHEADS} ${TAXHEADS}
   getLineage.cpp   getLineage.h
   )
 
+SET(GETNAME_SRC ${KITHEADS} ${TAXHEADS} 
+  getLeafName.cpp
+)
+
+SET(GETDB_SRC ${KITHEADS} ${TAXHEADS} 
+  getTaxaDB.cpp
+)
+
+
 ADD_LIBRARY(taxsys STATIC ${LIBTAXSYS_SRC})
 
 ADD_EXECUTABLE(collapse ${COLLAPSE_SRC})
@@ -41,5 +51,11 @@ TARGET_LINK_LIBRARIES(collapse kit taxsys)
 ADD_EXECUTABLE(getlng ${GETLNG_SRC})
 TARGET_LINK_LIBRARIES(getlng kit taxsys)
 
-INSTALL(TARGETS collapse getlng
+ADD_EXECUTABLE(getname ${GETNAME_SRC})
+TARGET_LINK_LIBRARIES(getname kit taxsys)
+
+ADD_EXECUTABLE(getdb ${GETDB_SRC})
+TARGET_LINK_LIBRARIES(getdb kit taxsys)
+
+INSTALL(TARGETS collapse getlng getname getdb
   RUNTIME DESTINATION bin)

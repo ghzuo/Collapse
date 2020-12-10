@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2018-01-02 15:42:07
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-03 14:03:32
+ * @Last Modified Time: 2020-12-09 17:17:24
  */
 
 #include "taxsys.h"
@@ -16,10 +16,6 @@
  * default value for static members of taxsys
  ********************************************************************************/
 const string TaxSys::rootTaxon("<B>Cellular_Organisms");
-Abbr TaxSys::division{{"Domain", 'D'}, {"Kingdom", 'K'}, {"Phylum", 'P'},
-                      {"Class", 'C'},  {"Order", 'O'},   {"Family", 'F'},
-                      {"Genus", 'G'},  {"Species", 'S'}};
-void TaxSys::setDivision(const Abbr &dv) { division = dv; }
 
 /********************************************************************************
  * @brief Construct a new Tax Sys:: Tax Sys object
@@ -132,6 +128,8 @@ Taxa::Taxa(const vector<Lineage> &lngs) {
     }
   }
 
+  rank = rank->create();
+
   def.initial(defNames);
   undef.initial(undefNames);
 };
@@ -238,7 +236,7 @@ void Taxa::outEntropy(const string &file) {
 void Taxa::outEntropy(ostream &os) {
 
   map<char, TaxLevelState> taxlev;
-  for (const auto &atax : TaxSys::division) {
+  for (const auto &atax : rank->outrank) {
     TaxLevelState tl;
     taxlev[atax.second] = tl;
   }
@@ -268,7 +266,7 @@ void Taxa::outEntropy(ostream &os) {
   }
 
   double maxEntropy = log2(double(def.nStrain));
-  for (const auto &atax : TaxSys::division) {
+  for (const auto &atax : rank->outrank) {
     int nTotal = taxlev[atax.second].nSolo + taxlev[atax.second].nMono +
                  taxlev[atax.second].nPoly;
     double sTax = maxEntropy - taxlev[atax.second].sTax / def.nStrain;
@@ -303,7 +301,7 @@ void Taxa::outStatitics(const string &file) {
 };
 
 void Taxa::outStatitics(ostream &os) {
-  for (const pair<string, char> &atax : TaxSys::division) {
+  for (auto &atax : rank->outrank) {
 
     // get the abbr
     char abbr = atax.second;

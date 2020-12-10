@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-11-15 20:20:23
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-08 14:57:55
+ * @Last Modified Time: 2020-12-09 10:49:13
  */
 
 #ifndef STRINGOPT_H
@@ -19,9 +19,10 @@
 #include <set>
 #include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <unistd.h>
 #include <vector>
+#include <sys/stat.h>
+#include <zlib.h>
 
 using namespace std;
 
@@ -140,6 +141,8 @@ template <class T> void uniqueWithOrder(vector<T> &list) {
   tmpVector.shrink_to_fit();
   list.swap(tmpVector);
 };
+
+int gzline(gzFile &, string &);
 
 /********************************************************************************
  * @brief function by sys stat
