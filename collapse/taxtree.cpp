@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-03-17 15:39:23
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-10 11:57:05
+ * @Last Modified Time: 2020-12-12 16:07:13
  */
 
 #include "taxtree.h"
@@ -195,8 +195,10 @@ Node *Node::rootingByTaxa() {
   theTree = _forceRooting(theTree);
 
   // renew the added node and the root
-  theTree->children.front()->_setOneBranch();
-  theTree->children.back()->_setOneBranch();
+  if (!theTree->children.front()->isLeaf())
+    theTree->children.front()->_setOneBranch();
+  if (!theTree->children.back()->isLeaf())
+    theTree->children.back()->_setOneBranch();
   theTree->_setOneBranch();
 
   return theTree;
@@ -235,7 +237,7 @@ Node *Node::_forceRooting(Node *root) {
   Node *outgrp = root->children.back();
   // the branch length are divided equally to two branch
   outgrp->length *= 0.5;
-  theRoot->addChild(outgrp); // outgrp at front  
+  theRoot->addChild(outgrp); // outgrp at front
   root->children.pop_back();
 
   // the origal node as another child of the Root
@@ -761,16 +763,16 @@ void Node::getUndefineNames(vector<string> &names) {
  * @brief set the lineage and annotate taxonomy of tree
  *
  ********************************************************************************/
-void Node::setOneLeaf(const string& nm, bool def){
-    if(def){
-      nleaf = 1;
-      unclassified = false;
-    }else{
-      nxleaf = 1;
-      unclassified = true;
-    }
-    name = nm;
-    taxLevel = nRanks(nm);
+void Node::setOneLeaf(const string &nm, bool def) {
+  if (def) {
+    nleaf = 1;
+    unclassified = false;
+  } else {
+    nxleaf = 1;
+    unclassified = true;
+  }
+  name = nm;
+  taxLevel = nRanks(nm);
 };
 
 void Node::_setOneBranch() {
@@ -803,9 +805,9 @@ void Node::_setOneBranch() {
   taxLevel = nRanks(name);
 }
 
-void Node::setAllBranches(){
-  if(!isLeaf()){
-    for (auto &child : children) 
+void Node::setAllBranches() {
+  if (!isLeaf()) {
+    for (auto &child : children)
       child->setAllBranches();
     _setOneBranch();
   }
