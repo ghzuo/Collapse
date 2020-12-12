@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-12-05 15:05:30
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-09 22:33:02
+ * @Last Modified Time: 2020-12-12 09:59:23
  */
 
 #ifndef TAXADB_H
@@ -54,8 +54,9 @@ struct TaxaDB {
   TaxaDB(const string &);
   string goodname(const string&);
   string idname(const string&);
-  void _readNodeDump(const string &);
-  void _readNameDump(const string &);
+  void tgz4taxdb(const string&);
+  void _readNodeDump(istream &);
+  void _readNameDump(istream &);
 
   // read/write gzip database file
   void readTable(const string &);

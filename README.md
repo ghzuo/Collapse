@@ -54,20 +54,23 @@ to install it. After install docker, basic usages for CVTree are:
 ## Run Programs with Example
 
 If this is the first time you use Collapse package, please go to the
-"example" folder. Run the collapse command to get an annotated phylogenetic
+"example" folder. Download the taxdump.tar.gz file from
+[NCBI FTP](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz) to
+this dirtory. Run the collapse command to get an annotated phylogenetic
 tree and monophyly status by:
 
     ../build/collapse
 
-More detail of the command usage can be obtaion by `-h` option.
+More detail of the command usage can be obtaion by `-h` option. To speedup
+the process, you can get the database image the data by `getdb` command at
+first.
 
 ## TODO
 
 1. detail usage
-2. read the multi-compress file of NCBI dump files directly
+2. package database by sqlite
 3. access lineage by accession number
-4. package database by sqlite
-5. UI interface program by Electron
+4. UI interface program by Electron
 
 ## Reference
 

@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-09-01 12:54:33
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-10 12:39:28
+ * @Last Modified Time: 2020-12-12 14:44:36
  */
 
 #include "collapse.h"
@@ -167,7 +167,10 @@ Args::Args(int argc, char **argv)
   if (taxadb.empty()) {
     taxadb = supdir + "taxadb.gz";
     if (!fileExists(taxadb)) {
-      taxadb = supdir + "taxdump";
+      taxadb = supdir + "taxdump.tar.gz";
+      if (!fileExists(taxadb)) {
+        taxadb = supdir + "taxdump";
+      }
     }
   }
 }
