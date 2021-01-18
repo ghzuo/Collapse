@@ -7,7 +7,7 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2020-12-07 09:06:29
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2020-12-07 09:56:59
+# @Last Modified Time: 2021-01-18 16:22:15
 ###
 
 ## Stage for build cvtree
@@ -19,7 +19,7 @@ LABEL Version=0.1 \
 ## for develop environment
 RUN apk --update add --no-cache g++ make cmake zlib-dev
 
-## Build cvtree
+## Build cltree
 WORKDIR /root
 COPY ./collapse /root/collapse/collapse
 COPY ./kit /root/collapse/kit
