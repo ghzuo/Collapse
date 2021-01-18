@@ -7,7 +7,7 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2017-09-01 15:54:30
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2021-01-18 16:10:28
+# @Last Modified Time: 2021-01-19 07:18:36
 ###
 
 INCLUDE_DIRECTORIES("../kit")
@@ -37,6 +37,6 @@ SET(COLLAPSE_SRC ${KITHEADS} ${TAXHEADS}
 ADD_LIBRARY(taxsys STATIC ${LIBTAXSYS_SRC})
 
 ADD_EXECUTABLE(cltree ${COLLAPSE_SRC})
-TARGET_LINK_LIBRARIES(cltree kit taxsys)
+TARGET_LINK_LIBRARIES(cltree kit taxsys z)
 
 INSTALL(TARGETS cltree RUNTIME DESTINATION bin)
