@@ -61,10 +61,10 @@ If this is the first time you use Collapse package, please go to the
 this dirtory. Run the collapse command to get an annotated phylogenetic
 tree and monophyly status by:
 
-    ../build/collapse
+    ../build/bin/cltree run
 
 More detail of the command usage can be obtaion by `-h` option. To speedup
-the process, you can get the database image the data by `getdb` command at
+the process, you can get the database image the data by `cltree index` command at
 first.
 
 ## TODO
