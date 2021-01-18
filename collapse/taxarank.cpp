@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-12-09 16:10:07
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-10 11:44:15
+ * @Last Modified Time: 2020-12-24 15:22:26
  */
 
 #include "taxarank.h"
@@ -131,6 +131,15 @@ void TaxaRank::setOutRank(const string &outRankStr) {
   }
 };
 
+void TaxaRank::outRanksJson(ostream &os) {
+  vector<string> jslist;
+  for (auto &rank : outrank) {
+    jslist.emplace_back("{\"level\":\"" + rank.first + "\",\"symbol\":\"" +
+                        rank.second + "\"}");
+  }
+  os << "[" << strjoin(jslist.begin(), jslist.end(), ',') << "]";
+};
+
 /********************************************************************************
  * @brief for check ranks
  *
@@ -217,7 +226,8 @@ string TaxaRank::rankString(const RankName &rn) const {
 size_t parseLineage(const string &taxstr, vector<string> &tax) {
   size_t prev_pos = 0;
   size_t pos = 1;
-  while ((pos = taxstr.find_first_of(TaxaRank::mark.first, pos)) != string::npos) {
+  while ((pos = taxstr.find_first_of(TaxaRank::mark.first, pos)) !=
+         string::npos) {
     tax.emplace_back(taxstr.substr(0, pos));
     ++pos;
   }
@@ -228,7 +238,8 @@ size_t parseLineage(const string &taxstr, vector<string> &tax) {
 size_t separateLineage(const string &taxstr, vector<string> &tax) {
   size_t prev_pos = 0;
   size_t pos = 1;
-  while ((pos = taxstr.find_first_of(TaxaRank::mark.first, prev_pos + 1)) != string::npos) {
+  while ((pos = taxstr.find_first_of(TaxaRank::mark.first, prev_pos + 1)) !=
+         string::npos) {
     tax.emplace_back(taxstr.substr(prev_pos, pos - prev_pos));
     prev_pos = pos;
   }
@@ -286,14 +297,13 @@ string commonLineage(const vector<string> &lngs) {
 };
 
 // delete the strain section in lineage
-string delStrain(const string& lng){
+string delStrain(const string &lng) {
   size_t npos = lng.find(TaxaRank::addMark('T'));
   if (npos != string::npos) {
-      return lng.substr(0, npos);
-    }
+    return lng.substr(0, npos);
+  }
   return lng;
 };
-
 
 // number ranks
 size_t nRanks(const string &lng) {

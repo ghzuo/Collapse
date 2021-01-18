@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-12-09 16:10:07
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-10 12:44:23
+ * @Last Modified Time: 2020-12-24 15:07:10
  */
 
 #ifndef TAXARANK_H
@@ -66,6 +66,7 @@ struct TaxaRank {
   string setRankByFile(const string &);
   string setOutRankByTaxfile(const string &);
   void setOutRank(const string &);
+  void outRanksJson(ostream&);
 
   // for check
   size_t nOutRanks() const;

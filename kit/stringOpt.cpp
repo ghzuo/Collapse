@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-09-01 13:03:04
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-09 10:48:06
+ * @Last Modified Time: 2020-12-12 10:37:32
  */
 
 #include "stringOpt.h"
@@ -116,6 +116,10 @@ string addsuffix(const string& str, const string& suff){
   }
 };
 
+bool hasSuffix(const string& filename, const string& suffix) {
+  return filename.rfind(suffix) + suffix.size() == filename.size();
+};
+
 
 /********************************************************************************
  * @brief option on convert string to number
@@ -148,19 +152,6 @@ int nColumns(const string &file) {
   return items.size();
 };
 
-// get line from gz file
-int gzline(gzFile &fp, string &line) {
-  line.clear();
-  char ch = gzgetc(fp);
-  for (; ch != -1; ch = gzgetc(fp)) {
-    if (ch == '\n') {
-      return ch;
-    } else {
-      line += ch;
-    }
-  }
-  return ch;
-};
 /********************************************************************************
  * @brief Functions by sys state for file state
  * @param filename

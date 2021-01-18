@@ -7,15 +7,15 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-11-27 09:59:06
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-09 21:51:04
+ * @Last Modified Time: 2021-01-18 14:16:11
  */
 
 #include "getLineage.h"
 
-int main(int argc, char *argv[]) {
+void getlineage(int argc, char *argv[]) {
 
   // get the input arguments
-  Args myargs(argc, argv);
+  LngArgs myargs(argc, argv);
 
   // Initial the taxadb by the dump files
   TaxaDB taxdb(myargs.dbpath);
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
   ofs.close();
 }
 
-Args::Args(int argc, char **argv)
+LngArgs::LngArgs(int argc, char **argv)
     : program(argv[0]), outfile("Lineage.list"), queryfile("name.list"),
       queryTaxID(0), queryName(""), outNonhit(true) {
 
@@ -125,7 +125,7 @@ Args::Args(int argc, char **argv)
   }
 }
 
-void Args::usage() {
+void LngArgs::usage() {
   cerr << "\nProgram Usage: \n"
        << program << "\n"
        << " [ -i name.list ]    The query list file defalut: blank, \n"

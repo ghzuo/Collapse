@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-11-15 20:20:23
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-09 10:49:13
+ * @Last Modified Time: 2020-12-12 10:37:02
  */
 
 #ifndef STRINGOPT_H
@@ -22,7 +22,6 @@
 #include <unistd.h>
 #include <vector>
 #include <sys/stat.h>
-#include <zlib.h>
 
 using namespace std;
 
@@ -76,6 +75,7 @@ string addsuffix(const string&, const string&);
 string chgsuffix(const string &, const string &);
 string getsuffix(const string &);
 string delsuffix(const string &);
+bool hasSuffix(const string&, const string&);
 
 /********************************************************************************
  * @brief option on convert string to number
@@ -141,8 +141,6 @@ template <class T> void uniqueWithOrder(vector<T> &list) {
   tmpVector.shrink_to_fit();
   list.swap(tmpVector);
 };
-
-int gzline(gzFile &, string &);
 
 /********************************************************************************
  * @brief function by sys stat

@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-11-27 09:59:06
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-09 12:13:37
+ * @Last Modified Time: 2021-01-18 14:30:55
  */
 
 #ifndef GETLINEAGE_H
@@ -19,7 +19,7 @@
 
 using namespace std;
 
-struct Args {
+struct LngArgs {
   string program;
   string dbpath;
   string outfile;
@@ -29,9 +29,11 @@ struct Args {
   string queryName;
   bool outNonhit;
 
-  Args(int, char **);
+  LngArgs(int, char **);
   void usage();
 };
+
+void getlineage(int, char **);
 
 void twoColumn(TaxaDB &, const string &, vector<string> &, vector<string> &,
                int ncName = 1, int ncTaxid = 2);

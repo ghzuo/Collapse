@@ -7,29 +7,15 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-12-08 20:01:45
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-09 08:28:38
+ * @Last Modified Time: 2021-01-18 14:49:45
  */
 
-#include "taxadb.h"
+#include "getTaxaDB.h"
 
-using namespace std;
-
-void usage(string &program) {
-  cerr
-      << "\nProgram Usage: \n"
-      << program << "\n"
-      << " [ -d taxdump/ ]    NCBI taxon dumpfile directory, default: taxdump\n"
-      << " [ -o taxadb.gz ]  Packaged taxon database, default: taxadb.gz\n"
-      << " [ -q ]            Run command in quiet mode\n"
-      << " [ -h ]            Display this information\n"
-      << endl;
-  exit(1);
-}
-
-int main(int argc, char *argv[]) {
+void mkTaxaDB(int argc, char *argv[]) {
 
   // get the name of file
-  string indir("taxdump/");
+  string dumps("taxdump.tar.gz");
   string outfile("taxadb.gz");
   string program(argv[0]);
 
@@ -37,8 +23,7 @@ int main(int argc, char *argv[]) {
   while ((ch = getopt(argc, argv, "i:o:h")) != -1) {
     switch (ch) {
     case 'i':
-      indir = optarg;
-      addsuffix(indir, '/');
+      dumps = optarg;
       break;
     case 'o':
       outfile = optarg;
@@ -47,15 +32,27 @@ int main(int argc, char *argv[]) {
       theInfo.quiet = true;
       break;
     case 'h':
-      usage(program);
+      mkdbUsage(program);
     case '?':
-      usage(program);
+      mkdbUsage(program);
     }
   }
 
   // Initial the taxadb by the dump files
-  TaxaDB taxdb(indir);
+  TaxaDB taxdb(dumps);
 
   // output the gz database if queryfile empty
   taxdb.writeTable(outfile);
+}
+
+void mkdbUsage(string &program) {
+  cerr
+      << "\nProgram Usage: \n"
+      << program << "\n"
+      << " [ -d taxdump.tar.gz ]  NCBI taxon dumpfile directory, default: taxdump\n"
+      << " [ -o taxadb.gz ]       Packaged taxon database, default: taxadb.gz\n"
+      << " [ -q ]                 Run command in quiet mode\n"
+      << " [ -h ]                 Display this information\n"
+      << endl;
+  exit(1);
 }

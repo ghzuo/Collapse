@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-07-21 11:48:01
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-10 10:25:25
+ * @Last Modified Time: 2020-12-28 12:10:53
  */
 
 #ifndef LINEAGE_H
@@ -21,7 +21,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "info.h"
+#include "kit.h"
 #include "reviseList.h"
 #include "taxarank.h"
 #include "taxadb.h"
@@ -35,6 +35,7 @@ struct Lineage {
 
   Lineage() = default;
   Lineage(const string &str) : name(str){};
+  friend ostream& operator<<(ostream&, const Lineage&);
 };
 
 struct LineageHandle { 

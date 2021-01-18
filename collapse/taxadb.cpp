@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-12-05 15:07:07
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-10 09:57:26
+ * @Last Modified Time: 2020-12-12 13:47:24
  */
 
 #include "taxadb.h"
@@ -31,10 +31,22 @@ TaxaDB::TaxaDB(const string &path) {
 
   // set the system
   if (isDirectory(path)) {
-    _readNodeDump(addsuffix(path, '/') + "nodes.dmp");
-    _readNameDump(addsuffix(path, '/') + "names.dmp");
+
+    ifstream fnd(addsuffix(path, '/') + "nodes.dmp");
+    _readNodeDump(fnd);
+    fnd.close();
+
+    ifstream fnm(addsuffix(path, '/') + "names.dmp");
+    _readNameDump(fnm);
+    fnm.close();
+
+    theInfo("INITIAL Section: initial database by files in directory " + path);
+  } else if (hasSuffix(path, ".tar.gz")) {
+    tgz4taxdb(path);
+    theInfo("INITIAL Section: initial database by file " + path);
   } else {
     readTable(path);
+    theInfo("INITIAL Section: initial database by cache file " + path);
   }
 };
 
@@ -42,14 +54,42 @@ TaxaDB::TaxaDB(const string &path) {
  * @brief intial function for database by dump files
  *
  ********************************************************************************/
-void TaxaDB::_readNodeDump(const string &file) {
-  ifstream ifs(file);
-  if (!ifs) {
-    cerr << "cannot open file " << file << endl;
+void TaxaDB::tgz4taxdb(const string &fname) {
+  gzFile fp;
+  if ((fp = gzopen(fname.c_str(), "rb")) == NULL) {
+    cerr << "Cannot found: \"" << fname << '"' << endl;
     exit(1);
   }
 
-  for (string line; getline(ifs, line);) {
+  map<string, string> files{{"names.dmp", ""}, {"nodes.dmp", ""}};
+  size_t nReadfile(0);
+  while (nReadfile < files.size()) {
+    TarRecord rc;
+    gzread(fp, rc.buff, sizeof(rc));
+    if (rc.header.name[0] == 0)
+      break;
+    size_t nsize = oct2size(rc.header.size);
+    auto iter = files.find(rc.header.name);
+
+    // read file
+    if (iter != files.end()) {
+      tgzReadFile(fp, nsize, iter->second);
+      nReadfile++;
+    } else {
+      size_t bsize = ((nsize + RECORDSIZE - 1) / RECORDSIZE) * RECORDSIZE;
+      gzseek(fp, bsize, SEEK_CUR);
+    }
+  }
+
+  istringstream snd(files["nodes.dmp"]);
+  _readNodeDump(snd);
+
+  istringstream snm(files["names.dmp"]);
+  _readNameDump(snm);
+};
+
+void TaxaDB::_readNodeDump(istream &is) {
+  for (string line; getline(is, line);) {
     line = trim(line);
     if (line.empty())
       continue;
@@ -64,17 +104,10 @@ void TaxaDB::_readNodeDump(const string &file) {
       taxlist.resize(nd.taxid + 1);
     taxlist.at(nd.taxid) = nd;
   }
-  ifs.close();
 };
 
-void TaxaDB::_readNameDump(const string &file) {
-  ifstream ifs(file);
-  if (!ifs) {
-    cerr << "cannot open file " << file << endl;
-    exit(1);
-  }
-
-  for (string line; getline(ifs, line);) {
+void TaxaDB::_readNameDump(istream &is) {
+  for (string line; getline(is, line);) {
     line = trim(line);
     if (line.empty())
       continue;
@@ -90,8 +123,6 @@ void TaxaDB::_readNameDump(const string &file) {
       taxlist.at(tid).nicks.push_back(idname(nm));
     }
   }
-
-  ifs.close();
 };
 
 string TaxaDB::goodname(const string &str) {
@@ -102,7 +133,7 @@ string TaxaDB::goodname(const string &str) {
   return nm;
 }
 
-string TaxaDB::idname(const string &str){
+string TaxaDB::idname(const string &str) {
   string nm(str);
   nm = regex_replace(nm, nonWord, "");
   return toLower(nm);

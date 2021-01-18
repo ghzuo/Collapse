@@ -7,25 +7,12 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-12-08 20:01:45
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-08 20:18:32
+ * @Last Modified Time: 2021-01-18 14:57:15
  */
 
-#include "taxtree.h"
+#include "getLeafName.h"
 
-using namespace std;
-
-void usage(string &program) {
-  cerr << "\nProgram Usage: \n"
-       << program << "\n"
-       << " [ -i Tree.nwk ]   Input tree file, default: Tree.nwk\n"
-       << " [ -o name.list ]  Output name list, default: name.list\n"
-       << " [ -q ]            Run command in quiet mode\n"
-       << " [ -h ]            Display this information\n"
-       << endl;
-  exit(1);
-}
-
-int main(int argc, char *argv[]) {
+void getLeafName(int argc, char *argv[]) {
 
   // get the name of file
   string infile("Tree.nwk");
@@ -45,9 +32,9 @@ int main(int argc, char *argv[]) {
       theInfo.quiet = true;
       break;
     case 'h':
-      usage(program);
+      leafUsage(program);
     case '?':
-      usage(program);
+      leafUsage(program);
     }
   }
 
@@ -61,4 +48,15 @@ int main(int argc, char *argv[]) {
     is << nd->name << endl;
   }
   is.close();
+}
+
+void leafUsage(string &program) {
+  cerr << "\nProgram Usage: \n"
+       << program << "\n"
+       << " [ -i Tree.nwk ]   Input tree file, default: Tree.nwk\n"
+       << " [ -o name.list ]  Output name list, default: name.list\n"
+       << " [ -q ]            Run command in quiet mode\n"
+       << " [ -h ]            Display this information\n"
+       << endl;
+  exit(1);
 }

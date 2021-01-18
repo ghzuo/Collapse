@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2018-01-02 15:42:07
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-09 17:17:24
+ * @Last Modified Time: 2020-12-21 18:18:32
  */
 
 #include "taxsys.h"
@@ -25,7 +25,7 @@ const string TaxSys::rootTaxon("<B>Cellular_Organisms");
 TaxSys::TaxSys(const vector<string> &names) { initial(names); };
 
 void TaxSys::initial(const vector<string> &names) {
-  //set the total number of the taxonomy set
+  // set the total number of the taxonomy set
   nStrain = names.size();
 
   // set the state map
@@ -347,5 +347,148 @@ void Taxa::outStatitics(ostream &os) {
     for (auto &str : tlist)
       os << str << endl;
     os << endl;
+  }
+};
+
+/********************************************************************************
+ * @brief output the json style infomation
+ *
+ ********************************************************************************/
+void Taxa::outJson(const string &file) {
+  ofstream os(file);
+  if (!os) {
+    cerr << "Open " << file << " for write failed" << endl;
+    exit(3);
+  }
+
+  outJsonTax(os);
+  os.close();
+};
+
+void Taxa::outJsonEntropy(ostream &os) {
+  map<char, TaxLevelState> taxlev;
+  for (const auto &atax : rank->outrank) {
+    TaxLevelState tl;
+    taxlev[atax.second] = tl;
+  }
+
+  for (auto &stateIter : def.state) {
+
+    string theItem = lastName(stateIter.first);
+    char abbrT = theItem[1];
+
+    // get the collapse state and sigle strain taxon
+    if (stateIter.second.nStrain == 1) {
+      ++taxlev[abbrT].nSolo;
+    } else {
+      // get number of non-solo taxon
+      if (stateIter.second.monophy)
+        ++taxlev[abbrT].nMono;
+      else
+        ++taxlev[abbrT].nPoly;
+
+      // get the entropy
+      taxlev[abbrT].sTax +=
+          stateIter.second.nStrain * log2(double(stateIter.second.nStrain));
+      for (auto &n : stateIter.second.distract) {
+        taxlev[abbrT].sTree += n * log2(double(n));
+      }
+    }
+  }
+
+  double maxEntropy = log2(double(def.nStrain));
+  vector<string> jslist;
+  for (const auto &atax : rank->outrank) {
+    stringstream ss;
+    int nTotal = taxlev[atax.second].nSolo + taxlev[atax.second].nMono +
+                 taxlev[atax.second].nPoly;
+    double sTax = maxEntropy - taxlev[atax.second].sTax / def.nStrain;
+    double sTree = maxEntropy - taxlev[atax.second].sTree / def.nStrain;
+
+    // output taxlevel data
+    ss << "{\"level\":\"" << atax.first << "\","
+       << "\"symbol\":\"" << atax.second << "\","
+       << "\"nSolo\":\"" << taxlev[atax.second].nSolo << "\","
+       << "\"nMono\":\"" << taxlev[atax.second].nMono << "\","
+       << "\"nTotal\":\"" << nTotal << "\","
+       << "\"sTax\":\"" << sTax << "\","
+       << "\"sTree\":\"" << sTree << "\"}";
+
+    jslist.emplace_back(ss.str());
+  }
+
+  os << "[" << strjoin(jslist.begin(), jslist.end(), ',') << "]";
+};
+
+void Taxa::outJsonUnclass(vector<string> &strName, ostream &os) {
+  // get undefine strain lineage
+  vector<string> taxName;
+  for (auto &str : undef.state)
+    taxName.push_back(str.first);
+  for (auto &str : strName)
+    str.erase(str.find('|'), 1);
+  sort(strName.begin(), strName.end());
+  vector<string> names;
+  merge(taxName.begin(), taxName.end(), strName.begin(), strName.end(),
+        back_inserter(names));
+
+  // output the json
+  size_t prevRank = 0;
+  os << "[";
+  for (auto &str : names) {
+
+    size_t theRank = nRanks(str);
+    if (prevRank == 0) {
+      os << "{";
+    } else if (theRank > prevRank) {
+      os << ",";
+      for (size_t iRank = theRank; iRank != prevRank; --iRank) {
+        os << "\"children\":[{";
+      }
+    } else if (theRank < prevRank) {
+      for (size_t iRank = theRank; iRank != prevRank; ++iRank) {
+        os << "}]";
+      }
+      os << "},{";
+    } else {
+      os << "},{";
+    }
+    os << "\"name\":\"" << lastName(str) << "\","
+       << "\"size\":\"" << undef.state[str].nStrain << "\"";
+    prevRank = theRank;
+  }
+  
+  for (size_t iRank = 0; iRank != prevRank; ++iRank) {
+    os << "}]";
+  }
+};
+
+void Taxa::outJsonTax(ostream &os) {
+  size_t prevRank = 0;
+  os << "[";
+  for (const auto &st : def.state) {
+    size_t theRank = nRanks(st.first);
+    if (prevRank == 0) {
+      os << "{";
+    } else if (theRank > prevRank) {
+      os << ",";
+      for (size_t iRank = theRank; iRank != prevRank; --iRank) {
+        os << "\"children\":[{";
+      }
+    } else if (theRank < prevRank) {
+      for (size_t iRank = theRank; iRank != prevRank; ++iRank) {
+        os << "}]";
+      }
+      os << "},{";
+    } else {
+      os << "},{";
+    }
+    os << "\"name\":\"" << lastName(st.first) << "\","
+       << "\"size\":\"" << st.second.nStrain << "\","
+       << "\"status\":\"" << ((st.second.monophy) ? "++" : "--") << "\"";
+    prevRank = theRank;
+  }
+  for (size_t iRank = 0; iRank != prevRank; ++iRank) {
+    os << "}]";
   }
 };

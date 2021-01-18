@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2020-12-08 16:13:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-08 16:15:02
+ * @Last Modified Time: 2020-12-12 10:08:37
  */
 
 #ifndef KIT_H
@@ -15,5 +15,6 @@
 
 #include "info.h"
 #include "stringOpt.h"
+#include "fileOpt.h"
 
 #endif // !KIT_H

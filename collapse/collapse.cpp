@@ -7,15 +7,15 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-09-01 12:54:33
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-10 12:39:28
+ * @Last Modified Time: 2021-01-18 14:17:48
  */
 
 #include "collapse.h"
 
-int main(int argc, char *argv[]) {
+void collapse(int argc, char *argv[]) {
 
   // get the input arguments
-  Args myargs(argc, argv);
+  RunArgs myargs(argc, argv);
 
   /************************************************************************
    ******* read the tree and checked *************************************/
@@ -80,15 +80,21 @@ int main(int argc, char *argv[]) {
 
   /***************************************************************************
    *********  output data ****************************************************/
-  output(aTaxa, aTree, lngs, myargs);
+  if (myargs.forApp) {
+    out4app(lngs, aTaxa, aTree, myargs.outPref + ".json");
+  } else if (myargs.forWeb) {
+    out4serv(lngs, aTaxa, aTree, myargs);
+  } else {
+    output(lngs, aTaxa, aTree, myargs);
+  }
 }
 /****************************************************************************
  ******************************  End main program ***************************
  ****************************************************************************/
 
-Args::Args(int argc, char **argv)
-    : infile(""), taxrev(""), outgrp(""), taxfile(""), lngfile(""),
-      forWeb(false), predict(true) {
+RunArgs::RunArgs(int argc, char **argv)
+    : infile(""), taxrev(""), outgrp(""), taxfile(""), forWeb(false),
+      forApp(false), predict(true) {
 
   program = argv[0];
   string outname("collapsed");
@@ -96,7 +102,7 @@ Args::Args(int argc, char **argv)
   string kstr;
 
   char ch;
-  while ((ch = getopt(argc, argv, "i:d:D:o:r:t:s:T:L:R:O:WPqh")) != -1) {
+  while ((ch = getopt(argc, argv, "i:d:D:o:r:t:s:T:R:O:WPAqh")) != -1) {
     switch (ch) {
     case 'i':
       infile = optarg;
@@ -119,9 +125,6 @@ Args::Args(int argc, char **argv)
     case 'R':
       abfile = optarg;
       break;
-    case 'L':
-      lngfile = optarg;
-      break;
     case 'O':
       outgrp = optarg;
       break;
@@ -130,6 +133,9 @@ Args::Args(int argc, char **argv)
       break;
     case 'W':
       forWeb = true;
+      break;
+    case 'A':
+      forApp = true;
       break;
     case 'P':
       predict = false;
@@ -158,34 +164,30 @@ Args::Args(int argc, char **argv)
   // the output prefix
   outPref = supdir + outname;
 
-  // for the output newick file name
-  treeSuff = ".tree";
-  if (infile.find(treeSuff) + treeSuff.size() == infile.size())
-    treeSuff = ".nwk";
-
   // for the default
   if (taxadb.empty()) {
     taxadb = supdir + "taxadb.gz";
     if (!fileExists(taxadb)) {
-      taxadb = supdir + "taxdump";
+      taxadb = supdir + "taxdump.tar.gz";
+      if (!fileExists(taxadb)) {
+        taxadb = supdir + "taxdump";
+      }
     }
   }
 }
 
-void Args::usage() {
+void RunArgs::usage() {
   cerr << "\nProgram Usage: \n\n"
        << program << "\n"
        << " [ -d ./ ]            The work directory, default: ./\n"
        << " [ -i Tree.nwk ]      Input newick tree file, default: Tree.nwk\n"
-       << " [ -o collpsed ]      Output prefix name: default: collapsed\n"
+       << " [ -o collapsed ]     Output prefix name: default: collapsed\n"
        << " [ -r Lineage.rev ]   Lineage revise file for batch edit,\n"
        << "                      default: Lineage.rev\n"
        << " [ -T Lineage.list ]  Lineage file for leafs of tree, \n"
        << "                      default: Lineage.list\n"
        << " [ -D taxadb.gz ]     Taxa database file or directory,\n"
        << "                      default: taxadb.gz or taxdump/\n"
-       << " [ -L <None> ]        Output lineage of all leafs:\n"
-       << "                      default: don't output lineages\n"
        << " [ -R <None> ]        Abbravition list for taxon rank name,\n"
        << "                      default: by program\n"
        << " [ -t DKPCOFGS ]      Abbreviation of output taxon rank,\n"
@@ -206,28 +208,17 @@ void Args::usage() {
  * @param aTree the tree
  * @param myargs the output file name and switches
  ***************************************************************************/
-void output(Taxa &aTaxa, Node *aTree, vector<Lineage> &lngs, Args &myargs) {
+void output(const vector<Lineage> &lngs, Taxa &aTaxa, Node *aTree,
+            RunArgs &myargs) {
 
   /// output the monophyly
   aTaxa.outStatitics(myargs.outPref + ".unit");
 
-  /// output for webserver
-  if (myargs.forWeb) {
-    //... check the upload genomes
-    aTree->checkUploaded();
+  /// output the entropy
+  aTaxa.outEntropy(myargs.outPref + ".entropy");
 
-    /// output the json file
-    aTree->outjson(myargs.outPref + ".json");
-
-    /// output the taxonomy list with relationship
-    aTaxa.outTax(myargs.outPref + ".list");
-  } else {
-    /// output the newick file
-    aTree->outnwk(myargs.outPref + myargs.treeSuff);
-
-    /// output the entropy
-    aTaxa.outEntropy(myargs.outPref + ".entropy");
-  }
+  /// output the annotated newick file
+  aTree->outnwk(myargs.outPref + "-annotated.nwk");
 
   // for undefined items
   if (aTree->nxleaf > 0) {
@@ -242,12 +233,98 @@ void output(Taxa &aTaxa, Node *aTree, vector<Lineage> &lngs, Args &myargs) {
     }
   }
 
-  // output lineage of leaf;
-  if (!myargs.lngfile.empty()) {
-    ofstream leaf(myargs.lngfile);
-    for (auto &lng : lngs) {
-      leaf << lng.name << endl;
-    }
-    leaf.close();
+  // oupt lineage of leafs
+  ofstream leaf(myargs.outPref + ".lineage");
+  for (auto &lng : lngs) {
+    leaf << lng.name << endl;
   }
+  leaf.close();
+};
+
+// output for web sever
+void out4serv(const vector<Lineage> &lngs, Taxa &aTaxa, Node *aTree,
+              RunArgs &myargs) {
+  /// open the ostream for tree page
+  ofstream TREE(myargs.outPref + "-phylogeny.json");
+  outTreeJson(aTaxa, aTree, TREE);
+  TREE.close();
+
+  /// open the ostream for taxa page
+  ofstream TAXA(myargs.outPref + "-taxonomy.json");
+  outTaxaJson(aTaxa, aTree, TAXA);
+  TAXA.close();
+
+  /// open the ostream for lineage of leafs
+  ofstream LNGS(myargs.outPref + "-lineage.json");
+  outLngsJson(lngs, aTaxa, LNGS);
+  LNGS.close();
+};
+
+// output the complex json for cltree app
+void out4app(const vector<Lineage> &lngs, Taxa &aTaxa, Node *aTree,
+             const string &file) {
+  /// open the ostream
+  ofstream JSON(file);
+
+  // output the phylogeny
+  JSON << "{\"phylogeny\":";
+  outTreeJson(aTaxa, aTree, JSON);
+  JSON << ", " << endl;
+
+  // output the taxonomy
+  JSON << "\"taxonomy\":";
+  outTaxaJson(aTaxa, aTree, JSON);
+  JSON << "," << endl;
+
+  // output the lineage
+  JSON << "\"lineage\":";
+  outLngsJson(lngs, aTaxa, JSON);
+  JSON << "}" << endl;
+
+  /// output the taxonomy list with relationship
+  JSON.close();
+}
+
+void outTaxaJson(Taxa &aTaxa, Node *aTree, ostream &os) {
+  // output the taxon system
+  os << "{\"taxa\":";
+  aTaxa.outJsonTax(os);
+  os << "," << endl;
+  // output unclassified info
+  if (aTree->nxleaf > 0) {
+    /// output the unclassified items
+    vector<string> strName;
+    aTree->getUndefineNames(strName);
+    os << "\"unclass\":";
+    aTaxa.outJsonUnclass(strName, os);
+    os << "," << endl;
+  }
+  // output the entropy
+  os << "\"rank\":";
+  aTaxa.rank->outRanksJson(os);
+  os << "}" << endl;
+};
+
+void outTreeJson(Taxa &aTaxa, Node *aTree, ostream &os) {
+  //... check the upload genomes
+  aTree->checkUploaded();
+  os << "{\"tree\":";
+  aTree->outjson(os);
+  os << "," << endl;
+
+  // output the level statistics
+  os << "\"statistics\":";
+  aTaxa.outJsonEntropy(os);
+  os << "}" << endl;
+};
+
+void outLngsJson(const vector<Lineage> &lngs, Taxa &aTaxa, ostream &os) {
+  // output lineage of leaf;
+  os << "{\"lineage\":[" << strjoin(lngs.begin(), lngs.end(), ",")
+     << "]," << endl;
+
+  // output the entropy
+  os << "\"rank\":";
+  aTaxa.rank->outRanksJson(os);
+  os << "}" << endl;
 };

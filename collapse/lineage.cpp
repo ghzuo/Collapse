@@ -7,10 +7,23 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2017-09-01 13:03:04
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-10 12:10:05
+ * @Last Modified Time: 2020-12-28 12:18:28
  */
 
 #include "lineage.h"
+
+ostream &operator<<(ostream &os, const Lineage &lng) {
+  vector<string> ranks;
+  separateLineage(lng.name, ranks);
+  for(auto& str : ranks){
+    str = lastNameNoRank(str);
+  }
+  os << "[\"";
+  os << ranks.back() << "\",\"";
+  os << strjoin(ranks.begin(), ranks.end()-1, "\",\"");
+  os << "\"]";
+  return os;
+};
 
 /********************************************************************************
  * @brief Construct a new Lineage Handle:: Lineage Handle object.
