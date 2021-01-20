@@ -7,12 +7,10 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2017-09-01 15:54:30
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2021-01-19 07:18:36
+# @Last Modified Time: 2021-01-20 18:06:53
 ###
 
 INCLUDE_DIRECTORIES("../kit")
-LINK_LIBRARIES(libkit.a)
-LINK_LIBRARIES(libtaxsys.a)
 
 SET(LIBTAXSYS_SRC 
     taxsys.cpp taxsys.h
