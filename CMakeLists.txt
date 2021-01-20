@@ -7,7 +7,7 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2020-12-07 09:06:29
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2021-01-20 17:53:53
+# @Last Modified Time: 2021-01-20 22:18:46
 ###
 
 cmake_minimum_required(VERSION 3.0)
@@ -27,16 +27,13 @@ ADD_DEFINITIONS("-O3 -std=c++11")
 
 ### Check required LIABRARIES
 if(NOT EMSCRIPTEN)
-  set(REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} z)
-  foreach(LIB ${REQUIRED_LIBRARIES})
-    find_library(THE${LIB} ${LIB})
-    if(THE${LIB})
-      message("-- Found library " ${LIB} ": " ${THE${LIB}})
-      LINK_LIBRARIES(${LIB})
-    else()
-      message(FATAL_ERROR ${LIB} " library not found!")
-    endif()
-  endforeach()
+  find_package(ZLIB)
+  if(ZLIB_FOUND)
+    include_directories(${ZLIB_INCLUDE_DIRS})
+    link_libraries(${ZLIB_LIBRARIES})
+  else()
+    message(FATAL_ERROR "Zlib not found")
+  endif()
 endif()
 
 ## include subdirectories
