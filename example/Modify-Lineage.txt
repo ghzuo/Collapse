@@ -1,5 +1,5 @@
 #######################################################################################################################################
-# This is a Lineage Modification example file accompanying our CVTree3 paper as Supplementary information                       #######     
+# This is a Lineage Modification example file
 #######################################################################################################################################
 
 # Phylum A2 Euryarchaeota (see our paper: Life 2015, 5: 949-968)
@@ -17,11 +17,9 @@
 <O>Unclassified<F>Unclassified<G>Unclassified<S>Unclassified<T>Uncultured_archaeon_A07HN63 <O>Halobacteriales<F>Halobacteriaceae<G>Halonotius<S>Unclutured_archaeon<T>Unclutured_archaeon_A07HN63
 
 # Phylum Ignavibacteriae IJSEM 2014, 64: 8-10
-
 <P>Chlorobi<C>Ignavibacteria <P>Ignavibacteriae<C>Ignavibacteriae
 
 # Phylum B8 Nitrospirae
-
 <P>Unclassified<C>Unclassified<O>Unclassified<F>Unclassified<G>Candidatus_Methylomirabilis <P>Nitrospirae<C>Nitrospira<O>Nitrospirales<F>Nitrospiraceae<G>Candidatus_Methylomirabilis     #  CVTree
 <P>Nitrospirae<C>Nitrospira<O>Nitrospirales<F>Nitrospiraceae<G>Thermodesulfovibrio <P>Thermodesulfobacteria<C>Thermodesulfobacteria<O>Thermodesulfobacteriales<F>Thermodesulfobacteriaceae<G>Thermodesulfovibrio  # CVTree
 
@@ -29,7 +27,7 @@
 # Phylum B11 Chloroflexi
 
 <P>Chloroflexi<C>Dehalococcoidia <P>Dehalococcoidia<C>Dehalococcoidia
- # phylum status according to CVTree
+# phylum status according to CVTree
 <P>Unclassified<C>Unclassified<O>Unclassified<F>Unclassified<G>Thermobaculum <P>Chloroflexi<C>Thermomicrobia<O>Thermobaculum<F>Thermobaculum<G>Thermobaculum # IJSEM 2011, 61, 1944-1953
 
 # Phlum B12 Proteobacteria
@@ -51,10 +49,8 @@
 <P>Unclassified<C>Unclassified<O>Unclassified<F>Unclassified<G>Halyomorpha <P>Proteobacteria<C>Gammaproteobacteria<O>Enterobacteriales<F>Enterobacteriaceae<G>Halyomorpha  #  CVTree
 
 # Phylum B13 Firmicutes
-
 <F>Erysipelotrichaceae<G>Eubacterium <F>Erysipelotrichaceae<G>Erysipelothrix   # CVTree 
 <P>Firmicutes<C>Erysipelotrichia <P>Tenericutes<C>Erysipelotrichia  # CVTree
-
 <F>Unclassified<G>Exiguobacterium <F>Bacillaceae<G>Exiguobacterium   # CVTree
 <F>Planococcaceae<G>Solibacillus <F>Bacillaceae<G>Solibacillus  #   NCBI taxonomy -> LPSN
 <S>Bacillus_sp_JS <S>Bacillus_subtilis  # CVTree
@@ -65,17 +61,14 @@
 # Phylum B14 Bacteroidetes
 
 <G>Sphingobacterium<S>Sphingobacterium_sp_21 <G>Pedobacter<S>Sphingobacterium_sp_21  # cf. IJSEM 2014, 64, 863-868
-
 <O>Actinomycetales<F>Nakamurellaceae <O>Nakamurellales<F>Nakamurellaceae  # IJSEM 2014, 64, 3821-3832
 <O>Actinomycetales<F>Frankiaceae <O>Frankiales<F>Frankiaceae              # IJSEM 2014, 64, 3821-3832
 <O>Actinomycetales<F>Geodermatophilaceae <O>Geodermatophilales<F>Geodermatophilaceae # as above
 <O>Actinomycetales<F>Acidothermaceae <O>Acidothermales<F>Acidothermaceae  # as above
-
 <P>Bacteroidetes<C>Bacteroidetes<O>Bacteroidetes_Order_II <P>Chlorobi<C>Unclassified<O>Bacteroidetes_Order_II #CVTree
 <P>Bacteroidetes<C>Unclassified<O>Bacteroidetes_Order_II <P>Chlorobi<C>Unclassified<O>Bacteroidetes_Order_II #CVTree
 
 # New Phylum Synergistetes
-
 <C>Synergistetes <C>Synergistia
 
           

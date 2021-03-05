@@ -7,13 +7,9 @@ CMakeLists.txt.user
 .vstags
 .history
 cache
-cvtreeManual.aux
-cvtreeManual.fdb_latexmk
-cvtreeManual.fls
-cvtreeManual.log
-cvtreeManual.synctex.gz
-__latexindent_temp.tex
 example/collapse.*
+example/taxadb.gz
+example/taxdump.tar.gz
 SourceTrail/
 /example/collapsed*
 
