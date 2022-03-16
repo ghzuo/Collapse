@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2018  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2018-01-02 15:42:07
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-21 18:18:32
+ * @Last Modified Time: 2022-03-16 12:27:15
  */
 
 #include "taxsys.h"
@@ -117,10 +117,10 @@ void TaxSys::annotateLeaf(int nClade, string &name, size_t &taxSize) {
  *
  * @param nmlist a list of the lineages for all leafs
  ********************************************************************************/
-Taxa::Taxa(const vector<Lineage> &lngs) {
+Taxa::Taxa(const LngData &lngs) {
   vector<string> defNames;
   vector<string> undefNames;
-  for (auto &lng : lngs) {
+  for (auto &lng : lngs.data) {
     if (lng.def) {
       defNames.emplace_back(lng.name);
     } else {
@@ -457,13 +457,18 @@ void Taxa::outJsonUnclass(vector<string> &strName, ostream &os) {
        << "\"size\":\"" << undef.state[str].nStrain << "\"";
     prevRank = theRank;
   }
-  
+
   for (size_t iRank = 0; iRank != prevRank; ++iRank) {
     os << "}]";
   }
 };
 
 void Taxa::outJsonTax(ostream &os) {
+  // for state is empty
+  if (def.state.empty())
+    return;
+
+  // output the json string
   size_t prevRank = 0;
   os << "[";
   for (const auto &st : def.state) {

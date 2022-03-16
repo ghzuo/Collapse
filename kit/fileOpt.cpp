@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2020  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2020-12-12 10:07:59
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-12 13:43:57
+ * @Last Modified Time: 2022-03-16 12:19:42
  */
 
 #include "fileOpt.h"
@@ -50,4 +50,40 @@ int gzline(gzFile &fp, string &line) {
     }
   }
   return ch;
+};
+
+// check whether a gzip file is exist and not emtpy
+bool gzvalid(const string &filename) {
+  if (fileExists(filename)) {
+    gzFile fp;
+    if ((fp = gzopen(filename.c_str(), "rb")) != NULL) {
+      if (gzgetc(fp) != -1) {
+        gzclose(fp);
+        return true;
+      }
+      gzclose(fp);
+    }
+  }
+  return false;
+};
+
+// read list file for list and name map
+void readNameMap(const string &file, vector<string> &nmlist,
+                 map<string, string> &nameMap) {
+  ifstream infile(file.c_str());
+  if (!infile) {
+    cerr << "\nCannot found the input file " << file << endl;
+    exit(1);
+  }
+
+  for (string line; getline(infile, line);) {
+    if (!line.empty()) {
+      vector<string> items;
+      separateWord(items, line);
+      nmlist.emplace_back(items[0]);
+      if (items.size() > 1) {
+        nameMap.insert({items[0], items[1]});
+      }
+    }
+  }
 };

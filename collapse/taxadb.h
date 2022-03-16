@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2020  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2020-12-05 15:05:30
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-12 09:59:23
+ * @Last Modified Time: 2022-03-16 12:27:50
  */
 
 #ifndef TAXADB_H
@@ -61,6 +61,7 @@ struct TaxaDB {
   // read/write gzip database file
   void readTable(const string &);
   void writeTable(const string &);
+  void outJsons(const string &);
 
   // search lineage
   string search(size_t);

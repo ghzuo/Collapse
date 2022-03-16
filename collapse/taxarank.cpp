@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2020  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2020-12-09 16:10:07
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-24 15:22:26
+ * @Last Modified Time: 2022-03-16 12:27:39
  */
 
 #include "taxarank.h"
@@ -30,30 +30,13 @@ TaxaRank *TaxaRank::create() {
  * @brief set rank
  *
  ********************************************************************************/
-void TaxaRank::initial(const string &taxfile, const string &abfile,
-                       const string &abtype) {
-  // revise the taxlevel if input give
-  string outRankStr = setRankByFile(abfile);
-
-  // set out ranks
-  if (!abtype.empty()) {
-    outRankStr = abtype;
-  } else if (outRankStr.empty()) {
-    outRankStr = setOutRankByTaxfile(taxfile);
-  }
-
-  setOutRank(outRankStr);
-};
-
 void TaxaRank::initial(const string &abfile, const string &abtype) {
   // revise the taxlevel if input give
-  string outRankStr = setRankByFile(abfile);
+  setOutRank(setRankByFile(abfile));
 
-  // set out ranks
-  if (!abtype.empty()) {
-    outRankStr = abtype;
-  }
-  setOutRank(outRankStr);
+  // set output rank
+  if (!abtype.empty())
+    setOutRank(abtype, true);
 };
 
 string TaxaRank::setRankByFile(const string &file) {
@@ -85,52 +68,47 @@ string TaxaRank::setRankByFile(const string &file) {
   return outRankStr;
 };
 
-string TaxaRank::setOutRankByTaxfile(const string &file) {
-  string outRankStr;
-  ifstream tax(file);
-  if (tax) {
-    string line;
-    do {
-      getline(tax, line);
-      trim(line);
-    } while (line.empty());
+void TaxaRank::setOutRank(const string &outRankStr, bool fix) {
 
-    sregex_iterator iter(line.begin(), line.end(), prefix);
-    sregex_iterator iterEnd;
-    for (; iter != iterEnd; ++iter) {
-      outRankStr += iter->str().at(1);
-    }
-    if (outRankStr.back() == 'T') {
-      outRankStr.pop_back();
-    }
-    tax.close();
-  }
-  return outRankStr;
-};
+  if (fixed || outRankStr.empty())
+    return;
 
-void TaxaRank::setOutRank(const string &outRankStr) {
+  // set outrank by string
+  map<char, string> abmap;
+  for (auto &item : rankmap) {
+    abmap[item.second] = item.first;
+  };
+  abmap['D'] = "Domain";
 
-  if (!outRankStr.empty()) {
-    map<char, string> abmap;
-    for (auto &item : rankmap) {
-      abmap[item.second] = item.first;
-    };
-    abmap['D'] = "Domain";
-
-    outrank.clear();
-    for (const char &c : outRankStr) {
-      if (abmap.find(c) != abmap.end()) {
-        string str = abmap[c];
-        str.front() = toupper(str.front());
-        outrank.emplace_back(str, c);
-      } else {
-        cerr << "Can't find the full name of " << c << endl;
-        exit(3);
-      }
+  outrank.clear();
+  for (const char &c : outRankStr) {
+    if (abmap.find(c) != abmap.end()) {
+      string str = abmap[c];
+      str.front() = toupper(str.front());
+      outrank.emplace_back(str, c);
+    } else {
+      cerr << "Can't find the full name of " << c << endl;
+      exit(3);
     }
   }
+
+  // fix or not fix the outrank
+  fixed = fix;
 };
 
+void TaxaRank::setOutRank(const vector<pair<string, char>> &rnlist, bool fix) {
+  if (!fixed)
+    outrank = rnlist;
+
+  // fix or not fix the outrank
+  fixed = fix;
+}
+
+/********************************************************************************
+ * @brief output the rank
+ *
+ * @param os
+ ********************************************************************************/
 void TaxaRank::outRanksJson(ostream &os) {
   vector<string> jslist;
   for (auto &rank : outrank) {
@@ -138,6 +116,14 @@ void TaxaRank::outRanksJson(ostream &os) {
                         rank.second + "\"}");
   }
   os << "[" << strjoin(jslist.begin(), jslist.end(), ',') << "]";
+};
+
+void TaxaRank::outRanksCSV(ostream &os) {
+  vector<string> csvlist;
+  for (auto &rank : outrank) {
+    csvlist.emplace_back(rank.first + "(" + rank.second + ")");
+  }
+  os << strjoin(csvlist.begin(), csvlist.end(), ',');
 };
 
 /********************************************************************************
@@ -200,19 +186,27 @@ void TaxaRank::format(string &atax) {
  * @param lngs taxon level and taxon name
  * @return string a abbrivated string for the taxon
  ********************************************************************************/
+char TaxaRank::getSymbol(const string &lvl) const {
+  auto iter = rankmap.find(toLower(lvl));
+  if (iter != rankmap.end())
+    return iter->second;
+  return ' ';
+};
+
 string TaxaRank::rankString(const vector<RankName> &rnlist) const {
   string lineStr("");
   for (auto &rn : rnlist) {
-    lineStr += rankString(rnlist);
+    lineStr += rankString(rn);
   }
   return lineStr;
 }
 
 string TaxaRank::rankString(const RankName &rn) const {
   string lineStr("");
-  if (rankmap.find(rn.first) != rankmap.end()) {
+  auto iter = rankmap.find(toLower(rn.first));
+  if (iter != rankmap.end()) {
     lineStr += mark.first;
-    lineStr += rankmap.find(rn.first)->second;
+    lineStr += iter->second;
     lineStr += mark.second;
     lineStr += rn.second;
   }
@@ -248,7 +242,13 @@ size_t separateLineage(const string &taxstr, vector<string> &tax) {
 };
 
 string lastName(const string &str) {
-  return str.substr(str.find_last_of(TaxaRank::mark.first));
+  auto pos = str.find_last_of(TaxaRank::mark.first);
+  if (pos != string::npos) {
+    return str.substr(pos);
+  } else {
+    cerr << "failed to parse the lineage name string: " << str << endl;
+    exit(3);
+  }
 };
 
 string lastNameNoRank(const string &str) {

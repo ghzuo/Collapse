@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2020  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2020-12-09 16:10:07
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-24 15:07:10
+ * @Last Modified Time: 2022-03-16 12:27:27
  */
 
 #ifndef TAXARANK_H
@@ -35,14 +35,13 @@ struct TaxaRank {
     title += mark.second;
     return title;
   }
-  
+
   // symbols for option
   string undefStr{"Unclassified"};
   string undefSym{mark.second + undefStr + mark.first};
   string strainMark{addMark('T')};
   regex misKingdom{addMark('D') + "([A-Za-z]+)" + addMark('K') + undefStr};
   string comKingdom{addMark('D') + "$1" + addMark('K') + "$1"};
-  regex prefix{addMark("[A-Za-z]")};
 
   // taxon rank map and list
   map<string, char> rankmap{
@@ -55,18 +54,22 @@ struct TaxaRank {
       {"subtribe", 'r'},     {"section", 'E'},    {"subsection", 'E'},
       {"serotype", 'Y'},     {"isolate", 'I'},    {"superphylum", 'Q'},
       {"superclass", 'L'},   {"superorder", 'W'}, {"superfamly", 'M'},
-      {"infraorder", 'i'},   {"biotype", 'B'},    {"genotype", 'N'}};
+      {"infraorder", 'i'},   {"biotype", 'B'},    {"genotype", 'N'},
+      {"domain", 'D'}};
   vector<pair<string, char>> outrank{
       {"Domain", 'D'}, {"Kingdom", 'K'}, {"Phylum", 'P'}, {"Class", 'C'},
       {"Order", 'O'},  {"Family", 'F'},  {"Genus", 'G'},  {"Species", 'S'}};
+  bool fixed{false};
 
   // set rank handle
-  void initial(const string &, const string &, const string &);
   void initial(const string &, const string &);
   string setRankByFile(const string &);
-  string setOutRankByTaxfile(const string &);
-  void setOutRank(const string &);
-  void outRanksJson(ostream&);
+  void setOutRank(const string &, bool fix = false);
+  void setOutRank(const vector<pair<string, char>> &, bool fix = false);
+
+  // output rank in formats
+  void outRanksJson(ostream &);
+  void outRanksCSV(ostream &);
 
   // for check
   size_t nOutRanks() const;
@@ -75,9 +78,10 @@ struct TaxaRank {
   string lineage(const string &, const string &);
 
   // convert linage style
+  char getSymbol(const string&) const;
   string rankString(const RankName &) const;
   string rankString(const vector<RankName> &) const;
-  
+
 private:
   TaxaRank() = default;
 };

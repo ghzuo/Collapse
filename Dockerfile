@@ -1,14 +1,15 @@
 ###
-# Copyright (c) 2020  T-Life Research Center, Fudan University, Shanghai, China.
+# Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences
 # See the accompanying Manual for the contributors and the way to cite this work.
 # Comments and suggestions welcome. Please contact
-# Dr. Guanghong Zuo <ghzuo@fudan.edu.cn>
+# Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
 # 
 # @Author: Dr. Guanghong Zuo
 # @Date: 2020-12-07 09:06:29
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2021-01-18 16:22:15
+# @Last Modified Time: 2022-03-16 10:59:16
 ###
+
 
 ## Stage for build cvtree
 FROM alpine AS dev

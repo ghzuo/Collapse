@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2020  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2020-12-12 10:07:46
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-12 12:16:20
+ * @Last Modified Time: 2022-03-16 12:19:28
  */
 
 #ifndef FILEOPT_H
@@ -16,6 +16,8 @@
 #include <iostream>
 #include <string>
 #include <zlib.h>
+#include <map>
+#include "stringOpt.h"
 using namespace std;
 
 /********************************************************************************
@@ -52,5 +54,12 @@ void tgzReadFile(gzFile&, size_t, string&);
 
 // read line of gnuzip file
 int gzline(gzFile &, string &);
+
+// check gzip file empty
+
+bool gzvalid(const string&);
+
+// read list file for list and name map
+void readNameMap(const string&, vector<string>&, map<string,string>&);
 
 #endif // FILEOPT_H

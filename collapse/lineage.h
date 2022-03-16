@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2018  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2017-07-21 11:48:01
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-28 12:10:53
+ * @Last Modified Time: 2022-03-16 12:29:26
  */
 
 #ifndef LINEAGE_H
@@ -23,10 +23,8 @@
 
 #include "kit.h"
 #include "reviseList.h"
-#include "taxarank.h"
 #include "taxadb.h"
-
-typedef unordered_map<string, string> TaxMap;
+#include "taxarank.h"
 
 // the lineage
 struct Lineage {
@@ -35,23 +33,40 @@ struct Lineage {
 
   Lineage() = default;
   Lineage(const string &str) : name(str){};
-  friend ostream& operator<<(ostream&, const Lineage&);
+  friend ostream &operator<<(ostream &, const Lineage &);
 };
 
-struct LineageHandle { 
-  string tdbpath; 
-  string taxfile;
+typedef unordered_map<string, string> TaxMap;
+struct LngData {
+  string tdbpath;
   string revfile;
-  TaxaRank* rank;
-  
+	vector<string> tflist;
+  vector<Lineage> data;
+  TaxaRank *rank;
+
   /// basic setting options
-  LineageHandle();
-  LineageHandle(const string &, const string &, const string &);
+  LngData();
+  LngData(const string &, const string &, const string &);
+  void initData(const vector<string> &);
 
   // search entry
-  void getLineage(vector<Lineage> &);
-  void readTaxFile(TaxMap &);
-  void checkRepeats(vector<Lineage> &);
+  void getLineage(vector<string> &);
+  size_t getLngFromFile();
+	void getLngFromDB();
+  void readListFile(istream &, TaxMap &);
+  void readJsonFile(istream &, TaxMap &);
+  void readCsvFile(istream &, TaxMap &);
+  void checkRepeats();
+
+  // output data
+  Lineage &operator[](size_t);
+  void getStat(vector<pair<int, int>>&) const;
+	size_t size() const;
+
+	void output(const string&, const string&) const;
+  void outjson(ostream &) const;
+	void outcsv(ostream &) const;
+	void outlist(ostream &) const;
 };
 
 #endif

@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2018  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2018-01-03 21:03:33
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-21 18:10:51
+ * @Last Modified Time: 2022-03-16 12:27:00
  */
 
 #ifndef TAXSYS_H
@@ -79,8 +79,9 @@ struct TaxSys {
  ********************************************************************************/
 struct Taxa {
   TaxSys def, undef;
+  pair<string, string> symbol;
   TaxaRank *rank;
-  Taxa(const vector<Lineage> &);
+  Taxa(const LngData &);
 
   void annotate(Node *);
 

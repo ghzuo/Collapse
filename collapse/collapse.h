@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2018  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2017-09-01 15:53:05
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2021-01-18 14:17:41
+ * @Last Modified Time: 2022-03-16 12:31:08
  */
 
 #ifndef COLLAPSE_H
@@ -28,6 +28,7 @@ struct RunArgs {
   string taxadb, taxfile, taxrev;
   string abfile, abtype;
   string outPref;
+  string lngfile;
   string outgrp;
   bool forWeb, forApp, predict; 
   // two hidden options for output for server and app
@@ -38,10 +39,10 @@ struct RunArgs {
 
 void collapse(int, char**);
 
-void output(const vector<Lineage>&, Taxa &, Node *, RunArgs &);
-void out4serv(const vector<Lineage>&, Taxa&, Node *, RunArgs &);
-void out4app(const vector<Lineage>&, Taxa&, Node *, const string&);
+void output(const LngData&, Taxa &, Node *, RunArgs &);
+void out4serv(const LngData&, Taxa&, Node *, RunArgs &);
+void out4app(const LngData&, Taxa&, Node *, const string&);
 void outTaxaJson(Taxa&, Node *, ostream&);
 void outTreeJson(Taxa&, Node *, ostream&);
-void outLngsJson(const vector<Lineage>&, Taxa&, ostream&);
+void outLngsJson(const LngData&, Taxa&, ostream&);
 #endif

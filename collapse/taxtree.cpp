@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2018  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2017-03-17 15:39:23
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-12 16:07:13
+ * @Last Modified Time: 2022-03-16 12:26:46
  */
 
 #include "taxtree.h"
@@ -142,11 +142,12 @@ Node *Node::rootingByTaxa() {
 
   // root the tree by the highest rank clade and length
   if (!clades.empty()) {
-    Node *outgrp(clades.front());
+    Node *outgrp(clades.back());
+    clades.pop_back();
 
     for (auto &nd : clades) {
-      if (outgrp->taxLevel > nd->taxLevel ||
-          (outgrp->taxLevel == nd->taxLevel && outgrp->length < nd->length)) {
+      if (nd->taxLevel > outgrp->taxLevel ||
+          (outgrp->taxLevel == nd->taxLevel && nd->length > outgrp->length)) {
         outgrp = nd;
       }
     }
@@ -161,30 +162,23 @@ Node *Node::rootingByTaxa() {
     // find a good outgroup (the last item of children)
     // by higest rank of common lineage or longest branch length
     size_t minComLev = nRanks(commonLineage(chgBranch->name, outgrp->name));
-    size_t maxLength = outgrp->length;
-    auto outIter = children.rbegin();
-    auto chgIter = children.rend();
+    size_t minLevel = outgrp->taxLevel;
+    auto outIter = theTree->children.rbegin();
     for (auto iter = theTree->children.rbegin() + 1;
          iter != theTree->children.rend(); ++iter) {
       if (*iter != chgBranch) {
         size_t comLev = nRanks(commonLineage(chgBranch->name, (*iter)->name));
         if ((comLev < minComLev) ||
-            ((comLev == minComLev) && ((*iter)->length > maxLength))) {
+            ((comLev == minComLev) && ((*iter)->taxLevel > minLevel))) {
           outIter = iter;
           minComLev = comLev;
-          maxLength = (*iter)->length;
+          minLevel = (*iter)->taxLevel;
         }
-      } else {
-        chgIter = iter;
-      }
+      } 
     }
 
     // swap new outgroup to the back
-    if ((*chgIter)->length > maxLength) {
-      auto tmp = *chgIter;
-      *chgIter = outgrp;
-      theTree->children.back() = tmp;
-    } else if (outgrp != *outIter) {
+    if (outgrp != *outIter) {
       auto tmp = *outIter;
       *outIter = outgrp;
       theTree->children.back() = tmp;

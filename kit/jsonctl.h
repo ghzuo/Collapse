@@ -7,30 +7,28 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:28:15
+ * @Last Modified Time: 2022-03-16 12:18:19
  */
 
-#ifndef REVISELIST_H
-#define REVISELIST_H
+#ifndef JSONCTL
+#define JSONCTL
 
 #include <fstream>
-#include <iostream>
-#include <regex>
+#include <iomanip>
+#include <nlohmann/json.hpp>
 #include <string>
-#include <vector>
-
-#include "info.h"
-#include "stringOpt.h"
-
+using Json = nlohmann::json;
 using namespace std;
-typedef pair<string, string> str2str;
-struct Revision {
-  vector<str2str> chglist;
 
-  Revision(const string &);
-  bool empty() const;
-  void revise(string &);
-  void revise(vector<string> &);
+struct JsonCtl {
+  bool format{false};
+
+  void operator()(const string &, const string &);
+  void operator()(ostream &, const string &);
 };
+#endif // !JSONCTL
 
-#endif
+#ifndef THEJSON
+#define THEJSON
+extern JsonCtl theJson;
+#endif //.!THEJSON

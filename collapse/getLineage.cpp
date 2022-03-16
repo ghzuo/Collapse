@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2020  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2020-11-27 09:59:06
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2021-01-18 14:16:11
+ * @Last Modified Time: 2022-03-16 12:30:29
  */
 
 #include "getLineage.h"
@@ -67,6 +67,8 @@ void getlineage(int argc, char *argv[]) {
     for (auto &it : hit) {
       ofs << it << endl;
     }
+
+		// output the nonhit 
     if (myargs.outNonhit) {
       for (auto &it : nonhit)
         ofs << it << endl;
@@ -128,8 +130,9 @@ LngArgs::LngArgs(int argc, char **argv)
 void LngArgs::usage() {
   cerr << "\nProgram Usage: \n"
        << program << "\n"
-       << " [ -i name.list ]    The query list file defalut: blank, \n"
-       << "                     output all items of database \n"
+       << " [ -I <Taxon ID> ]   Query a taxon id\n"
+       << " [ -N <Taxon Name> ] Query a taxon name\n"
+       << " [ -i name.list ]    The query list file defalut: name.list\n"
        << " [ -d taxadb.gz ]    The dump of NCBI taxonomy database\n"
        << " [ -o Lineage.list ] Output file, default: stdout\n"
        << " [ -r <rankfile> ]   Rank mapping file\n"

@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2020  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2020-12-05 15:07:07
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-12 13:47:24
+ * @Last Modified Time: 2022-03-16 12:28:01
  */
 
 #include "taxadb.h"
@@ -193,6 +193,28 @@ void TaxaDB::writeTable(const string &fname) {
     }
   }
   gzclose(fp);
+};
+
+void TaxaDB::outJsons(const string &path) {
+  for (auto &nd : taxlist) {
+    if (nd.taxid != 0) {
+      // query the lineage by taxid
+      vector<TaxonNode> lng;
+      if (getFullLineage(nd.taxid, lng)) {
+        vector<string> vstr;
+
+        // output the json file
+        for (auto &ln : lng) {
+          vstr.emplace_back(ln.level);
+          vstr.emplace_back(ln.name);
+        }
+        string jsonstr =
+            "[\"" + strjoin(vstr.begin(), vstr.end(), "\",\"") + "\"]";
+        string fname = addsuffix(path, '/') + to_string(nd.taxid) + ".json";
+        theJson(fname, jsonstr);
+      }
+    }
+  }
 };
 
 /********************************************************************************

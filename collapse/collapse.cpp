@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2018  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2017-09-01 12:54:33
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2021-01-18 14:17:48
+ * @Last Modified Time: 2022-03-16 12:31:20
  */
 
 #include "collapse.h"
@@ -25,21 +25,21 @@ void collapse(int argc, char *argv[]) {
   /**********************************************************************
    ********* set for the lineage system and get lineage *****************/
   TaxaRank *rank = TaxaRank::create();
-  rank->initial(myargs.taxfile, myargs.abfile, myargs.abtype);
-  LineageHandle lngHandle(myargs.taxadb, myargs.taxfile, myargs.taxrev);
+  rank->initial(myargs.abfile, myargs.abtype);
+  LngData lngs(myargs.taxadb, myargs.taxfile, myargs.taxrev);
 
   // get the leafs lineage
   vector<Node *> allLeafs;
   aTree->getLeafs(allLeafs);
-  vector<Lineage> lngs;
-  for (auto nd : allLeafs) {
-    lngs.emplace_back(nd->name);
-  }
   theInfo("There are " + to_string(allLeafs.size()) +
           " leafs in the phylogenetic tree");
 
   // set lineage of leafs
-  lngHandle.getLineage(lngs);
+  vector<string> nmlist;
+  for (auto nd : allLeafs) {
+    nmlist.emplace_back(nd->name);
+  }
+  lngs.getLineage(nmlist);
 
   /*************************************************************************
    *********** set lineage of Nodes and rooting unrooted tree **************/
@@ -94,7 +94,7 @@ void collapse(int argc, char *argv[]) {
 
 RunArgs::RunArgs(int argc, char **argv)
     : infile(""), taxrev(""), outgrp(""), taxfile(""), forWeb(false),
-      forApp(false), predict(true) {
+      forApp(false), predict(true), lngfile("") {
 
   program = argv[0];
   string outname("collapsed");
@@ -102,7 +102,7 @@ RunArgs::RunArgs(int argc, char **argv)
   string kstr;
 
   char ch;
-  while ((ch = getopt(argc, argv, "i:d:D:o:r:t:s:T:R:O:WPAqh")) != -1) {
+  while ((ch = getopt(argc, argv, "i:d:D:o:r:t:s:T:R:O:L:WPAJqh")) != -1) {
     switch (ch) {
     case 'i':
       infile = optarg;
@@ -131,6 +131,9 @@ RunArgs::RunArgs(int argc, char **argv)
     case 'T':
       taxfile = optarg;
       break;
+    case 'L':
+      lngfile = optarg;
+      break;
     case 'W':
       forWeb = true;
       break;
@@ -142,6 +145,9 @@ RunArgs::RunArgs(int argc, char **argv)
       break;
     case 'q':
       theInfo.quiet = true;
+      break;
+    case 'J':
+      theJson.format = true;
       break;
     case 'h':
       usage();
@@ -208,8 +214,7 @@ void RunArgs::usage() {
  * @param aTree the tree
  * @param myargs the output file name and switches
  ***************************************************************************/
-void output(const vector<Lineage> &lngs, Taxa &aTaxa, Node *aTree,
-            RunArgs &myargs) {
+void output(const LngData &lngs, Taxa &aTaxa, Node *aTree, RunArgs &myargs) {
 
   /// output the monophyly
   aTaxa.outStatitics(myargs.outPref + ".unit");
@@ -235,61 +240,63 @@ void output(const vector<Lineage> &lngs, Taxa &aTaxa, Node *aTree,
 
   // oupt lineage of leafs
   ofstream leaf(myargs.outPref + ".lineage");
-  for (auto &lng : lngs) {
-    leaf << lng.name << endl;
-  }
+  lngs.outcsv(leaf);
   leaf.close();
 };
 
 // output for web sever
-void out4serv(const vector<Lineage> &lngs, Taxa &aTaxa, Node *aTree,
-              RunArgs &myargs) {
+void out4serv(const LngData &lngs, Taxa &aTaxa, Node *aTree, RunArgs &myargs) {
   /// open the ostream for tree page
-  ofstream TREE(myargs.outPref + "-phylogeny.json");
-  outTreeJson(aTaxa, aTree, TREE);
-  TREE.close();
+  stringstream jstree;
+  outTreeJson(aTaxa, aTree, jstree);
+  theJson(myargs.outPref + "-phylogeny.json", jstree.str());
 
   /// open the ostream for taxa page
-  ofstream TAXA(myargs.outPref + "-taxonomy.json");
-  outTaxaJson(aTaxa, aTree, TAXA);
-  TAXA.close();
+  stringstream jstaxa;
+  outTaxaJson(aTaxa, aTree, jstaxa);
+  theJson(myargs.outPref + "-taxonomy.json", jstaxa.str());
 
-  /// open the ostream for lineage of leafs
-  ofstream LNGS(myargs.outPref + "-lineage.json");
-  outLngsJson(lngs, aTaxa, LNGS);
-  LNGS.close();
+  /// output put lineage file
+  if (!myargs.lngfile.empty()) {
+    lngs.output(myargs.lngfile, "json");
+  }
 };
 
 // output the complex json for cltree app
-void out4app(const vector<Lineage> &lngs, Taxa &aTaxa, Node *aTree,
+void out4app(const LngData &lngs, Taxa &aTaxa, Node *aTree,
              const string &file) {
   /// open the ostream
-  ofstream JSON(file);
+  stringstream jsonbuf;
 
   // output the phylogeny
-  JSON << "{\"phylogeny\":";
-  outTreeJson(aTaxa, aTree, JSON);
-  JSON << ", " << endl;
+  jsonbuf << "{\"phylogeny\":";
+  outTreeJson(aTaxa, aTree, jsonbuf);
+  jsonbuf << ", " << endl;
 
   // output the taxonomy
-  JSON << "\"taxonomy\":";
-  outTaxaJson(aTaxa, aTree, JSON);
-  JSON << "," << endl;
+  jsonbuf << "\"taxonomy\":";
+  outTaxaJson(aTaxa, aTree, jsonbuf);
+  jsonbuf << "," << endl;
 
   // output the lineage
-  JSON << "\"lineage\":";
-  outLngsJson(lngs, aTaxa, JSON);
-  JSON << "}" << endl;
+  jsonbuf << "\"lineage\":";
+  lngs.outjson(jsonbuf);
+  jsonbuf << "}" << endl;
 
   /// output the taxonomy list with relationship
-  JSON.close();
+  theJson(file, jsonbuf.str());
 }
 
 void outTaxaJson(Taxa &aTaxa, Node *aTree, ostream &os) {
   // output the taxon system
   os << "{\"taxa\":";
-  aTaxa.outJsonTax(os);
+  if (aTree->nleaf == 0) {
+    os << "[]";
+  } else {
+    aTaxa.outJsonTax(os);
+  }
   os << "," << endl;
+  
   // output unclassified info
   if (aTree->nxleaf > 0) {
     /// output the unclassified items
@@ -302,7 +309,7 @@ void outTaxaJson(Taxa &aTaxa, Node *aTree, ostream &os) {
   // output the entropy
   os << "\"rank\":";
   aTaxa.rank->outRanksJson(os);
-  os << "}" << endl;
+  os << "}";
 };
 
 void outTreeJson(Taxa &aTaxa, Node *aTree, ostream &os) {
@@ -315,16 +322,5 @@ void outTreeJson(Taxa &aTaxa, Node *aTree, ostream &os) {
   // output the level statistics
   os << "\"statistics\":";
   aTaxa.outJsonEntropy(os);
-  os << "}" << endl;
-};
-
-void outLngsJson(const vector<Lineage> &lngs, Taxa &aTaxa, ostream &os) {
-  // output lineage of leaf;
-  os << "{\"lineage\":[" << strjoin(lngs.begin(), lngs.end(), ",")
-     << "]," << endl;
-
-  // output the entropy
-  os << "\"rank\":";
-  aTaxa.rank->outRanksJson(os);
-  os << "}" << endl;
+  os << "}";
 };

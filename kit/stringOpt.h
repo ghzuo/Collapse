@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2018  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2017-11-15 20:20:23
+ * @Date: 2022-03-16 12:10:28
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2020-12-12 10:37:02
+ * @Last Modified Time: 2022-03-16 12:17:37
  */
 
 #ifndef STRINGOPT_H

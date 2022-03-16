@@ -1,19 +1,20 @@
 /*
- * Copyright (c) 2021  T-Life Research Center, Fudan University, Shanghai,
- * China. See the accompanying Manual for the contributors and the way to cite
- * this work. Comments and suggestions welcome. Please contact Dr. Guanghong Zuo
- * <ghzuo@fudan.edu.cn>
- *
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
+ * See the accompanying Manual for the contributors and the way to cite this work.
+ * Comments and suggestions welcome. Please contact
+ * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+ * 
  * @Author: Dr. Guanghong Zuo
- * @Date: 2021-01-18 10:31:12
+ * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2021-01-18 16:01:07
+ * @Last Modified Time: 2022-03-16 12:29:13
  */
 
 #include "collapse.h"
 #include "getLeafName.h"
 #include "getLineage.h"
 #include "getTaxaDB.h"
+#include "updateLineage.h"
 using namespace std;
 
 void usage(string &program) {
@@ -23,6 +24,7 @@ void usage(string &program) {
        << "   run       Compare phylogenetic tree with taxonomy system\n"
        << "   index     Index local NCBI taxonomy by dump file\n"
        << "   query     Query lineage from the taxonomy database\n"
+       << "   search    Search lineage from taxa file and taxonomy database\n"
        << "   leaf      Obtain the name list of phylogenetic tree\n"
        << " [ -h ]      Display this information\n"
        << endl;
@@ -50,6 +52,8 @@ int main(int argc, char *argv[]) {
     mkTaxaDB(subArgc, subArgv);
   } else if (task.compare("leaf") == 0) {
     getLeafName(subArgc, subArgv);
+  } else if (task.compare("search") == 0) {
+    updateLineage(subArgc, subArgv);
   } else {
     cerr << "\nUnknown Task: " << task << endl;
     usage(program);
