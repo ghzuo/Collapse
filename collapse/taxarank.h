@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
- * See the accompanying Manual for the contributors and the way to cite this work.
- * Comments and suggestions welcome. Please contact
- * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
- * 
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of
+ * Sciences. See the accompanying Manual for the contributors and the way to
+ * cite this work. Comments and suggestions welcome. Please contact Dr.
+ * Guanghong Zuo <ghzuo@ucas.ac.cn>
+ *
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:27:27
+ * @Last Modified Time: 2022-03-22 16:21:25
  */
 
 #ifndef TAXARANK_H
@@ -45,16 +45,16 @@ struct TaxaRank {
 
   // taxon rank map and list
   map<string, char> rankmap{
-      {"superkingdom", 'D'}, {"kingdom", 'K'},    {"subkingdom", 'k'},
-      {"phylum", 'P'},       {"subphylum", 'p'},  {"class", 'C'},
-      {"subclass", 'c'},     {"order", 'O'},      {"suborder", 'o'},
-      {"family", 'F'},       {"subfamily", 'f'},  {"genus", 'G'},
-      {"subgenus", 'g'},     {"species", 'S'},    {"subspecies", 's'},
-      {"varietas", 'V'},     {"subvariety", 'v'}, {"tribe", 'R'},
-      {"subtribe", 'r'},     {"section", 'E'},    {"subsection", 'E'},
-      {"serotype", 'Y'},     {"isolate", 'I'},    {"superphylum", 'Q'},
-      {"superclass", 'L'},   {"superorder", 'W'}, {"superfamly", 'M'},
-      {"infraorder", 'i'},   {"biotype", 'B'},    {"genotype", 'N'},
+      {"superkingdom", 'D'}, {"kingdom", 'K'},  {"subkingdom", 'k'},
+      {"superphylum", 'Q'},  {"phylum", 'P'},   {"subphylum", 'p'},
+      {"superclass", 'L'},   {"class", 'C'},    {"subclass", 'c'},
+      {"superorder", 'W'},   {"order", 'O'},    {"suborder", 'o'},
+      {"superfamly", 'M'},   {"family", 'F'},   {"subfamily", 'f'},
+      {"genus", 'G'},        {"subgenus", 'g'}, {"species", 'S'},
+      {"subspecies", 's'},   {"varietas", 'V'}, {"subvariety", 'v'},
+      {"tribe", 'R'},        {"subtribe", 'r'}, {"section", 'E'},
+      {"subsection", 'E'},   {"serotype", 'Y'}, {"isolate", 'I'},
+      {"infraorder", 'i'},   {"biotype", 'B'},  {"genotype", 'N'},
       {"domain", 'D'}};
   vector<pair<string, char>> outrank{
       {"Domain", 'D'}, {"Kingdom", 'K'}, {"Phylum", 'P'}, {"Class", 'C'},
@@ -78,7 +78,7 @@ struct TaxaRank {
   string lineage(const string &, const string &);
 
   // convert linage style
-  char getSymbol(const string&) const;
+  char getSymbol(const string &) const;
   string rankString(const RankName &) const;
   string rankString(const vector<RankName> &) const;
 

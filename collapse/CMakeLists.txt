@@ -7,7 +7,7 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2017-09-01 15:54:30
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2021-06-21 15:10:00
+# @Last Modified Time: 2022-03-22 19:03:35
 ###
 
 INCLUDE_DIRECTORIES("../kit")
@@ -28,11 +28,12 @@ SET(TAXHEADS taxsys.h reviseList.h lineage.h
 
 SET(COLLAPSE_SRC ${KITHEADS} ${TAXHEADS}
     main.cpp
-    collapse.cpp     collapse.h
-    getLineage.cpp   getLineage.h
-    getTaxaDB.cpp    getTaxaDB.h
-    getLeafName.cpp  getLeafName.h
-    updateLineage.cpp updateLineage.h
+    collapse.cpp       collapse.h
+    queryLineage.cpp   queryLineage.h
+    getTaxaDB.cpp      getTaxaDB.h
+    getLeafName.cpp    getLeafName.h
+    getRank.cpp        getRank.h
+    searchLineage.cpp  searchLineage.h
 )
 
 ADD_LIBRARY(taxsys STATIC ${LIBTAXSYS_SRC})

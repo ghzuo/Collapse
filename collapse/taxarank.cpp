@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:27:39
+ * @Last Modified Time: 2022-03-22 19:55:29
  */
 
 #include "taxarank.h"
@@ -30,13 +30,13 @@ TaxaRank *TaxaRank::create() {
  * @brief set rank
  *
  ********************************************************************************/
-void TaxaRank::initial(const string &abfile, const string &abtype) {
+void TaxaRank::initial(const string &rankfile, const string &rankstr) {
   // revise the taxlevel if input give
-  setOutRank(setRankByFile(abfile));
+  setOutRank(setRankByFile(rankfile));
 
   // set output rank
-  if (!abtype.empty())
-    setOutRank(abtype, true);
+  if (!rankstr.empty())
+    setOutRank(rankstr, true);
 };
 
 string TaxaRank::setRankByFile(const string &file) {

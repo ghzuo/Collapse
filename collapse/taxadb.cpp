@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:28:01
+ * @Last Modified Time: 2022-03-22 18:16:47
  */
 
 #include "taxadb.h"
@@ -331,7 +331,7 @@ string TaxaDB::_getlng(size_t tid) {
  *
  ********************************************************************************/
 void TaxaDB::query(size_t tid, vector<TaxonNode> &tnlist) {
-  if (getFullLineage(tid, tnlist)) {
+  if (!getFullLineage(tid, tnlist)) {
     theInfo("Cannot find the taxid " + to_string(tid) + " in the database");
   }
 };

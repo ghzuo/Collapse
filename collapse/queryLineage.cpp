@@ -1,18 +1,18 @@
 /*
- * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
- * See the accompanying Manual for the contributors and the way to cite this work.
- * Comments and suggestions welcome. Please contact
- * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
- * 
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of
+ * Sciences. See the accompanying Manual for the contributors and the way to
+ * cite this work. Comments and suggestions welcome. Please contact Dr.
+ * Guanghong Zuo <ghzuo@ucas.ac.cn>
+ *
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:30:29
+ * @Last Modified Time: 2022-03-22 20:03:07
  */
 
-#include "getLineage.h"
+#include "queryLineage.h"
 
-void getlineage(int argc, char *argv[]) {
+void queryLineage(int argc, char *argv[]) {
 
   // get the input arguments
   LngArgs myargs(argc, argv);
@@ -24,6 +24,8 @@ void getlineage(int argc, char *argv[]) {
   TaxaRank *rank = TaxaRank::create();
   if (!myargs.rankfile.empty())
     rank->setRankByFile(myargs.rankfile);
+  if (!myargs.outrank.empty())
+    rank->setOutRank(myargs.outrank);
 
   // do the search
   ofstream ofs(myargs.outfile);
@@ -44,7 +46,7 @@ void getlineage(int argc, char *argv[]) {
   } else {
     // search the queries in query file
     smatch matchs;
-    vector<string> hit;
+    vector<pair<string, string>> hit;
     vector<string> nonhit;
     if (regex_search(myargs.queryfile, matchs,
                      regex("([^:]+):([0-9]+),([0-9]+)"))) {
@@ -63,12 +65,19 @@ void getlineage(int argc, char *argv[]) {
       oneColumn(taxdb, myargs.queryfile, hit, nonhit);
     }
 
-    // output the result
-    for (auto &it : hit) {
-      ofs << it << endl;
+    // format the output lineage string
+    if (!myargs.outrank.empty()) {
+      for (auto &it : hit) {
+        rank->format(it.second);
+      }
     }
 
-		// output the nonhit 
+    // output the result
+    for (auto &it : hit) {
+      ofs << it.first << " " << it.second << endl;
+    }
+
+    // output the nonhit
     if (myargs.outNonhit) {
       for (auto &it : nonhit)
         ofs << it << endl;
@@ -78,11 +87,11 @@ void getlineage(int argc, char *argv[]) {
 }
 
 LngArgs::LngArgs(int argc, char **argv)
-    : program(argv[0]), outfile("Lineage.list"), queryfile("name.list"),
+    : program(argv[0]), outfile("Lineage.txt"), queryfile("namelist.txt"),
       queryTaxID(0), queryName(""), outNonhit(true) {
 
   char ch;
-  while ((ch = getopt(argc, argv, "i:d:o:r:I:N:Hqh")) != -1) {
+  while ((ch = getopt(argc, argv, "i:d:o:R:r:I:N:Hqh")) != -1) {
     switch (ch) {
     case 'd':
       dbpath = optarg;
@@ -93,8 +102,11 @@ LngArgs::LngArgs(int argc, char **argv)
     case 'o':
       outfile = optarg;
       break;
-    case 'r':
+    case 'R':
       rankfile = optarg;
+      break;
+    case 'r':
+      outrank = optarg;
       break;
     case 'I':
       queryTaxID = stoi(optarg);
@@ -115,13 +127,23 @@ LngArgs::LngArgs(int argc, char **argv)
     }
   }
 
+  // check the input file
+  if (!fileExists(queryfile)) {
+    cerr << "\n** Error **: Cannot find the input file : " << queryfile << endl;
+    usage();
+  }
+
+  // set the default NCBI Taxonomy database file/folder
   if (dbpath.empty()) {
     dbpath = "taxadb.gz";
     if (!fileExists(dbpath)) {
-      dbpath = "./taxdump";
+      dbpath = "taxdump.tar.gz";
       if (!fileExists(dbpath)) {
-        cerr << "\n** Error **: No database file/directory gived" << endl;
-        usage();
+        dbpath = "./taxdump";
+        if (!fileExists(dbpath)) {
+          cerr << "\n** Error **: No database file/directory gived" << endl;
+          usage();
+        }
       }
     }
   }
@@ -130,20 +152,25 @@ LngArgs::LngArgs(int argc, char **argv)
 void LngArgs::usage() {
   cerr << "\nProgram Usage: \n"
        << program << "\n"
-       << " [ -I <Taxon ID> ]   Query a taxon id\n"
-       << " [ -N <Taxon Name> ] Query a taxon name\n"
-       << " [ -i name.list ]    The query list file defalut: name.list\n"
-       << " [ -d taxadb.gz ]    The dump of NCBI taxonomy database\n"
-       << " [ -o Lineage.list ] Output file, default: stdout\n"
-       << " [ -r <rankfile> ]   Rank mapping file\n"
-       << " [ -q ]              Run command in quiet mode\n"
-       << " [ -h ]              display this information\n"
+       << " [ -I <Taxon ID> ]     Query a taxon id\n"
+       << " [ -N <Taxon Name> ]   Query a taxon name\n"
+       << " [ -i namelist.txt ]   The query list file defalut: name.list\n"
+       << " [ -d taxadb.gz ]      The dump of NCBI taxonomy database\n"
+       << " [ -o Lineage.txt ]    Output file, default: Lineage.txt\n"
+       << " [ -R <None> ]         List file for rank names and abbrivations,\n"
+       << "                       default: use the setting of program\n"
+       << " [ -r <DKPCOFGS> ]     Set output taxon rank by abbrivations,\n"
+       << "                       default: same to the source\n"
+       << " [ -H ]                Don't output missing items\n"
+       << " [ -q ]                Run command in quiet mode\n"
+       << " [ -h ]                Display this information\n"
        << endl;
   exit(1);
 }
 
-void twoColumn(TaxaDB &taxdb, const string &fname, vector<string> &hit,
-               vector<string> &nonhit, int ncName, int ncTaxid) {
+void twoColumn(TaxaDB &taxdb, const string &fname,
+               vector<pair<string, string>> &hit, vector<string> &nonhit,
+               int ncName, int ncTaxid) {
   // for two column file
   vector<string> nmlist;
   vector<size_t> tidlist;
@@ -155,13 +182,14 @@ void twoColumn(TaxaDB &taxdb, const string &fname, vector<string> &hit,
     if (res.empty()) {
       nonhit.push_back(nmlist[i]);
     } else {
-      hit.emplace_back(nmlist[i] + " " + res);
+      hit.emplace_back(nmlist[i], res);
     }
   }
 }
 
-void oneColumn(TaxaDB &taxdb, const string &fname, vector<string> &hit,
-               vector<string> &nonhit, int ncName) {
+void oneColumn(TaxaDB &taxdb, const string &fname,
+               vector<pair<string, string>> &hit, vector<string> &nonhit,
+               int ncName) {
   vector<string> qlist;
   readlist(fname, qlist, ncName);
   // search the query in list by name
@@ -170,7 +198,7 @@ void oneColumn(TaxaDB &taxdb, const string &fname, vector<string> &hit,
     if (res.empty()) {
       nonhit.push_back(q);
     } else {
-      hit.emplace_back(q + " " + res);
+      hit.emplace_back(q, res);
     }
   }
 };

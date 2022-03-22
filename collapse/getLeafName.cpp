@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:30:57
+ * @Last Modified Time: 2022-03-22 12:43:39
  */
 
 #include "getLeafName.h"
@@ -16,7 +16,7 @@ void getLeafName(int argc, char *argv[]) {
 
   // get the name of file
   string infile("Tree.nwk");
-  string outfile("name.list");
+  string outfile("namelist.txt");
   string program(argv[0]);
 
   char ch;
@@ -53,10 +53,10 @@ void getLeafName(int argc, char *argv[]) {
 void leafUsage(string &program) {
   cerr << "\nProgram Usage: \n"
        << program << "\n"
-       << " [ -i Tree.nwk ]   Input tree file, default: Tree.nwk\n"
-       << " [ -o name.list ]  Output name list, default: name.list\n"
-       << " [ -q ]            Run command in quiet mode\n"
-       << " [ -h ]            Display this information\n"
+       << " [ -i Tree.nwk ]      Input tree file, default: Tree.nwk\n"
+       << " [ -o namelist.txt ]  Output name list, default: name.list\n"
+       << " [ -q ]               Run command in quiet mode\n"
+       << " [ -h ]               Display this information\n"
        << endl;
   exit(1);
 }

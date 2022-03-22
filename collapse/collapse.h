@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:31:08
+ * @Last Modified Time: 2022-03-22 18:43:27
  */
 
 #ifndef COLLAPSE_H
@@ -26,7 +26,7 @@ struct RunArgs {
   string program;
   string infile;
   string taxadb, taxfile, taxrev;
-  string abfile, abtype;
+  string rankfile, outrank;
   string outPref;
   string lngfile;
   string outgrp;

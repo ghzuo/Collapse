@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2021-06-21 14:40:41
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2021-06-21 15:08:11
+ * @Last Modified Time: 2022-03-22 19:02:30
  */
 
 #ifndef UPDATELINEAGE_H
@@ -24,7 +24,7 @@ using namespace std;
 struct UpLngArgs {
   string program;
   string taxadb, taxfile, taxrev;
-  string abfile, abtype;
+  string rankfile, outrank;
   vector<string> nmlist;
   string outfile;
   string format;
@@ -34,5 +34,5 @@ struct UpLngArgs {
   void usage();
 };
 
-void updateLineage(int, char**);
+void searchLineage(int, char**);
 #endif

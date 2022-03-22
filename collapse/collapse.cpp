@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
- * See the accompanying Manual for the contributors and the way to cite this work.
- * Comments and suggestions welcome. Please contact
- * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
- * 
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of
+ * Sciences. See the accompanying Manual for the contributors and the way to
+ * cite this work. Comments and suggestions welcome. Please contact Dr.
+ * Guanghong Zuo <ghzuo@ucas.ac.cn>
+ *
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:31:20
+ * @Last Modified Time: 2022-03-22 20:56:01
  */
 
 #include "collapse.h"
@@ -25,7 +25,7 @@ void collapse(int argc, char *argv[]) {
   /**********************************************************************
    ********* set for the lineage system and get lineage *****************/
   TaxaRank *rank = TaxaRank::create();
-  rank->initial(myargs.abfile, myargs.abtype);
+  rank->initial(myargs.rankfile, myargs.outrank);
   LngData lngs(myargs.taxadb, myargs.taxfile, myargs.taxrev);
 
   // get the leafs lineage
@@ -94,7 +94,7 @@ void collapse(int argc, char *argv[]) {
 
 RunArgs::RunArgs(int argc, char **argv)
     : infile(""), taxrev(""), outgrp(""), taxfile(""), forWeb(false),
-      forApp(false), predict(true), lngfile("") {
+      forApp(false), predict(false), lngfile("") {
 
   program = argv[0];
   string outname("collapsed");
@@ -102,33 +102,33 @@ RunArgs::RunArgs(int argc, char **argv)
   string kstr;
 
   char ch;
-  while ((ch = getopt(argc, argv, "i:d:D:o:r:t:s:T:R:O:L:WPAJqh")) != -1) {
+  while ((ch = getopt(argc, argv, "i:d:D:o:m:t:s:T:R:O:L:l:WPAJqh")) != -1) {
     switch (ch) {
     case 'i':
       infile = optarg;
       break;
-    case 'd':
+    case 'D':
       supdir = optarg;
       break;
-    case 'D':
+    case 'd':
       taxadb = optarg;
       break;
     case 'o':
       outname = optarg;
       break;
-    case 'r':
+    case 'm':
       taxrev = optarg;
       break;
-    case 't':
-      abtype = optarg;
+    case 'r':
+      outrank = optarg;
       break;
     case 'R':
-      abfile = optarg;
+      rankfile = optarg;
       break;
     case 'O':
       outgrp = optarg;
       break;
-    case 'T':
+    case 'l':
       taxfile = optarg;
       break;
     case 'L':
@@ -141,7 +141,7 @@ RunArgs::RunArgs(int argc, char **argv)
       forApp = true;
       break;
     case 'P':
-      predict = false;
+      predict = true;
       break;
     case 'q':
       theInfo.quiet = true;
@@ -162,10 +162,11 @@ RunArgs::RunArgs(int argc, char **argv)
   // the input items
   if (infile.empty())
     infile = supdir + "Tree.nwk";
-  if (taxrev.empty())
-    taxrev = supdir + "Lineage.rev";
-  if (taxfile.empty())
-    taxfile = supdir + "Lineage.list";
+  if (taxfile.empty()) {
+    taxfile = supdir + "Lineage.txt";
+    if (!fileExists(taxfile))
+      taxfile = supdir + "Lineage.csv";
+  }
 
   // the output prefix
   outPref = supdir + outname;
@@ -185,24 +186,24 @@ RunArgs::RunArgs(int argc, char **argv)
 void RunArgs::usage() {
   cerr << "\nProgram Usage: \n\n"
        << program << "\n"
-       << " [ -d ./ ]            The work directory, default: ./\n"
-       << " [ -i Tree.nwk ]      Input newick tree file, default: Tree.nwk\n"
-       << " [ -o collapsed ]     Output prefix name: default: collapsed\n"
-       << " [ -r Lineage.rev ]   Lineage revise file for batch edit,\n"
-       << "                      default: Lineage.rev\n"
-       << " [ -T Lineage.list ]  Lineage file for leafs of tree, \n"
-       << "                      default: Lineage.list\n"
-       << " [ -D taxadb.gz ]     Taxa database file or directory,\n"
-       << "                      default: taxadb.gz or taxdump/\n"
-       << " [ -R <None> ]        Abbravition list for taxon rank name,\n"
-       << "                      default: by program\n"
-       << " [ -t DKPCOFGS ]      Abbreviation of output taxon rank,\n"
-       << "                      default: DKPCOFGS\n"
-       << " [ -O <Outgroup> ]    Set the outgroup for the unroot tree.\n"
-       << "                      default: None, rearranged by taxonomy\n"
-       << " [ -P ]               Output the prediction for undefined leafs\n"
-       << " [ -q ]               Run command in quiet mode\n"
-       << " [ -h ]               Display this information\n"
+       << " [ -D ./ ]              The work directory, default: ./\n"
+       << " [ -i Tree.nwk ]        Input newick tree, default: Tree.nwk\n"
+       << " [ -o collapsed ]       Output prefix name: default: collapsed\n"
+       << " [ -m <Revision.txt> ]  Lineage revision file for batch edit,\n"
+       << "                        default: None\n"
+       << " [ -l Lineage.txt ]     Lineage file for leafs of tree, \n"
+       << "                        default: Lineage.txt or Lineage.csv\n"
+       << " [ -d taxadb.gz ]       Taxa database file or directory,\n"
+       << "                        default: taxadb.gz or taxdump.tar.gz\n"
+       << " [ -R <None> ]          List of rank names and abbravitions,\n"
+       << "                        default: use the setting of program\n"
+       << " [ -r DKPCOFGS ]        Abbreviation of output taxon rank,\n"
+       << "                        default: according to source\n"
+       << " [ -O <Outgroup> ]      Set the outgroup for the unroot tree.\n"
+       << "                        default: None, rearranged by taxonomy\n"
+       << " [ -P ]                 Output prediction for undefined leafs\n"
+       << " [ -q ]                 Run command in quiet mode\n"
+       << " [ -h ]                 Display this information\n"
        << endl;
   exit(1);
 }
@@ -296,7 +297,7 @@ void outTaxaJson(Taxa &aTaxa, Node *aTree, ostream &os) {
     aTaxa.outJsonTax(os);
   }
   os << "," << endl;
-  
+
   // output unclassified info
   if (aTree->nxleaf > 0) {
     /// output the unclassified items

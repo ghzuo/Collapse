@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
- * See the accompanying Manual for the contributors and the way to cite this work.
- * Comments and suggestions welcome. Please contact
- * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
- * 
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of
+ * Sciences. See the accompanying Manual for the contributors and the way to
+ * cite this work. Comments and suggestions welcome. Please contact Dr.
+ * Guanghong Zuo <ghzuo@ucas.ac.cn>
+ *
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:29:37
+ * @Last Modified Time: 2022-03-22 20:47:22
  */
 
 #include "lineage.h"
@@ -64,10 +64,12 @@ void LngData::getLineage(vector<string> &nmlist) {
   }
 
   // do revision
-  Revision rev(revfile);
-  if (!rev.empty()) {
-    for (auto &lng : data) {
-      rev.revise(lng.name);
+  if (!revfile.empty()) {
+    Revision rev(revfile);
+    if (!rev.empty()) {
+      for (auto &lng : data) {
+        rev.revise(lng.name);
+      }
     }
   }
 
@@ -90,7 +92,7 @@ size_t LngData::getLngFromFile() {
       theInfo("Open file " + taxfile + " failed, skip this file for lineage.");
     } else {
       TaxMap taxmap;
-      if (taxfile.find(".list") != string::npos) {
+      if (taxfile.find(".txt") != string::npos) {
         readListFile(tax, taxmap);
       } else if (taxfile.find(".json") != string::npos) {
         readJsonFile(tax, taxmap);

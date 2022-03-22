@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:30:16
+ * @Last Modified Time: 2022-03-22 19:22:34
  */
 
 #ifndef GETLINEAGE_H
@@ -24,6 +24,7 @@ struct LngArgs {
   string dbpath;
   string outfile;
   string rankfile;
+  string outrank;
   string queryfile;
   size_t queryTaxID;
   string queryName;
@@ -33,11 +34,11 @@ struct LngArgs {
   void usage();
 };
 
-void getlineage(int, char **);
+void queryLineage(int, char **);
 
-void twoColumn(TaxaDB &, const string &, vector<string> &, vector<string> &,
+void twoColumn(TaxaDB &, const string &, vector<pair<string,string>> &, vector<string> &,
                int ncName = 1, int ncTaxid = 2);
-void oneColumn(TaxaDB &, const string &, vector<string> &, vector<string> &,
+void oneColumn(TaxaDB &, const string &, vector<pair<string,string>> &, vector<string> &,
                int ncName = 1);
 
 #endif // !GETLINEAGE_H
