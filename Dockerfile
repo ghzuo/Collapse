@@ -7,18 +7,19 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2020-12-07 09:06:29
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2022-03-16 10:59:16
+# @Last Modified Time: 2022-03-22 22:49:21
 ###
 
 
 ## Stage for build cvtree
 FROM alpine AS dev
 LABEL Version=0.1 \
-  MAINTAINER="Guanghong Zuo<ghzuo@fudan.edu.cn>"\
+  MAINTAINER="Guanghong Zuo<ghzuo@ucas.ac.cn>"\
   description="Docker image for Collapse" 
 
 ## for develop environment
 RUN apk --update add --no-cache g++ make cmake zlib-dev
+RUN apk --update add --no-cache nlohmann-json --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
 
 ## Build cltree
 WORKDIR /root

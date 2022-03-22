@@ -38,19 +38,19 @@ Docker allows users run programs on both Windows and Linux/MacOS.
 You can download docker free and reference [docker document](https://docs.docker.com/install/)
 to install it. After install docker, basic usages for CVTree are:
 
-1. Build/download docker image: `docker build -t="cltree" .`
+1. Build/download docker image: `docker build -t="cltree-img" .`
    or `docker pull ghzuo/cltree`. In this step, a image with cvtree
    programs will obtained. Here option "-t" set the image name. After build
    image, you can delete the dangling images for build by `docker image prune`.
-2. Start container from image:
-   `docker run --rm -it -v $PWD/example:/root/data cltree`
+2. Start container from image in:
+   `docker run --rm -it -v $PWD/example:/root/data cltree-img`
    In this step, you will enter the cvtree container, and the "example" folder
    of this project will be find in the "data" folder. Change path to the data folder,
    and run `cltree`. You will get the result for eight genomes in the "list"
    file. You can change the path "\$PWD/example" to your own data directory.
 3. Exit and stop container: `exit` in docker terminal.
-4. Run cvtree in docker by one command:
-   `docker run --rm -v $PWD:/data -w /data cltree cltree`
+4. Run cvtree in docker by one command in example folder:
+   `docker run --rm -v $PWD:/root/data cltree-img cltree`
 5. More usage for docker can reference [docker document](https://docs.docker.com/).
 
 ## Run Programs with Example
@@ -61,10 +61,10 @@ If this is the first time you use Collapse package, please go to the
 this dirtory. Run the collapse command to get an annotated phylogenetic
 tree and monophyly status by:
 
-    ../build/bin/cltree run
+    ../build/bin/cltree
 
 More detail of the command usage can be obtaion by `-h` option. To speedup
-the process, you can get the database image the data by `cltree index` command at
+the process, you can get the database image the data by `cltree cache` command at
 first.
 
 ## TODO
