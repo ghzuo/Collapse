@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-22 20:55:40
+ * @Last Modified Time: 2022-03-23 09:25:45
  */
 
 #include "searchLineage.h"
@@ -125,9 +125,9 @@ void UpLngArgs::usage() {
        << "                        default: Lineage.txt\n"
        << " [ -d taxadb.gz ]       Taxa database file or directory,\n"
        << "                        default: taxadb.gz or taxdump.tar.gz\n"
-       << " [ -R <None> ]          List file for rank names and abbrivations,\n"
+       << " [ -R <None> ]          List file for rank names and abbreviations,\n"
        << "                        default: use the setting of program\n"
-       << " [ -r <DKPCOFGS> ]      Set output taxon rank by abbrivations,\n"
+       << " [ -r <DKPCOFGS> ]      Set output taxon rank by abbreviations,\n"
        << "                        default: according to source\n"
        << " [ -q ]                 Run command in quiet mode\n"
        << " [ -h ]                 Display this information\n"

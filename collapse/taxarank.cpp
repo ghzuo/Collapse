@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-22 19:55:29
+ * @Last Modified Time: 2022-03-23 09:26:12
  */
 
 #include "taxarank.h"
@@ -184,7 +184,7 @@ void TaxaRank::format(string &atax) {
  * @brief convert the taxa to lineage string
  *
  * @param lngs taxon level and taxon name
- * @return string a abbrivated string for the taxon
+ * @return string a abbreviated string for the taxon
  ********************************************************************************/
 char TaxaRank::getSymbol(const string &lvl) const {
   auto iter = rankmap.find(toLower(lvl));

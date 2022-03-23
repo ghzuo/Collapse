@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-22 15:10:34
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-22 17:48:12
+ * @Last Modified Time: 2022-03-23 09:24:25
  */
 
 #include "getRank.h"
@@ -33,7 +33,7 @@ void getRank(int argc, char *argv[]) {
     }
   }
 
-  // get the rank abbrivation map
+  // get the rank abbreviation map
   TaxaRank *rank = TaxaRank::create();
   vector<string> ranklist = {"kingdom", "phylum", "class",  "order",
                              "family",  "genus",  "species"};

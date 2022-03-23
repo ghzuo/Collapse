@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-22 20:03:07
+ * @Last Modified Time: 2022-03-23 09:25:17
  */
 
 #include "queryLineage.h"
@@ -20,7 +20,7 @@ void queryLineage(int argc, char *argv[]) {
   // Initial the taxadb by the dump files
   TaxaDB taxdb(myargs.dbpath);
 
-  // reset the rank abbrivation map
+  // reset the rank abbreviation map
   TaxaRank *rank = TaxaRank::create();
   if (!myargs.rankfile.empty())
     rank->setRankByFile(myargs.rankfile);
@@ -157,9 +157,9 @@ void LngArgs::usage() {
        << " [ -i namelist.txt ]   The query list file defalut: name.list\n"
        << " [ -d taxadb.gz ]      The dump of NCBI taxonomy database\n"
        << " [ -o Lineage.txt ]    Output file, default: Lineage.txt\n"
-       << " [ -R <None> ]         List file for rank names and abbrivations,\n"
+       << " [ -R <None> ]         List file for rank names and abbreviations,\n"
        << "                       default: use the setting of program\n"
-       << " [ -r <DKPCOFGS> ]     Set output taxon rank by abbrivations,\n"
+       << " [ -r <DKPCOFGS> ]     Set output taxon rank by abbreviations,\n"
        << "                       default: same to the source\n"
        << " [ -H ]                Don't output missing items\n"
        << " [ -q ]                Run command in quiet mode\n"
