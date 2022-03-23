@@ -7,12 +7,13 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2017-09-01 15:54:30
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2022-03-23 16:05:50
+# @Last Modified Time: 2022-03-23 17:03:05
 ###
 
 INCLUDE_DIRECTORIES("../kit")
 LINK_LIBRARIES(libkit.a)
 LINK_LIBRARIES(libtaxsys.a)
+LINK_LIBRARIES(libcltr.a)
 
 SET(LIBTAXSYS_SRC 
     taxsys.cpp taxsys.h
@@ -35,7 +36,7 @@ SET(LIBCLTREE_SRC
   searchLineage.cpp  searchLineage.h
 )
 
-SET(CLTREEHEADER collapse.h queryLineage.h
+SET(CLTREEHEADS collapse.h queryLineage.h
   getTaxaDB.h getLeafName.h getRank.h 
   searchLineage.h)
 
