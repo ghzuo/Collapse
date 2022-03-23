@@ -7,7 +7,7 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2017-09-01 15:54:30
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2022-03-22 19:03:35
+# @Last Modified Time: 2022-03-23 16:05:50
 ###
 
 INCLUDE_DIRECTORIES("../kit")
@@ -26,19 +26,27 @@ SET(LIBTAXSYS_SRC
 SET(TAXHEADS taxsys.h reviseList.h lineage.h 
     taxtree.h taxadb.h taxarank.h)
 
-SET(COLLAPSE_SRC ${KITHEADS} ${TAXHEADS}
-    main.cpp
-    collapse.cpp       collapse.h
-    queryLineage.cpp   queryLineage.h
-    getTaxaDB.cpp      getTaxaDB.h
-    getLeafName.cpp    getLeafName.h
-    getRank.cpp        getRank.h
-    searchLineage.cpp  searchLineage.h
+SET(LIBCLTREE_SRC 
+  collapse.cpp       collapse.h
+  queryLineage.cpp   queryLineage.h
+  getTaxaDB.cpp      getTaxaDB.h
+  getLeafName.cpp    getLeafName.h
+  getRank.cpp        getRank.h
+  searchLineage.cpp  searchLineage.h
+)
+
+SET(CLTREEHEADER collapse.h queryLineage.h
+  getTaxaDB.h getLeafName.h getRank.h 
+  searchLineage.h)
+
+SET(CLTREE_SRC ${KITHEADS} ${TAXHEADS} 
+  ${CLTREEHEADS} main.cpp
 )
 
 ADD_LIBRARY(taxsys STATIC ${LIBTAXSYS_SRC})
+ADD_LIBRARY(cltr   STATIC ${LIBCLTREE_SRC})
 
-ADD_EXECUTABLE(cltree ${COLLAPSE_SRC})
-TARGET_LINK_LIBRARIES(cltree kit taxsys)
+ADD_EXECUTABLE(cltree ${CLTREE_SRC})
+TARGET_LINK_LIBRARIES(cltree kit taxsys cltr)
 
 INSTALL(TARGETS cltree RUNTIME DESTINATION bin)

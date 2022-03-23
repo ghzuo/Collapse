@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-23 11:54:11
+ * @Last Modified Time: 2022-03-23 15:52:03
  */
 
 #include "collapse.h"
@@ -29,7 +29,7 @@ void usage(string &program) {
        << "             database, and revised by the revision file\n"
        << "   leaf      Obtain the species name list of phylogenetic tree\n"
        << "   rank      Output the default rank names and abbreviations\n"
-       << "   help      Privode the help information for <Task>\n"
+       << "   help      Provide the help information for <Task>\n"
        << " [ -h ]      Display this information\n"
        << endl;
   exit(1);
@@ -53,21 +53,17 @@ int main(int argc, char *argv[]) {
     // set the argc and argv for task
     *(argv[1] - 1) = ' ';
     argv[1] = argv[0];
-    char **subArgv = &argv[1];
-    int subArgc = argc - 1;
+    argv = &argv[1];
+    argc -= 1;
 
-    // add help task
+    // for help task
     if (task.compare("help") == 0) {
-      if (subArgc > 1) {
-        task = subArgv[1];
-        subArgc = 2;
-        *(argv[2] - 1) = ' ';
-        int len = strlen(argv[2]);
-        strcat(argv[2], " -h");
-        argv[2][len] = '\0';
-        argv[3] = &(argv[2][len + 1]);
-        argv[2] = argv[0];
-        subArgv = &(argv[2]);
+      if (argc > 1) {
+        task = argv[1];
+        *(argv[1] - 1) = ' ';
+        argv[1] += (strlen(argv[1]) + 1);
+        strcpy(argv[1], "-h");
+        argc = 2;
       } else {
         usage(program);
       }
@@ -75,17 +71,17 @@ int main(int argc, char *argv[]) {
 
     // run the task
     if (task.compare("run") == 0) {
-      collapse(subArgc, subArgv);
+      collapse(argc, argv);
     } else if (task.compare("query") == 0) {
-      queryLineage(subArgc, subArgv);
+      queryLineage(argc, argv);
     } else if (task.compare("cache") == 0) {
-      mkTaxaDB(subArgc, subArgv);
+      mkTaxaDB(argc, argv);
     } else if (task.compare("leaf") == 0) {
-      getLeafName(subArgc, subArgv);
+      getLeafName(argc, argv);
     } else if (task.compare("search") == 0) {
-      searchLineage(subArgc, subArgv);
+      searchLineage(argc, argv);
     } else if (task.compare("rank") == 0) {
-      getRank(subArgc, subArgv);
+      getRank(argc, argv);
     } else if (task.compare("help") == 0) {
       usage(program);
     } else {
