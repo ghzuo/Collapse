@@ -1,18 +1,19 @@
 # Collapse Lineage Tree
 
-A tool to annotate phylogenetic tree by lineage and measure their differences in toplogy by Shannon entropy.
+CLTree is a tool to annotate the phylogenetic tree by lineage and
+measure their differences in topology by Shannon entropy.
 
 ## Program and Tasks
 
 All tasks are run by the program `cltree` with tasks. The available tasks are:
 
-- run: the main program, annotate the tree (newick format) by lineage,
-  and statistics.
-- index: A tool to convert the NCBI taxonomy database dump file (download from:  
+- run: the main program, annotate the tree (newick format) by the lineage of genomes,
+  and statistics. It can be emitted.
+- cache: A tool to convert the NCBI taxonomy database dump file (download from:  
   [NCBI Taxonomy dump](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz)
   to an input lineage string file
-- query: Query the lineage of genome names/taxids from the database.
-- leaf: Obtain the leafs name list of a phylogenetic tree (in Newick form).
+- search: Query the lineage of genomes from the NCBI database and Lineage files.
+- leaf: Obtain the leaf name list of a phylogenetic tree (in Newick form).
 
 ## Installation
 
@@ -32,22 +33,22 @@ All tasks are run by the program `cltree` with tasks. The available tasks are:
 4. make
 5. make install (_option_)
 
-### Run Programms in Docker
+### Run Programs in Docker
 
-Docker allows users run programs on both Windows and Linux/MacOS.
+Docker allows users preforming programs on both Windows and Linux/MacOS.
 You can download docker free and reference [docker document](https://docs.docker.com/install/)
-to install it. After install docker, basic usages for CVTree are:
+to install it. After installing docker, basic usages for CVTree are:
 
 1. Build/download docker image: `docker build -t="cltree-img" .`
-   or `docker pull ghzuo/cltree`. In this step, a image with cvtree
-   programs will obtained. Here option "-t" set the image name. After build
-   image, you can delete the dangling images for build by `docker image prune`.
-2. Start container from image in:
+   or `docker pull ghzuo/cltree`. In this step, an image with cltree
+   programs will obtain. Here option "-t" sets the image name. After building
+   the image, you can delete the dangling images for build by `docker image prune`.
+2. Start container from the image in:
    `docker run --rm -it -v $PWD/example:/root/data cltree-img`
-   In this step, you will enter the cvtree container, and the "example" folder
-   of this project will be find in the "data" folder. Change path to the data folder,
-   and run `cltree`. You will get the result for eight genomes in the "list"
-   file. You can change the path "\$PWD/example" to your own data directory.
+   In this step, you will enter the cltree container, and the "example" folder
+   in the host will be mounted on the "data" folder in the container. Change the path
+   to the data folder, and run `cltree`. You will get the result for genomes 
+   in the "list" file. You can change the path "\$PWD/example" to your data directory.
 3. Exit and stop container: `exit` in docker terminal.
 4. Run cvtree in docker by one command in example folder:
    `docker run --rm -v $PWD:/root/data cltree-img cltree`
@@ -55,17 +56,17 @@ to install it. After install docker, basic usages for CVTree are:
 
 ## Run Programs with Example
 
-If this is the first time you use Collapse package, please go to the
+If this is the first time you use CLTree package, please go to the
 "example" folder. Download the taxdump.tar.gz file from
-[NCBI FTP](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz) to
-this dirtory. Run the collapse command to get an annotated phylogenetic
+[NCBI FTP](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz).
+Run the collapse command to get an annotated phylogenetic
 tree and monophyly status by:
 
     ../build/bin/cltree
 
-More detail of the command usage can be obtaion by `-h` option. To speedup
-the process, you can get the database image the data by `cltree cache` command at
-first.
+More detail of the command usages can be obtained by `-h` option. To speedup
+the process, you can get the database image the data by `cltree cache` command
+at first.
 
 ## TODO
 
