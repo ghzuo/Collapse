@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-22 20:56:01
+ * @Last Modified Time: 2022-03-24 18:40:41
  */
 
 #include "collapse.h"
@@ -227,16 +227,14 @@ void output(const LngData &lngs, Taxa &aTaxa, Node *aTree, RunArgs &myargs) {
   aTree->outnwk(myargs.outPref + "-annotated.nwk");
 
   // for undefined items
-  if (aTree->nxleaf > 0) {
+  if (myargs.predict && aTree->nxleaf > 0) {
     /// output the unclassified items
     vector<string> strName;
     aTree->getUndefineNames(strName);
     aTaxa.outUnclass(strName, myargs.outPref + ".unclass");
 
     /// output the prediction of unclassifed items
-    if (myargs.predict) {
-      aTree->outPrediction(myargs.outPref + ".predict");
-    }
+    aTree->outPrediction(myargs.outPref + ".predict");
   }
 
   // oupt lineage of leafs

@@ -10,7 +10,32 @@ example/taxadb.gz
 example/taxdump.tar.gz
 SourceTrail/
 /example/collapsed*
-/manual/.texpadtmp/
-/manual/*.synctex.gz
+manual/.texpadtmp/
+manual/*.aux
+manual/*.bbl
+manual/*.blg
+manual/*.idx
+manual/*.ind
+manual/*.lof
+manual/*.lot
+manual/*.out
+manual/*.toc
+manual/*.acn
+manual/*.acr
+manual/*.alg
+manual/*.glg
+manual/*.glo
+manual/*.gls
+manual/*.fls
+manual/*.log
+manual/*.fdb_latexmk
+manual/*.snm
+manual/*.synctex(busy)
+manual/*.synctex.gz(busy)
+manual/*.nav
+manual/*.vrb
+manual/__latexindent_temp.tex
+manual/*.synctex.gz
+
 
 
