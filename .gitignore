@@ -1,6 +1,4 @@
 /build*
-*.log
-*.aux
 built
 CMakeLists.txt.user
 .vscode
@@ -12,4 +10,7 @@ example/taxadb.gz
 example/taxdump.tar.gz
 SourceTrail/
 /example/collapsed*
+/manual/.texpadtmp/
+/manual/*.synctex.gz
+
 

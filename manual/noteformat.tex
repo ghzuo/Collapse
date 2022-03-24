@@ -1,0 +1,93 @@
+\usepackage[paper=a4paper,
+			top = 3.5cm,
+      total={15.5cm,23cm}
+      ]{geometry}
+\usepackage{times}
+%\usepackage[slantfont,boldfont]{xeCJK}
+%\setCJKmainfont[BoldFont=SimHei,ItalicFont=KaiTi]{SimSun}
+\usepackage{natbib}
+\usepackage{latexsym,bm}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{wasysym}
+%\usepackage{layout}
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{rotating}
+\usepackage{fancyhdr}
+\usepackage[normalem]{ulem}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage[bookmarksnumbered=true,
+            bookmarksopen=true,
+            colorlinks=true,
+            citecolor=blue,
+            linkcolor=blue,
+            anchorcolor=green,
+            urlcolor=blue
+            ]{hyperref}
+
+
+\setlength{\headsep}{15pt}
+\graphicspath{{figs/}}
+\renewcommand{\cite}{\citep}
+
+\newcommand{\makeheadrule}{%
+  \makebox[0pt][l]{\rule[.7\baselineskip]{\headwidth}{0.8pt}}%
+  \vskip-0.8\baselineskip}
+\makeatletter
+\renewcommand{\headrule}{%
+  {\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
+    \makeheadrule}}
+\makeatother
+
+\pagestyle{fancy}
+\pagenumbering{roman}
+
+\newcommand{\PreserveBackslash}[1]{\let\temp=\\#1\let\\=\temp}
+\newcolumntype{P}[1]{>{\PreserveBackslash\centering}p{#1}}
+\newcolumntype{M}[1]{>{\PreserveBackslash\centering}m{#1}}
+\newcolumntype{B}[1]{>{\PreserveBackslash\centering}b{#1}}
+
+\makeatletter
+
+%% for watermark
+\usepackage{draftwatermark}
+\SetWatermarkScale{0.5}
+\SetWatermarkLightness{0.9}
+\SetWatermarkText{\shortstack{\@title\\\vspace*{0.5em}\\\@author}}
+
+\def\address#1{\def\@address{#1}}\def\@address{}
+\def\email#1{\def\@email{#1}}\def\@email{}
+\def\subtitle#1{\def\@subtitle{#1}}\def\@subtitle{}
+\def\maketitle{
+  \begin{titlepage}
+    \begin{center}%
+      \vspace*{30mm}
+      {\fontsize{40pt}{60pt}\selectfont \bf \@title \par}%
+      {\fontsize{25pt}{50pt}\selectfont \bf \@subtitle \par}%
+      \begin{table}[b]
+        \centering
+        \begin{tabular}{P{0.85\textwidth}}
+          {\LARGE \@author\par}          
+          {\LARGE \@email\par}          
+          \vskip 2em%
+          {\Large \itshape \@address \par }
+          \vskip 1.5em%
+          {\Large \@date \par}
+        \end{tabular}
+      \end{table}
+    \end{center}\par
+  \end{titlepage}
+
+  \setcounter{page}{1}\setlength{\baselineskip}{3.2ex}
+  \tableofcontents  
+
+  \newpage\pagenumbering{arabic}\setcounter{page}{1}
+  \setlength{\baselineskip}{3.2ex}
+
+}
+\makeatother
+\setlength{\parskip}{0.25\baselineskip}%
+
+%%\bibliographystyle{notes}
+
