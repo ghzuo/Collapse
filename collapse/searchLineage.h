@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2021-06-21 14:40:41
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-22 19:02:30
+ * @Last Modified Time: 2022-03-26 20:02:48
  */
 
 #ifndef UPDATELINEAGE_H
@@ -18,6 +18,7 @@
 
 #include "kit.h"
 #include "lineage.h"
+#include "getLeafName.h"
 using namespace std;
 
 // read arguments

@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-22 20:47:22
+ * @Last Modified Time: 2022-03-26 20:16:48
  */
 
 #include "lineage.h"
@@ -89,7 +89,7 @@ size_t LngData::getLngFromFile() {
   for (auto &taxfile : tflist) {
     ifstream tax(taxfile);
     if (!tax) {
-      theInfo("Open file " + taxfile + " failed, skip this file for lineage.");
+      theInfo("Open file " + taxfile + " failed, skip this file for lineage");
     } else {
       TaxMap taxmap;
       if (taxfile.find(".txt") != string::npos) {

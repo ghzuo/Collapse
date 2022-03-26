@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:30:45
+ * @Last Modified Time: 2022-03-26 20:02:27
  */
 
 #ifndef GETLEAFNAME_H
@@ -19,5 +19,6 @@ using namespace std;
 
 void leafUsage(string &program);
 void getLeafName(int, char**);
+void getAllLeaf(const string&, vector<string>&);
 
 #endif

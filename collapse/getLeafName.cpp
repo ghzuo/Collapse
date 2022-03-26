@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
- * See the accompanying Manual for the contributors and the way to cite this work.
- * Comments and suggestions welcome. Please contact
- * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
- * 
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of
+ * Sciences. See the accompanying Manual for the contributors and the way to
+ * cite this work. Comments and suggestions welcome. Please contact Dr.
+ * Guanghong Zuo <ghzuo@ucas.ac.cn>
+ *
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-26 13:59:26
+ * @Last Modified Time: 2022-03-26 20:02:05
  */
 
 #include "getLeafName.h"
@@ -38,16 +38,22 @@ void getLeafName(int argc, char *argv[]) {
     }
   }
 
+  vector<string> namelist;
+  getAllLeaf(infile, namelist); 
+  ofstream is(outfile);
+  is << strjoin(namelist.begin(), namelist.end(), '\n') << endl;
+  is.close();
+}
+
+void getAllLeaf(const string &intree, vector<string> &namelist) {
   Node *aTree = new Node;
-  aTree->innwk(infile);
+  aTree->innwk(intree);
   vector<Node *> allLeafs;
   aTree->getLeafs(allLeafs);
 
-  ofstream is(outfile);
   for (auto &nd : allLeafs) {
-    is << nd->name << endl;
+    namelist.emplace_back(nd->name);
   }
-  is.close();
 }
 
 void leafUsage(string &program) {

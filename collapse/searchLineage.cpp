@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-26 14:06:25
+ * @Last Modified Time: 2022-03-26 20:15:11
  */
 
 #include "searchLineage.h"
@@ -36,13 +36,17 @@ UpLngArgs::UpLngArgs(int argc, char **argv)
     : outfile("Lineage.csv"), format("") {
 
   program = argv[0];
-  string infile("namelist.txt");
+  string infile;
+  string intree;
 
   char ch;
-  while ((ch = getopt(argc, argv, "i:d:o:r:m:l:R:F:Jqh")) != -1) {
+  while ((ch = getopt(argc, argv, "i:t:d:o:r:m:l:R:F:Jqh")) != -1) {
     switch (ch) {
     case 'i':
       infile = optarg;
+      break;
+    case 't':
+      intree = optarg;
       break;
     case 'd':
       taxadb = optarg;
@@ -79,13 +83,24 @@ UpLngArgs::UpLngArgs(int argc, char **argv)
   }
 
   // read the input name list
-  smatch matchs;
-  if (regex_search(infile, matchs, regex("([^:]+):([0-9]+)"))) {
-    string fname = matchs[1].str();
-    int ncol = stoi(matchs[2].str());
-    readlist(fname, nmlist, ncol);
+  if (!infile.empty()) {
+    smatch matchs;
+    if (regex_search(infile, matchs, regex("([^:]+):([0-9]+)"))) {
+      string fname = matchs[1].str();
+      int ncol = stoi(matchs[2].str());
+      readlist(fname, nmlist, ncol);
+    } else {
+      readlist(infile, nmlist, 1);
+    }
+  } else if (!intree.empty()) {
+    getAllLeaf(intree, nmlist);
+  } else if (fileExists("namelist.txt")) {
+    readlist("namelist.txt", nmlist, 1);
+  } else if (fileExists("Tree.nwk")) {
+    getAllLeaf("Tree.nwk", nmlist);
   } else {
-    readlist(infile, nmlist, 1);
+    cerr << "Cannot find the name list file!" << endl;
+    exit(3);
   }
 
   // set the output format
@@ -99,7 +114,7 @@ UpLngArgs::UpLngArgs(int argc, char **argv)
     if (!fileExists(taxfile))
       taxfile = "Lineage.csv";
   }
-  
+
   // for the default
   if (taxadb.empty()) {
     taxadb = "taxadb.gz";
@@ -118,6 +133,8 @@ void UpLngArgs::usage() {
        << " [ -i namelist.txt ]  Input name list, ':N' after the file name\n"
        << "                      select the N column of the file\n"
        << "                      default: first column of namelist.txt\n"
+       << " [ -t Tree.nwk ]      Search the species name of the tree\n"
+       << "                      when the input name list is not set\n"
        << " [ -o Lineage.csv ]   Output lineage file, default: lineage.csv\n"
        << " [ -m Revision.txt ]  Lineage revise file for batch edit,\n"
        << "                      default: None\n"
