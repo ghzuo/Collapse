@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:26:46
+ * @Last Modified Time: 2022-03-26 09:35:21
  */
 
 #include "taxtree.h"
@@ -701,6 +701,7 @@ void Node::outPrediction(ostream &os) {
     if ((*nd).unclassified) {
       string p;
       (*nd)._getPrediction(p);
+      p.erase(remove(p.begin(), p.end(), '|'), p.end());
       os << lastNameNoRank(nd->name) << "\t" << p << endl;
     }
   }

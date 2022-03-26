@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-24 18:40:41
+ * @Last Modified Time: 2022-03-26 09:09:15
  */
 
 #include "collapse.h"
@@ -229,9 +229,9 @@ void output(const LngData &lngs, Taxa &aTaxa, Node *aTree, RunArgs &myargs) {
   // for undefined items
   if (myargs.predict && aTree->nxleaf > 0) {
     /// output the unclassified items
-    vector<string> strName;
-    aTree->getUndefineNames(strName);
-    aTaxa.outUnclass(strName, myargs.outPref + ".unclass");
+    // vector<string> strName;
+    // aTree->getUndefineNames(strName);
+    // aTaxa.outUnclass(strName, myargs.outPref + ".unclass");
 
     /// output the prediction of unclassifed items
     aTree->outPrediction(myargs.outPref + ".predict");
