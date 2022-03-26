@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:30:06
+ * @Last Modified Time: 2022-03-26 13:44:15
  */
 
 #include "getTaxaDB.h"
@@ -58,8 +58,7 @@ void mkdbUsage(string &program) {
   cerr
       << "\nProgram Usage: \n"
       << program << "\n"
-      << " [ -d taxdump.tar.gz ]  NCBI taxon dumpfile directory, default: "
-         "taxdump\n"
+      << " [ -d taxdump.tar.gz ]  NCBI taxon dump, default: taxdump.tar.gz\n"
       << " [ -o taxadb.gz ]       Packaged taxon database, default: taxadb.gz\n"
       << " [ -q ]                 Run command in quiet mode\n"
       << " [ -h ]                 Display this information\n"

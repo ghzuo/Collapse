@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-26 09:09:15
+ * @Last Modified Time: 2022-03-26 14:07:48
  */
 
 #include "collapse.h"
@@ -188,17 +188,18 @@ void RunArgs::usage() {
        << program << "\n"
        << " [ -D ./ ]              The work directory, default: ./\n"
        << " [ -i Tree.nwk ]        Input newick tree, default: Tree.nwk\n"
-       << " [ -o collapsed ]       Output prefix name: default: collapsed\n"
+       << " [ -o collapsed ]       Set prefix name of output files, \n"
+       << "                        default: collapsed\n"
        << " [ -m <Revision.txt> ]  Lineage revision file for batch edit,\n"
        << "                        default: None\n"
-       << " [ -l Lineage.txt ]     Lineage file for leafs of tree, \n"
+       << " [ -l Lineage.txt ]     Input lineage file for leaves of tree, \n"
        << "                        default: Lineage.txt or Lineage.csv\n"
-       << " [ -d taxadb.gz ]       Taxa database file or directory,\n"
+       << " [ -d taxadb.gz ]       Taxonomy data file or directory,\n"
        << "                        default: taxadb.gz or taxdump.tar.gz\n"
        << " [ -R <None> ]          List of rank names and abbravitions,\n"
-       << "                        default: use the setting of program\n"
-       << " [ -r DKPCOFGS ]        Abbreviation of output taxon rank,\n"
-       << "                        default: according to source\n"
+       << "                        default: set by program\n"
+       << " [ -r DKPCOFGS ]        Abbreviations of output taxon rank,\n"
+       << "                        default: set by program\n"
        << " [ -O <Outgroup> ]      Set the outgroup for the unroot tree.\n"
        << "                        default: None, rearranged by taxonomy\n"
        << " [ -P ]                 Output prediction for undefined leafs\n"

@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-23 09:25:45
+ * @Last Modified Time: 2022-03-26 14:06:25
  */
 
 #include "searchLineage.h"
@@ -115,22 +115,22 @@ UpLngArgs::UpLngArgs(int argc, char **argv)
 void UpLngArgs::usage() {
   cerr << "\nProgram Usage: \n\n"
        << program << "\n"
-       << " [ -i namelist.txt ]    Input name list, ':N' after the file name\n"
-       << "                        select the N column of the file\n"
-       << "                        default: first column of namelist.txt\n"
-       << " [ -o Lineage.csv ]     Output lineage file, default: lineage.csv\n"
-       << " [ -m <Revision.txt> ]  Lineage revise file for batch edit,\n"
-       << "                        default: None\n"
-       << " [ -l Lineage.txt ]     Lineage file for leafs of tree, \n"
-       << "                        default: Lineage.txt\n"
-       << " [ -d taxadb.gz ]       Taxa database file or directory,\n"
-       << "                        default: taxadb.gz or taxdump.tar.gz\n"
-       << " [ -R <None> ]          List file for rank names and abbreviations,\n"
-       << "                        default: use the setting of program\n"
-       << " [ -r <DKPCOFGS> ]      Set output taxon rank by abbreviations,\n"
-       << "                        default: according to source\n"
-       << " [ -q ]                 Run command in quiet mode\n"
-       << " [ -h ]                 Display this information\n"
+       << " [ -i namelist.txt ]  Input name list, ':N' after the file name\n"
+       << "                      select the N column of the file\n"
+       << "                      default: first column of namelist.txt\n"
+       << " [ -o Lineage.csv ]   Output lineage file, default: lineage.csv\n"
+       << " [ -m Revision.txt ]  Lineage revise file for batch edit,\n"
+       << "                      default: None\n"
+       << " [ -l Lineage.txt ]   Lineage file for leafs of tree, \n"
+       << "                      default: Lineage.txt or Lineage.csv\n"
+       << " [ -d taxadb.gz ]     Taxa database file or directory,\n"
+       << "                      default: taxadb.gz or taxdump.tar.gz\n"
+       << " [ -R <None> ]        List file for rank names and abbreviations,\n"
+       << "                      default: set by program\n"
+       << " [ -r DKPCOFGS ]      Set output taxon rank by abbreviations,\n"
+       << "                      default: set by program\n"
+       << " [ -q ]               Run command in quiet mode\n"
+       << " [ -h ]               Display this information\n"
        << endl;
   exit(1);
 }

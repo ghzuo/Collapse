@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-23 15:52:03
+ * @Last Modified Time: 2022-03-26 14:08:23
  */
 
 #include "collapse.h"
@@ -20,16 +20,17 @@ using namespace std;
 
 void usage(string &program) {
   cerr << "\nProgram Usage: \n"
-       << program << " Task [options] \n"
-       << " Available Task:\n"
-       << "   run       Annotate phylogenetic tree with taxonomy system\n"
+       << program << " Token [options] \n"
+       << " Available Tokens:\n"
+       << "   run       All-in-one command: search lineage of leavies,\n"
+       << "             annotate phylogenetic tree, and do comparation.\n"
+       << "   leaf      Obtain species name list of phylogenetic tree\n"
        << "   cache     Make NCBI database cache from taxdump.tar.gz\n"
+       << "   rank      Output taxon rank names and abbreviations\n"
        << "   query     Query lineage from local NCBI taxonomy database\n"
-       << "   search    Search lineage from lineage files and NCBI taxonomy \n"
+       << "   search    Search lineage from lineage files and NCBI taxonomy\n"
        << "             database, and revised by the revision file\n"
-       << "   leaf      Obtain the species name list of phylogenetic tree\n"
-       << "   rank      Output the default rank names and abbreviations\n"
-       << "   help      Provide the help information for <Task>\n"
+       << "   help      Provide the help information for <Token>\n"
        << " [ -h ]      Display this information\n"
        << endl;
   exit(1);

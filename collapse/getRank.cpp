@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-22 15:10:34
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-23 09:24:25
+ * @Last Modified Time: 2022-03-26 14:00:30
  */
 
 #include "getRank.h"
@@ -55,7 +55,8 @@ void getRank(int argc, char *argv[]) {
 void rankUsage(string &program) {
   cerr << "\nProgram Usage: \n"
        << program << "\n"
-       << " [ -o ranklist.txt ]  Output name list, default: ranklist.txt\n"
+       << " [ -o ranklist.txt ]  Output name list file,\n"
+       << "                      default: ranklist.txt\n"
        << " [ -q ]               Run command in quiet mode\n"
        << " [ -h ]               Display this information\n"
        << endl;
