@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-26 14:07:48
+ * @Last Modified Time: 2022-03-27 22:24:15
  */
 
 #include "collapse.h"
@@ -159,11 +159,13 @@ RunArgs::RunArgs(int argc, char **argv)
   // the workdir
   addsuffix(supdir, '/');
 
-  // the input items
+  // the input tree file
   if (infile.empty())
     infile = supdir + "Tree.nwk";
+
+  // the input lineage file
   if (taxfile.empty()) {
-    taxfile = supdir + "Lineage.txt";
+    taxfile = supdir + "Lineage.lsn";
     if (!fileExists(taxfile))
       taxfile = supdir + "Lineage.csv";
   }
@@ -177,7 +179,7 @@ RunArgs::RunArgs(int argc, char **argv)
     if (!fileExists(taxadb)) {
       taxadb = supdir + "taxdump.tar.gz";
       if (!fileExists(taxadb)) {
-        taxadb = supdir + "taxdump";
+        taxadb = supdir + "taxdump/";
       }
     }
   }

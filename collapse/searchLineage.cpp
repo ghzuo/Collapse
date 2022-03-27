@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-26 20:15:11
+ * @Last Modified Time: 2022-03-27 22:23:56
  */
 
 #include "searchLineage.h"
@@ -110,7 +110,7 @@ UpLngArgs::UpLngArgs(int argc, char **argv)
 
   // set the custom lineage file
   if (taxfile.empty()) {
-    taxfile = "Lineage.txt";
+    taxfile = "Lineage.lns";
     if (!fileExists(taxfile))
       taxfile = "Lineage.csv";
   }
@@ -122,6 +122,9 @@ UpLngArgs::UpLngArgs(int argc, char **argv)
       taxadb = "taxdump.tar.gz";
       if (!fileExists(taxadb)) {
         taxadb = "taxdump";
+        if (!fileExists(taxadb)) {
+          taxadb = "taxdump/";
+        }
       }
     }
   }
@@ -136,9 +139,11 @@ void UpLngArgs::usage() {
        << " [ -t Tree.nwk ]      Search the species name of the tree\n"
        << "                      when the input name list is not set\n"
        << " [ -o Lineage.csv ]   Output lineage file, default: lineage.csv\n"
+       << " [ -F <CSV> ]         Set the output lineage file format\n"
+       << "                      default: CSV \n"
        << " [ -m Revision.txt ]  Lineage revise file for batch edit,\n"
        << "                      default: None\n"
-       << " [ -l Lineage.txt ]   Lineage file for leafs of tree, \n"
+       << " [ -l Lineage.lns ]   Lineage file for leafs of tree, \n"
        << "                      default: Lineage.txt or Lineage.csv\n"
        << " [ -d taxadb.gz ]     Taxa database file or directory,\n"
        << "                      default: taxadb.gz or taxdump.tar.gz\n"

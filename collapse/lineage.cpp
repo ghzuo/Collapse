@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-26 20:16:48
+ * @Last Modified Time: 2022-03-27 18:17:58
  */
 
 #include "lineage.h"
@@ -92,9 +92,10 @@ size_t LngData::getLngFromFile() {
       theInfo("Open file " + taxfile + " failed, skip this file for lineage");
     } else {
       TaxMap taxmap;
-      if (taxfile.find(".txt") != string::npos) {
+      string format = toLower(getsuffix(taxfile));
+      if (format.compare("lns") == 0) {
         readListFile(tax, taxmap);
-      } else if (taxfile.find(".json") != string::npos) {
+      } else if (taxfile.compare("json") == 0) {
         readJsonFile(tax, taxmap);
       } else {
         readCsvFile(tax, taxmap);
@@ -311,7 +312,7 @@ void LngData::output(const string &fname, const string &format) const {
     outjson(jsonbuf);
     theJson(LNG, jsonbuf.str());
     LNG << endl;
-  } else if (outformat.compare("list") == 0) {
+  } else if (outformat.compare("lns") == 0) {
     outlist(LNG);
   } else {
     outcsv(LNG);

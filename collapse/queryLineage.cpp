@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-26 14:06:41
+ * @Last Modified Time: 2022-03-27 18:04:46
  */
 
 #include "queryLineage.h"
@@ -87,7 +87,7 @@ void queryLineage(int argc, char *argv[]) {
 }
 
 LngArgs::LngArgs(int argc, char **argv)
-    : program(argv[0]), outfile("Lineage.txt"), queryfile("namelist.txt"),
+    : program(argv[0]), outfile("Lineage.lns"), queryfile("namelist.txt"),
       queryTaxID(0), queryName(""), outNonhit(true) {
 
   char ch;
@@ -158,7 +158,7 @@ void LngArgs::usage() {
        << "                       defalut: namelist.txt\n"
        << " [ -d taxadb.gz ]      The NCBI taxonomy data file\n"
        << "                       default: taxadb.gz or taxdump.tar.gz\n"
-       << " [ -o Lineage.txt ]    Output lineage file, \n"
+       << " [ -o Lineage.lns ]    Output lineage file, \n"
        << "                       default: Lineage.txt\n"
        << " [ -R <None> ]         List file for rank names and abbreviations,\n"
        << "                       default: set by program\n"
