@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:27:15
+ * @Last Modified Time: 2022-03-29 11:28:38
  */
 
 #include "taxsys.h"
@@ -265,23 +265,30 @@ void Taxa::outEntropy(ostream &os) {
     }
   }
 
+   os << "rank" << "\t" << "#Solo" << "\t"
+       << "#Molo" << "\t" << "#Taxa" << "\t" << "Htaxa" << "\t"
+       << "Htree" << "\t" << "~H" <<  endl;
+
   double maxEntropy = log2(double(def.nStrain));
   for (const auto &atax : rank->outrank) {
     int nTotal = taxlev[atax.second].nSolo + taxlev[atax.second].nMono +
                  taxlev[atax.second].nPoly;
     double sTax = maxEntropy - taxlev[atax.second].sTax / def.nStrain;
     double sTree = maxEntropy - taxlev[atax.second].sTree / def.nStrain;
+    double sRelative = taxlev[atax.second].sTree / taxlev[atax.second].sTax;
 
     // output taxlevel data
     os << atax.first << "\t" << taxlev[atax.second].nSolo << "\t"
-       << taxlev[atax.second].nMono << "\t" << nTotal << "\t" << sTax << "\t"
-       << sTree << endl;
+       << taxlev[atax.second].nMono << "\t" << nTotal << "\t" 
+       << fixed << setprecision(3)<< sTax << "\t"
+       << sTree <<"\t" << sRelative << endl;
   }
 
   // output the strain data
   os << "Strain"
      << "\t" << def.nStrain << "\t" << 0 << "\t" << def.nStrain << "\t"
-     << maxEntropy << "\t" << maxEntropy << endl;
+     << fixed << setprecision(3) << maxEntropy << "\t" << maxEntropy 
+     << "\t" << "-" << endl;
 };
 
 /********************************************************************************
