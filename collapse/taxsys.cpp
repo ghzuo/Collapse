@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-29 11:28:38
+ * @Last Modified Time: 2022-03-29 13:51:19
  */
 
 #include "taxsys.h"
@@ -285,10 +285,10 @@ void Taxa::outEntropy(ostream &os) {
   }
 
   // output the strain data
-  os << "Strain"
-     << "\t" << def.nStrain << "\t" << 0 << "\t" << def.nStrain << "\t"
-     << fixed << setprecision(3) << maxEntropy << "\t" << maxEntropy 
-     << "\t" << "-" << endl;
+  // os << "Strain"
+  //    << "\t" << def.nStrain << "\t" << 0 << "\t" << def.nStrain << "\t"
+  //    << fixed << setprecision(3) << maxEntropy << "\t" << maxEntropy 
+  //    << "\t" << "-" << endl;
 };
 
 /********************************************************************************
