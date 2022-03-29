@@ -23,7 +23,7 @@ All tasks are run by the program `cltree` with tasks. The available tasks are:
 
 - cmake >= 3.0
 - compiler supporting C++11 standard
-- require library: libz
+- require library: libz, nlohmann-json
 
 #### Compiling
 
@@ -47,7 +47,7 @@ to install it. After installing docker, basic usages for CVTree are:
    `docker run --rm -it -v $PWD/example:/root/data cltree-img`
    In this step, you will enter the cltree container, and the "example" folder
    in the host will be mounted on the "data" folder in the container. Change the path
-   to the data folder, and run `cltree`. You will get the result for genomes 
+   to the data folder, and run `cltree`. You will get the result for genomes
    in the "list" file. You can change the path "\$PWD/example" to your data directory.
 3. Exit and stop container: `exit` in docker terminal.
 4. Run cvtree in docker by one command in example folder:
@@ -70,13 +70,14 @@ at first.
 
 ## TODO
 
-1. detail usage
-2. package database by sqlite
-3. access lineage by accession number
-4. UI interface program by Electron
+1. package database by sqlite
+2. access lineage by accession number
+3. UI interface program by Electron
 
 ## Reference
 
+- Guanghong Zuo (2022) CLTree: Annotate Phylogenetic Tree by Lineage and
+  Measure their Consistency based on Shannon Entropy. In preparation.
 - Guanghong Zuo, Bailin Hao (2015) CVTree3 web server for
   whole-genome-based and alignment-free prokaryotic phylogeny and
   taxonomy, Genomics Proteomics & Bioinformatics, 13: 321-331
