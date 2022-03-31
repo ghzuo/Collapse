@@ -69,12 +69,6 @@ the process, you can get the database image the data by `cltree cache` command
 at first, and with option (`-N`) to output the newick format with NHX metadata
 for displaying on [iTOL](https://itol.embl.de/).
 
-## TODO
-
-1. package database by sqlite
-2. access lineage by accession number
-3. UI interface program by Electron
-
 ## Reference
 
 - Guanghong Zuo (2022) CLTree: Annotate Phylogenetic Tree by Lineage and
