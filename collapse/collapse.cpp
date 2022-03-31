@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-31 19:22:24
+ * @Last Modified Time: 2022-03-31 19:29:17
  */
 
 #include "collapse.h"
@@ -209,6 +209,8 @@ void RunArgs::usage() {
        << "                        default: set by program\n"
        << " [ -O <Outgroup> ]      Set the outgroup for the unroot tree.\n"
        << "                        default: None, rearranged by taxonomy\n"
+       << " [ -N ]                 Output newick with NHX for display it\n"
+       << "                        in iToL Website, default: No\n"
        << " [ -P ]                 Output prediction for undefined leafs\n"
        << " [ -q ]                 Run command in quiet mode\n"
        << " [ -h ]                 Display this information\n"
