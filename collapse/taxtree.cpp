@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
- * See the accompanying Manual for the contributors and the way to cite this work.
- * Comments and suggestions welcome. Please contact
- * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
- * 
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of
+ * Sciences. See the accompanying Manual for the contributors and the way to
+ * cite this work. Comments and suggestions welcome. Please contact Dr.
+ * Guanghong Zuo <ghzuo@ucas.ac.cn>
+ *
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-26 09:35:21
+ * @Last Modified Time: 2022-03-31 18:45:30
  */
 
 #include "taxtree.h"
 const size_t N_FORKS(2);
+TaxaRank *Node::rank;
 
 /*******************************************************************/
 /********* Member Functions For Node Class *************************/
@@ -20,24 +21,28 @@ Node::Node()
     : name(""), id(0), length(NAN), parent(NULL), taxSize(0), taxLevel(0),
       nleaf(0), nxleaf(0), unclassified(false), uploaded(false) {
   children.reserve(N_FORKS);
+  rank = rank->create();
 };
 
 Node::Node(size_t n)
     : name(""), id(n), length(NAN), parent(NULL), taxSize(0), taxLevel(0),
       nleaf(0), nxleaf(0), unclassified(false), uploaded(false) {
   children.reserve(N_FORKS);
+  rank = rank->create();
 };
 
 Node::Node(size_t n, const string &str)
     : name(str), id(n), length(NAN), parent(NULL), taxSize(0), taxLevel(0),
       nleaf(0), nxleaf(0), unclassified(false), uploaded(false) {
   children.reserve(N_FORKS);
+  rank = rank->create();
 };
 
 Node::Node(size_t n, const vector<Node *> &vn)
     : name(""), id(n), length(NAN), parent(NULL), children(vn), taxSize(0),
       nleaf(0), nxleaf(0), unclassified(false), uploaded(false) {
   children.reserve(2);
+  rank = rank->create();
 };
 
 bool Node::isLeaf() { return children.empty(); };
@@ -174,7 +179,7 @@ Node *Node::rootingByTaxa() {
           minComLev = comLev;
           minLevel = (*iter)->taxLevel;
         }
-      } 
+      }
     }
 
     // swap new outgroup to the back
@@ -296,6 +301,33 @@ Node *Node::resetroot(Node *np) {
  *
  * @param file
  ********************************************************************************/
+function<string(string)> Node::nwkname = [](string lngstr) {
+  return lngstr.substr(lngstr.find_first_of('|') + 1);
+};
+
+void Node::setNwkWithNHX() {
+  nwkname = [this](string lngstr) {
+    lngstr.erase(remove(lngstr.begin(), lngstr.end(), '|'), lngstr.end());
+    string nhxstr = lastNameNoRank(lngstr);
+
+    vector<string> nmlist;
+    separateLineage(lngstr, nmlist);
+    size_t nOutput = nmlist.size() < rank->outrank.size()
+                         ? nmlist.size()
+                         : rank->outrank.size();
+    nhxstr += "[&&NHX";
+    for (size_t i = 0; i < nOutput; ++i) {
+      nhxstr += ":";
+      nhxstr += to_string(i);
+      nhxstr += "_";
+      nhxstr += rank->outrank[i].first;
+      nhxstr += "=";
+      nhxstr += lastNameNoRank(nmlist[i]);
+    }
+    nhxstr += "]";
+    return nhxstr;
+  };
+};
 
 void Node::_outnwk(ostream &os) {
   if (!isLeaf()) {
@@ -310,8 +342,8 @@ void Node::_outnwk(ostream &os) {
   }
 
   // output the name of node
-  string forename = name.substr(name.find_first_of('|') + 1);
-  os << ((name.find(' ') == string::npos) ? forename : ('"' + forename + '"'));
+  string namestr = nwkname(name);
+  os << ((namestr.find(' ') == string::npos) ? namestr : ('"' + namestr + '"'));
 
   // output the length of node
   if (!std::isnan(length))

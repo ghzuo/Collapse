@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:26:31
+ * @Last Modified Time: 2022-03-31 18:43:51
  */
 
 #ifndef TREE_H
@@ -30,6 +30,7 @@ typedef pair<string, string> str2str;
 
 struct Node {
   typedef vector<Node *> Children;
+  static TaxaRank *rank;
 
   string name;
   size_t id;
@@ -84,6 +85,8 @@ struct Node {
   Node *_forceRooting(Node *);
 
   void _outnwk(ostream &);
+  static function<string(string)> nwkname;
+  void setNwkWithNHX();
   void outnwk(ostream &);
   void outnwk(const string &);
   void _innwk(istream &);

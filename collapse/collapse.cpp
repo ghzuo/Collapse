@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-27 22:24:15
+ * @Last Modified Time: 2022-03-31 19:22:24
  */
 
 #include "collapse.h"
@@ -85,6 +85,8 @@ void collapse(int argc, char *argv[]) {
   } else if (myargs.forWeb) {
     out4serv(lngs, aTaxa, aTree, myargs);
   } else {
+    if(myargs.withNHX)
+      aTree->setNwkWithNHX();
     output(lngs, aTaxa, aTree, myargs);
   }
 }
@@ -94,7 +96,7 @@ void collapse(int argc, char *argv[]) {
 
 RunArgs::RunArgs(int argc, char **argv)
     : infile(""), taxrev(""), outgrp(""), taxfile(""), forWeb(false),
-      forApp(false), predict(false), lngfile("") {
+      forApp(false), predict(false), withNHX(false), lngfile("") {
 
   program = argv[0];
   string outname("collapsed");
@@ -102,7 +104,7 @@ RunArgs::RunArgs(int argc, char **argv)
   string kstr;
 
   char ch;
-  while ((ch = getopt(argc, argv, "i:d:D:o:m:t:s:T:R:O:L:l:WPAJqh")) != -1) {
+  while ((ch = getopt(argc, argv, "i:d:D:o:m:t:s:T:R:O:L:l:NWPAJqh")) != -1) {
     switch (ch) {
     case 'i':
       infile = optarg;
@@ -133,6 +135,9 @@ RunArgs::RunArgs(int argc, char **argv)
       break;
     case 'L':
       lngfile = optarg;
+      break;
+    case 'N':
+      withNHX = true;
       break;
     case 'W':
       forWeb = true;
@@ -227,7 +232,7 @@ void output(const LngData &lngs, Taxa &aTaxa, Node *aTree, RunArgs &myargs) {
   aTaxa.outEntropy(myargs.outPref + ".entropy");
 
   /// output the annotated newick file
-  aTree->outnwk(myargs.outPref + "-annotated.nwk");
+  aTree->outnwk(myargs.outPref + ".nwk");
 
   // for undefined items
   if (myargs.predict && aTree->nxleaf > 0) {
