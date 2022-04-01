@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:28
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:17:37
+ * @Last Modified Time: 2022-04-01 23:51:34
  */
 
 #ifndef STRINGOPT_H
@@ -149,4 +149,10 @@ long getFileSize(const string &);
 bool fileExists(const string &);
 bool isDirectory(const string &);
 
+/********************************************************************************
+ * @brief for color wheel
+ * 
+ ********************************************************************************/
+
+void hsv2rgb(vector<int>&);
 #endif

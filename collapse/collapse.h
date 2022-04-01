@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
- * See the accompanying Manual for the contributors and the way to cite this work.
- * Comments and suggestions welcome. Please contact
- * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
- * 
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of
+ * Sciences. See the accompanying Manual for the contributors and the way to
+ * cite this work. Comments and suggestions welcome. Please contact Dr.
+ * Guanghong Zuo <ghzuo@ucas.ac.cn>
+ *
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-31 18:46:25
+ * @Last Modified Time: 2022-04-01 21:58:46
  */
 
 #ifndef COLLAPSE_H
@@ -30,20 +30,28 @@ struct RunArgs {
   string outPref;
   string lngfile;
   string outgrp;
-  bool forWeb, forApp, predict; 
-  bool withNHX;
+  bool forWeb, forApp, predict;
+  bool itol;
   // two hidden options for output for server and app
 
   RunArgs(int, char **);
   void usage();
 };
 
-void collapse(int, char**);
+void collapse(int, char **);
 
-void output(const LngData&, Taxa &, Node *, RunArgs &);
-void out4serv(const LngData&, Taxa&, Node *, RunArgs &);
-void out4app(const LngData&, Taxa&, Node *, const string&);
-void outTaxaJson(Taxa&, Node *, ostream&);
-void outTreeJson(Taxa&, Node *, ostream&);
-void outLngsJson(const LngData&, Taxa&, ostream&);
+void output(const LngData &, Taxa &, Node *, RunArgs &);
+void out4serv(const LngData &, Taxa &, Node *, RunArgs &);
+void out4app(const LngData &, Taxa &, Node *, const string &);
+void outTaxaJson(Taxa &, Node *, ostream &);
+void outTreeJson(Taxa &, Node *, ostream &);
+void outLngsJson(const LngData &, Taxa &, ostream &);
+
+void itolHeader(ostream&, const string&, const string&);
+void outItolLabel(const vector<Node *>&, const string &);
+void outItolPopup(const Taxa &, const vector<Node *>&, const string &);
+void outItolStrap(const Taxa &, const vector<Node *>&, const string &);
+int getColorMap(const Taxa&, map<string,string>&);
+string itolPopusStr(Node*, const Taxa&);
+
 #endif

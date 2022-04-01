@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-31 19:29:17
+ * @Last Modified Time: 2022-04-01 23:53:00
  */
 
 #include "collapse.h"
@@ -85,8 +85,6 @@ void collapse(int argc, char *argv[]) {
   } else if (myargs.forWeb) {
     out4serv(lngs, aTaxa, aTree, myargs);
   } else {
-    if(myargs.withNHX)
-      aTree->setNwkWithNHX();
     output(lngs, aTaxa, aTree, myargs);
   }
 }
@@ -96,7 +94,7 @@ void collapse(int argc, char *argv[]) {
 
 RunArgs::RunArgs(int argc, char **argv)
     : infile(""), taxrev(""), outgrp(""), taxfile(""), forWeb(false),
-      forApp(false), predict(false), withNHX(false), lngfile("") {
+      forApp(false), predict(false), itol(false), lngfile("") {
 
   program = argv[0];
   string outname("collapsed");
@@ -104,7 +102,7 @@ RunArgs::RunArgs(int argc, char **argv)
   string kstr;
 
   char ch;
-  while ((ch = getopt(argc, argv, "i:d:D:o:m:t:s:T:R:O:L:l:NWPAJqh")) != -1) {
+  while ((ch = getopt(argc, argv, "i:d:D:o:m:t:s:T:R:O:L:l:IWPAJqh")) != -1) {
     switch (ch) {
     case 'i':
       infile = optarg;
@@ -136,8 +134,8 @@ RunArgs::RunArgs(int argc, char **argv)
     case 'L':
       lngfile = optarg;
       break;
-    case 'N':
-      withNHX = true;
+    case 'I':
+      itol = true;
       break;
     case 'W':
       forWeb = true;
@@ -209,8 +207,8 @@ void RunArgs::usage() {
        << "                        default: set by program\n"
        << " [ -O <Outgroup> ]      Set the outgroup for the unroot tree.\n"
        << "                        default: None, rearranged by taxonomy\n"
-       << " [ -N ]                 Output newick with NHX for display it\n"
-       << "                        in iToL Website, default: No\n"
+       << " [ -I ]                 Output newick and annotate files for itol\n"
+       << "                        default: No\n"
        << " [ -P ]                 Output prediction for undefined leafs\n"
        << " [ -q ]                 Run command in quiet mode\n"
        << " [ -h ]                 Display this information\n"
@@ -234,7 +232,16 @@ void output(const LngData &lngs, Taxa &aTaxa, Node *aTree, RunArgs &myargs) {
   aTaxa.outEntropy(myargs.outPref + ".entropy");
 
   /// output the annotated newick file
-  aTree->outnwk(myargs.outPref + ".nwk");
+  if (myargs.itol) {
+    aTree->outitol(myargs.outPref + "-iToL_tree.nwk");
+    vector<Node *> nodes;
+    aTree->getDescendants(nodes);
+    outItolLabel(nodes, myargs.outPref + "-iToL_label.txt");
+    outItolPopup(aTaxa, nodes, myargs.outPref + "-iToL_popup.txt");
+    outItolStrap(aTaxa, nodes, myargs.outPref + "-iToL_strap.txt");
+  } else {
+    aTree->outnwk(myargs.outPref + ".nwk");
+  }
 
   // for undefined items
   if (myargs.predict && aTree->nxleaf > 0) {
@@ -332,4 +339,158 @@ void outTreeJson(Taxa &aTaxa, Node *aTree, ostream &os) {
   os << "\"statistics\":";
   aTaxa.outJsonEntropy(os);
   os << "}";
+};
+
+void itolHeader(ostream &os, const string &file, const string &type) {
+  // test output file stream
+  if (!os) {
+    cerr << "Open " << file << " for write failed" << endl;
+    exit(3);
+  }
+
+  // the title
+  os << type << "\n"
+     << "SEPARATOR TAB\n";
+
+  // for strap
+  if (type.compare("DATASET_COLORSTRIP") == 0)
+    os << "DATASET_LABEL\tcolor_strip\n"
+       << "COLOR_BRANCHES\t1\n"
+       << "STRIP_WIDTH\t25\n"
+       << "MARGIN\t0\n"
+       << "BORDER_WIDTH\t0\n"
+       << "SHOW_INTERNAL\t0\n";
+
+  // the data section
+  os << "DATA\n" << endl;
+};
+
+void outItolLabel(const vector<Node *> &nodes, const string &file) {
+  ofstream os(file);
+  itolHeader(os, file, "LABELS");
+
+  for (auto &nd : nodes) {
+    if (nd->isLeaf()) {
+      os << nd->id << "\t" << lastNameNoRank(nd->name) << endl;
+    } else if (nRanks(nd->name) > nRanks(nd->parent->name)) {
+      os << "I" + to_string(nd->id) << "\t" << lastNameNoRank(nd->name) << endl;
+    }
+  }
+
+  os.close();
+};
+
+void outItolPopup(const Taxa &aTaxa, const vector<Node *> &nodes,
+                  const string &file) {
+  ofstream os(file);
+  itolHeader(os, file, "POPUP_INFO");
+
+  for (auto &nd : nodes) {
+    if (nd->isLeaf()) {
+      os << nd->id << "\tSpecies information:\t" << itolPopusStr(nd, aTaxa)
+         << endl;
+    } else if (nd->nleaf > 0 && nRanks(nd->name) > nRanks(nd->parent->name)) {
+      os << "I" + to_string(nd->id) << "\tClade information:\t"
+         << itolPopusStr(nd, aTaxa) << endl;
+    }
+  }
+
+  os.close();
+};
+
+void outItolStrap(const Taxa &aTaxa, const vector<Node *> &nodes,
+                  const string &file) {
+
+  map<string, string> colorMap;
+  int theRank = getColorMap(aTaxa, colorMap);
+
+  ofstream os(file);
+  itolHeader(os, file, "DATASET_COLORSTRIP");
+
+  for (auto &nd : nodes) {
+    string lngstr = nd->name;
+    lngstr.erase(remove(lngstr.begin(), lngstr.end(), '|'), lngstr.end());
+    vector<string> nmlist;
+    parseLineage(lngstr, nmlist);
+    if (nmlist.size() > theRank) {
+      auto iter = colorMap.find(nmlist[theRank]);
+      if (iter != colorMap.end()) {
+        if (!nd->isLeaf())
+          os << "I";
+        os << to_string(nd->id) << "\t" << iter->second << "\t"
+           << lastNameNoRank(iter->first) << endl;
+      }
+    }
+  }
+
+  os.close();
+};
+
+int getColorMap(const Taxa &aTaxa, map<string, string> &colorMap) {
+
+  vector<map<string, string>> rankstate(aTaxa.rank->outrank.size() + 1);
+  for (auto &tax : aTaxa.def.state) {
+    rankstate[nRanks(tax.first)][tax.first] = "X";
+  }
+
+  int theRank = 0;
+  for (auto &rk : rankstate) {
+    if (rk.size() > 1) {
+      ++theRank;
+      colorMap = rk;
+      break;
+    }
+  }
+
+  float delta = 360 / colorMap.size();
+  int i = 0;
+  for (auto &cm : colorMap) {
+    vector<int> cv{(int)(delta * i++), 95, 95};
+    hsv2rgb(cv);
+
+    stringstream buf;
+    buf << "rgba(";
+    for (auto c : cv)
+      buf << c << ",";
+    buf << "1.0)";
+    cm.second = buf.str();
+  }
+  return theRank;
+}
+
+string itolPopusStr(Node *nd, const Taxa &aTaxa) {
+
+  stringstream buf;
+
+  buf << "<div class='tPop'>"
+      << "<h1>" << lastNameNoRank(nd->name) << "</h1>"
+      << "<h2>Branch length: " << nd->length << "</h2>"
+      << "<h2>" << nd->nleaf;
+  if (nd->nxleaf > 0)
+    buf << "+" << nd->nxleaf;
+  buf << " Leaves</h2>"
+      << "<br><h1>Lineage Information: </h1>";
+
+  string lngstr = nd->name;
+  lngstr.erase(remove(lngstr.begin(), lngstr.end(), '|'), lngstr.end());
+  vector<string> nmlist;
+  parseLineage(lngstr, nmlist);
+  size_t nOutput = nmlist.size() < aTaxa.rank->outrank.size()
+                       ? nmlist.size()
+                       : aTaxa.rank->outrank.size();
+
+  buf << "<table class = 'lineage'>";
+  for (size_t i = 0; i < nOutput; ++i) {
+    buf << "<tr>"
+        << "<th>" << aTaxa.rank->outrank[i].first << ": </th>"
+        << "<td>" << lastNameNoRank(nmlist[i]);
+
+    auto iter = aTaxa.def.state.find(nmlist[i]);
+    buf << "{" << iter->second.nStrain << ", " << iter->second.distract.size()
+        << "}</td></tr>";
+  }
+  buf << "</table>";
+
+  buf << "</div>";
+  return buf.str();
 };

@@ -7,12 +7,11 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-31 18:45:30
+ * @Last Modified Time: 2022-04-01 11:04:13
  */
 
 #include "taxtree.h"
 const size_t N_FORKS(2);
-TaxaRank *Node::rank;
 
 /*******************************************************************/
 /********* Member Functions For Node Class *************************/
@@ -21,28 +20,24 @@ Node::Node()
     : name(""), id(0), length(NAN), parent(NULL), taxSize(0), taxLevel(0),
       nleaf(0), nxleaf(0), unclassified(false), uploaded(false) {
   children.reserve(N_FORKS);
-  rank = rank->create();
 };
 
 Node::Node(size_t n)
     : name(""), id(n), length(NAN), parent(NULL), taxSize(0), taxLevel(0),
       nleaf(0), nxleaf(0), unclassified(false), uploaded(false) {
   children.reserve(N_FORKS);
-  rank = rank->create();
 };
 
 Node::Node(size_t n, const string &str)
     : name(str), id(n), length(NAN), parent(NULL), taxSize(0), taxLevel(0),
       nleaf(0), nxleaf(0), unclassified(false), uploaded(false) {
   children.reserve(N_FORKS);
-  rank = rank->create();
 };
 
 Node::Node(size_t n, const vector<Node *> &vn)
     : name(""), id(n), length(NAN), parent(NULL), children(vn), taxSize(0),
       nleaf(0), nxleaf(0), unclassified(false), uploaded(false) {
   children.reserve(2);
-  rank = rank->create();
 };
 
 bool Node::isLeaf() { return children.empty(); };
@@ -301,32 +296,8 @@ Node *Node::resetroot(Node *np) {
  *
  * @param file
  ********************************************************************************/
-function<string(string)> Node::nwkname = [](string lngstr) {
-  return lngstr.substr(lngstr.find_first_of('|') + 1);
-};
-
-void Node::setNwkWithNHX() {
-  nwkname = [this](string lngstr) {
-    lngstr.erase(remove(lngstr.begin(), lngstr.end(), '|'), lngstr.end());
-    string nhxstr = lastNameNoRank(lngstr);
-
-    vector<string> nmlist;
-    separateLineage(lngstr, nmlist);
-    size_t nOutput = nmlist.size() < rank->outrank.size()
-                         ? nmlist.size()
-                         : rank->outrank.size();
-    nhxstr += "[&&NHX";
-    for (size_t i = 0; i < nOutput; ++i) {
-      nhxstr += ":";
-      nhxstr += to_string(i);
-      nhxstr += "_";
-      nhxstr += rank->outrank[i].first;
-      nhxstr += "=";
-      nhxstr += lastNameNoRank(nmlist[i]);
-    }
-    nhxstr += "]";
-    return nhxstr;
-  };
+function<string(Node *)> Node::nwkname = [](Node *nd) {
+  return nd->name.substr(nd->name.find_first_of('|') + 1);
 };
 
 void Node::_outnwk(ostream &os) {
@@ -342,7 +313,7 @@ void Node::_outnwk(ostream &os) {
   }
 
   // output the name of node
-  string namestr = nwkname(name);
+  string namestr = nwkname(this);
   os << ((namestr.find(' ') == string::npos) ? namestr : ('"' + namestr + '"'));
 
   // output the length of node
@@ -356,6 +327,28 @@ void Node::outnwk(const string &file) {
     cerr << "Open " << file << " for write failed" << endl;
     exit(3);
   }
+
+  outnwk(os);
+  os.close();
+};
+
+void Node::outitol(const string &file) {
+  ofstream os(file);
+  if (!os) {
+    cerr << "Open " << file << " for write failed" << endl;
+    exit(3);
+  }
+
+  // output the taxid
+  int theId = 0;
+  updateId(theId);
+  nwkname = [](Node *nd) {
+    if (nd->isLeaf()) {
+      return to_string(nd->id);
+    } else {
+      return "I" + to_string(nd->id);
+    }
+  };
 
   outnwk(os);
   os.close();
@@ -707,6 +700,14 @@ void Node::renewId(const unordered_map<string, size_t> &mgi) {
   } else {
     for (auto &nd : children)
       (*nd).renewId(mgi);
+  }
+};
+
+void Node::updateId(int &theId) {
+  id = ++theId;
+  if (!isLeaf()) {
+    for (auto &nd : children)
+      (*nd).updateId(theId);
   }
 };
 
