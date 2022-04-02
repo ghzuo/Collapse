@@ -66,8 +66,8 @@ tree and monophyly status by:
 
 More detail of the command usages can be obtained by `-h` option. To speedup
 the process, you can get the database image the data by `cltree cache` command
-at first, and with option (`-N`) to output the newick format with NHX metadata
-for displaying on [iTOL](https://itol.embl.de/).
+at first, and with option (`-I`) to output the newick tree and annotate files
+for handling tree on [iTOL](https://itol.embl.de/).
 
 ## Reference
 
