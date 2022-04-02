@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-04-01 21:58:46
+ * @Last Modified Time: 2022-04-02 12:18:38
  */
 
 #ifndef COLLAPSE_H
@@ -47,10 +47,12 @@ void outTaxaJson(Taxa &, Node *, ostream &);
 void outTreeJson(Taxa &, Node *, ostream &);
 void outLngsJson(const LngData &, Taxa &, ostream &);
 
-void itolHeader(ostream&, const string&, const string&);
+void outItolNodes(const vector<Node *>&, const string &);
 void outItolLabel(const vector<Node *>&, const string &);
 void outItolPopup(const Taxa &, const vector<Node *>&, const string &);
 void outItolStrap(const Taxa &, const vector<Node *>&, const string &);
+void outItolSymbol(const Taxa &, const vector<Node *>&, const string &);
+void itolHeader(ostream&, const string&, const string&);
 int getColorMap(const Taxa&, map<string,string>&);
 string itolPopusStr(Node*, const Taxa&);
 

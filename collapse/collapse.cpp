@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-04-01 23:53:00
+ * @Last Modified Time: 2022-04-02 12:33:14
  */
 
 #include "collapse.h"
@@ -236,9 +236,11 @@ void output(const LngData &lngs, Taxa &aTaxa, Node *aTree, RunArgs &myargs) {
     aTree->outitol(myargs.outPref + "-iToL_tree.nwk");
     vector<Node *> nodes;
     aTree->getDescendants(nodes);
+    outItolNodes(nodes, myargs.outPref + "-iToL_nodelist.txt");
     outItolLabel(nodes, myargs.outPref + "-iToL_label.txt");
     outItolPopup(aTaxa, nodes, myargs.outPref + "-iToL_popup.txt");
     outItolStrap(aTaxa, nodes, myargs.outPref + "-iToL_strap.txt");
+    outItolSymbol(aTaxa, nodes, myargs.outPref + "-iToL_symbol.txt");
   } else {
     aTree->outnwk(myargs.outPref + ".nwk");
   }
@@ -341,34 +343,39 @@ void outTreeJson(Taxa &aTaxa, Node *aTree, ostream &os) {
   os << "}";
 };
 
-void itolHeader(ostream &os, const string &file, const string &type) {
-  // test output file stream
-  if (!os) {
-    cerr << "Open " << file << " for write failed" << endl;
-    exit(3);
+/********************************************************************************
+ * @brief the function for output iToL files
+ *
+ * @param os
+ * @param file
+ * @param type
+ ********************************************************************************/
+void outItolNodes(const vector<Node *> &nodes, const string &file) {
+  ofstream os(file);
+  for (auto &nd : nodes) {
+
+    if (nd->isLeaf()) {
+      os << nd->id << "\t"
+         << "leaf";
+    } else {
+      string type = "-";
+      if (nd->nleaf > 0 && nRanks(nd->name) > nRanks(nd->parent->name))
+        type = "clade";
+      os << "I" << nd->id << "\t" << type;
+    }
+
+    string lngstr = nd->name;
+    lngstr.erase(remove(lngstr.begin(), lngstr.end(), '|'), lngstr.end());
+    os << "\t" << lngstr << endl;
   }
-
-  // the title
-  os << type << "\n"
-     << "SEPARATOR TAB\n";
-
-  // for strap
-  if (type.compare("DATASET_COLORSTRIP") == 0)
-    os << "DATASET_LABEL\tcolor_strip\n"
-       << "COLOR_BRANCHES\t1\n"
-       << "STRIP_WIDTH\t25\n"
-       << "MARGIN\t0\n"
-       << "BORDER_WIDTH\t0\n"
-       << "SHOW_INTERNAL\t0\n";
-
-  // the data section
-  os << "DATA\n" << endl;
 };
 
 void outItolLabel(const vector<Node *> &nodes, const string &file) {
   ofstream os(file);
   itolHeader(os, file, "LABELS");
 
+  // the data section
+  os << "DATA\n" << endl;
   for (auto &nd : nodes) {
     if (nd->isLeaf()) {
       os << nd->id << "\t" << lastNameNoRank(nd->name) << endl;
@@ -385,6 +392,8 @@ void outItolPopup(const Taxa &aTaxa, const vector<Node *> &nodes,
   ofstream os(file);
   itolHeader(os, file, "POPUP_INFO");
 
+  // the data section
+  os << "DATA\n" << endl;
   for (auto &nd : nodes) {
     if (nd->isLeaf()) {
       os << nd->id << "\tSpecies information:\t" << itolPopusStr(nd, aTaxa)
@@ -400,12 +409,22 @@ void outItolPopup(const Taxa &aTaxa, const vector<Node *> &nodes,
 
 void outItolStrap(const Taxa &aTaxa, const vector<Node *> &nodes,
                   const string &file) {
-
-  map<string, string> colorMap;
-  int theRank = getColorMap(aTaxa, colorMap);
-
+  // the file header
   ofstream os(file);
   itolHeader(os, file, "DATASET_COLORSTRIP");
+  os << "DATASET_LABEL\tcolor_strip\n"
+     << "COLOR_BRANCHES\t1\n"
+     << "STRIP_WIDTH\t25\n"
+     << "MARGIN\t0\n"
+     << "BORDER_WIDTH\t0\n"
+     << "SHOW_INTERNAL\t0\n";
+
+  // the data section
+  os << "DATA\n" << endl;
+
+  // the color map
+  map<string, string> colorMap;
+  int theRank = getColorMap(aTaxa, colorMap);
 
   for (auto &nd : nodes) {
     string lngstr = nd->name;
@@ -424,6 +443,41 @@ void outItolStrap(const Taxa &aTaxa, const vector<Node *> &nodes,
   }
 
   os.close();
+};
+
+void outItolSymbol(const Taxa &aTaxa, const vector<Node *> &nodes,
+                   const string &file) {
+  // the file header
+  ofstream os(file);
+  itolHeader(os, file, "DATASET_SYMBOL");
+  os << "DATASET_LABEL\tsymbol\n"
+     << "MAXIMUM_SIZE\t20\n"
+     << "COLOR\t#ffff00\n";
+
+  // the data section
+  os << "DATA\n" << endl;
+
+  for (auto &nd : nodes) {
+    if (!nd->isLeaf() && nd->nleaf > 0 &&
+        nRanks(nd->name) > nRanks(nd->parent->name)) {
+      os << "I" << to_string(nd->id) << "\t" << 3 << "\t" << 30 << "\t"
+         << "#999999"
+         << "\t" << 1 << "\t" << 1.0 << endl;
+    }
+  }
+  os.close();
+};
+
+void itolHeader(ostream &os, const string &file, const string &type) {
+  // test output file stream
+  if (!os) {
+    cerr << "Open " << file << " for write failed" << endl;
+    exit(3);
+  }
+
+  // the title
+  os << type << "\n"
+     << "SEPARATOR TAB\n";
 };
 
 int getColorMap(const Taxa &aTaxa, map<string, string> &colorMap) {
@@ -445,7 +499,7 @@ int getColorMap(const Taxa &aTaxa, map<string, string> &colorMap) {
   float delta = 360 / colorMap.size();
   int i = 0;
   for (auto &cm : colorMap) {
-    vector<int> cv{(int)(delta * i++), 95, 95};
+    vector<int> cv{(int)(delta * i++), 99, 90};
     hsv2rgb(cv);
 
     stringstream buf;
