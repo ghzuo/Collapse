@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-04-02 12:33:14
+ * @Last Modified Time: 2022-04-08 16:24:13
  */
 
 #include "collapse.h"
@@ -356,17 +356,26 @@ void outItolNodes(const vector<Node *> &nodes, const string &file) {
 
     if (nd->isLeaf()) {
       os << nd->id << "\t"
-         << "leaf";
+         << "leaf"
+         << "\t" << nd->name.substr(nd->name.find_first_of('|') + 1);
     } else {
-      string type = "-";
-      if (nd->nleaf > 0 && nRanks(nd->name) > nRanks(nd->parent->name))
-        type = "clade";
-      os << "I" << nd->id << "\t" << type;
+      os << "I" << nd->id << "\t";
+      int nlvl = nRanks(nd->name) - nRanks(nd->parent->name);
+      if (nd->nleaf > 0 && nlvl > 0 ) {
+        string lngstr = nd->name;
+        lngstr.erase(remove(lngstr.begin(), lngstr.end(), '|'), lngstr.end());
+        vector<string> lngvec;
+        separateLineage(lngstr, lngvec);
+        os << "clade" << "\t";
+        for(int i=lngvec.size()-nlvl; i<lngvec.size(); ++i)
+          os << lngvec[i];
+      } else {
+        os << "-"
+           << "\t" << nd->name.substr(nd->name.find_first_of('|') + 1);
+      }
     }
 
-    string lngstr = nd->name;
-    lngstr.erase(remove(lngstr.begin(), lngstr.end(), '|'), lngstr.end());
-    os << "\t" << lngstr << endl;
+    os << endl;
   }
 };
 
