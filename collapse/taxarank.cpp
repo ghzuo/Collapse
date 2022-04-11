@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
- * See the accompanying Manual for the contributors and the way to cite this work.
- * Comments and suggestions welcome. Please contact
- * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
- * 
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of
+ * Sciences. See the accompanying Manual for the contributors and the way to
+ * cite this work. Comments and suggestions welcome. Please contact Dr.
+ * Guanghong Zuo <ghzuo@ucas.ac.cn>
+ *
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-23 09:26:12
+ * @Last Modified Time: 2022-04-11 15:35:27
  */
 
 #include "taxarank.h"
@@ -212,6 +212,26 @@ string TaxaRank::rankString(const RankName &rn) const {
   }
   return lineStr;
 }
+
+// output the rank index
+int TaxaRank::rankindex(const string &str) {
+  if (str.size() == 1) {
+    char c = str[0];
+    for (int i = 0; i < outrank.size(); ++i) {
+      if (c == outrank[i].second) {
+        return i + 1;
+      }
+    }
+  } else {
+    string strlev = toLower(str);
+    for (int i = 0; i < outrank.size(); ++i) {
+      if (strlev.compare(toLower(outrank[i].first)) == 0) {
+        return i + 1;
+      }
+    }
+  }
+  return 0;
+};
 
 /********************************************************************************
  * @brief functions for the option on lineages

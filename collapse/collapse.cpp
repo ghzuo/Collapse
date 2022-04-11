@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-04-08 16:24:13
+ * @Last Modified Time: 2022-04-11 19:55:07
  */
 
 #include "collapse.h"
@@ -94,7 +94,7 @@ void collapse(int argc, char *argv[]) {
 
 RunArgs::RunArgs(int argc, char **argv)
     : infile(""), taxrev(""), outgrp(""), taxfile(""), forWeb(false),
-      forApp(false), predict(false), itol(false), lngfile("") {
+      forApp(false), predict(false), itol(false), lngfile(""), clevel("") {
 
   program = argv[0];
   string outname("collapsed");
@@ -102,7 +102,7 @@ RunArgs::RunArgs(int argc, char **argv)
   string kstr;
 
   char ch;
-  while ((ch = getopt(argc, argv, "i:d:D:o:m:t:s:T:R:O:L:l:IWPAJqh")) != -1) {
+  while ((ch = getopt(argc, argv, "i:d:D:o:m:t:s:T:R:O:L:l:C:IWPAJqh")) != -1) {
     switch (ch) {
     case 'i':
       infile = optarg;
@@ -133,6 +133,9 @@ RunArgs::RunArgs(int argc, char **argv)
       break;
     case 'L':
       lngfile = optarg;
+      break;
+    case 'C':
+      clevel = optarg;
       break;
     case 'I':
       itol = true;
@@ -205,6 +208,8 @@ void RunArgs::usage() {
        << "                        default: set by program\n"
        << " [ -r DKPCOFGS ]        Abbreviations of output taxon rank,\n"
        << "                        default: set by program\n"
+       << " [ -C <None> ]          Collapse tree on the taxon level,\n"
+       << "                        default: the top division taxon level\n"
        << " [ -O <Outgroup> ]      Set the outgroup for the unroot tree.\n"
        << "                        default: None, rearranged by taxonomy\n"
        << " [ -I ]                 Output newick and annotate files for itol\n"
@@ -239,8 +244,16 @@ void output(const LngData &lngs, Taxa &aTaxa, Node *aTree, RunArgs &myargs) {
     outItolNodes(nodes, myargs.outPref + "-iToL_nodelist.txt");
     outItolLabel(nodes, myargs.outPref + "-iToL_label.txt");
     outItolPopup(aTaxa, nodes, myargs.outPref + "-iToL_popup.txt");
-    outItolStrap(aTaxa, nodes, myargs.outPref + "-iToL_strap.txt");
     outItolSymbol(aTaxa, nodes, myargs.outPref + "-iToL_symbol.txt");
+
+    // get division rank
+    set<string> division;
+    getDivision(aTaxa, myargs.clevel, division);
+    if (division.size() > 1) {
+      theInfo("The phylogenetic tree will shown in " + to_string(division.size()) + " classes");
+      outItolStrap(nodes, division, myargs.outPref + "-iToL_strap.txt");
+      outItolCollapse(nodes, division, myargs.outPref + "-iToL_collapse.txt");
+    }
   } else {
     aTree->outnwk(myargs.outPref + ".nwk");
   }
@@ -361,13 +374,14 @@ void outItolNodes(const vector<Node *> &nodes, const string &file) {
     } else {
       os << "I" << nd->id << "\t";
       int nlvl = nRanks(nd->name) - nRanks(nd->parent->name);
-      if (nd->nleaf > 0 && nlvl > 0 ) {
+      if (nd->nleaf > 0 && nlvl > 0) {
         string lngstr = nd->name;
         lngstr.erase(remove(lngstr.begin(), lngstr.end(), '|'), lngstr.end());
         vector<string> lngvec;
         separateLineage(lngstr, lngvec);
-        os << "clade" << "\t";
-        for(int i=lngvec.size()-nlvl; i<lngvec.size(); ++i)
+        os << "clade"
+           << "\t";
+        for (int i = lngvec.size() - nlvl; i < lngvec.size(); ++i)
           os << lngvec[i];
       } else {
         os << "-"
@@ -416,7 +430,7 @@ void outItolPopup(const Taxa &aTaxa, const vector<Node *> &nodes,
   os.close();
 };
 
-void outItolStrap(const Taxa &aTaxa, const vector<Node *> &nodes,
+void outItolStrap(const vector<Node *> &nodes, const set<string> &division,
                   const string &file) {
   // the file header
   ofstream os(file);
@@ -432,8 +446,12 @@ void outItolStrap(const Taxa &aTaxa, const vector<Node *> &nodes,
   os << "DATA\n" << endl;
 
   // the color map
+  int theRank = nRanks(*division.begin()) - 1;
   map<string, string> colorMap;
-  int theRank = getColorMap(aTaxa, colorMap);
+  for (auto &d : division) {
+    colorMap[d] = "X";
+  }
+  getColorMap(colorMap);
 
   for (auto &nd : nodes) {
     string lngstr = nd->name;
@@ -451,6 +469,26 @@ void outItolStrap(const Taxa &aTaxa, const vector<Node *> &nodes,
     }
   }
 
+  os.close();
+};
+
+void outItolCollapse(const vector<Node *> &nodes, const set<string> &division,
+                     const string &file) {
+  // the file header
+  ofstream os(file);
+  itolHeader(os, file, "COLLAPSE");
+
+  // the data section
+  os << "DATA\n" << endl;
+
+  int theRank = nRanks(*division.begin());
+  for (auto &nd : nodes) {
+    if (!nd->isLeaf()) {
+      if ( nRanks(nd->parent->name) < theRank && nRanks(nd->name) >= theRank ) {
+        os << "I" << nd->id << endl;
+      }
+    }
+  }
   os.close();
 };
 
@@ -489,22 +527,41 @@ void itolHeader(ostream &os, const string &file, const string &type) {
      << "SEPARATOR TAB\n";
 };
 
-int getColorMap(const Taxa &aTaxa, map<string, string> &colorMap) {
-
-  vector<map<string, string>> rankstate(aTaxa.rank->outrank.size() + 1);
-  for (auto &tax : aTaxa.def.state) {
-    rankstate[nRanks(tax.first)][tax.first] = "X";
-  }
-
+void getDivision(const Taxa &aTaxa, const string &str, set<string> &division) {
   int theRank = 0;
-  for (auto &rk : rankstate) {
-    if (rk.size() > 1) {
-      ++theRank;
-      colorMap = rk;
-      break;
+  if (!str.empty()) {
+    theRank = aTaxa.rank->rankindex(str);
+    if (theRank == 0) {
+      theInfo("Cann't find the rank level: " + str);
     }
   }
 
+  if (theRank != 0) {
+    for (auto &tax : aTaxa.def.state) {
+      if (nRanks(tax.first) == theRank)
+        division.insert(tax.first);
+    }
+  } else {
+    theInfo("Use the top division rank level");
+    getTopDivision(aTaxa, division);
+  }
+};
+
+void getTopDivision(const Taxa &aTaxa, set<string> &division) {
+  vector<set<string>> rankset(aTaxa.rank->outrank.size() + 1);
+  for (auto &tax : aTaxa.def.state) {
+    rankset[nRanks(tax.first)].insert(tax.first);
+  }
+
+  for (auto &rk : rankset) {
+    if (rk.size() > 1) {
+      division = rk;
+      break;
+    }
+  }
+}
+
+void getColorMap(map<string, string> &colorMap) {
   float delta = 360 / colorMap.size();
   int i = 0;
   for (auto &cm : colorMap) {
@@ -518,7 +575,6 @@ int getColorMap(const Taxa &aTaxa, map<string, string> &colorMap) {
     buf << "1.0)";
     cm.second = buf.str();
   }
-  return theRank;
 }
 
 string itolPopusStr(Node *nd, const Taxa &aTaxa) {

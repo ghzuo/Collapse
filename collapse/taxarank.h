@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-22 16:21:25
+ * @Last Modified Time: 2022-04-11 14:34:29
  */
 
 #ifndef TAXARANK_H
@@ -81,6 +81,9 @@ struct TaxaRank {
   char getSymbol(const string &) const;
   string rankString(const RankName &) const;
   string rankString(const vector<RankName> &) const;
+
+  //output the rank index
+  int rankindex(const string&);
 
 private:
   TaxaRank() = default;

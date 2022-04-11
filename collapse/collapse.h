@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-04-02 12:18:38
+ * @Last Modified Time: 2022-04-11 17:48:34
  */
 
 #ifndef COLLAPSE_H
@@ -15,6 +15,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <set>
 
 #include "kit.h"
 #include "taxsys.h"
@@ -30,6 +31,7 @@ struct RunArgs {
   string outPref;
   string lngfile;
   string outgrp;
+  string clevel;
   bool forWeb, forApp, predict;
   bool itol;
   // two hidden options for output for server and app
@@ -50,10 +52,13 @@ void outLngsJson(const LngData &, Taxa &, ostream &);
 void outItolNodes(const vector<Node *>&, const string &);
 void outItolLabel(const vector<Node *>&, const string &);
 void outItolPopup(const Taxa &, const vector<Node *>&, const string &);
-void outItolStrap(const Taxa &, const vector<Node *>&, const string &);
 void outItolSymbol(const Taxa &, const vector<Node *>&, const string &);
+void outItolStrap(const vector<Node *>&, const set<string>&, const string &);
+void outItolCollapse(const vector<Node*>&, const set<string>&, const string&);
 void itolHeader(ostream&, const string&, const string&);
-int getColorMap(const Taxa&, map<string,string>&);
+void getDivision(const Taxa&, const string&, set<string>&);
+void getTopDivision(const Taxa &, set<string>&);
+void getColorMap(map<string,string>&);
 string itolPopusStr(Node*, const Taxa&);
 
 #endif
