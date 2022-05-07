@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-06 20:07:02
+ * @Last Modified Time: 2022-05-07 16:33:38
  */
 
 #ifndef TREE_H
@@ -88,9 +88,9 @@ struct Node {
   bool _findOutgrpCandidates(vector<Node *> &);
   Node *_forceRooting(Node *);
 
-  void balanceTree(const string &, const string &);
-  void findRootCandidates(vector<Node *> &);
-  void _findRootCandidates(vector<Node *> &);
+  void balanceTree(const string &, size_t);
+  void findRootCandidates(vector<Node *> &, size_t);
+  void _findRootCandidates(vector<Node *> &, size_t);
   void _rearrangeOutgroup(Node *);
   Node *_sibling();
 

@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-07 08:56:36
+ * @Last Modified Time: 2022-05-07 18:19:19
  */
 
 #include "taxtree.h"
@@ -265,14 +265,17 @@ Node *Node::_forceRooting(Node *root) {
  * @param root
  * @return Node*
  ********************************************************************************/
-void Node::balanceTree(const string &meth, const string &otu) {
+void Node::balanceTree(const string &meth, size_t otulvl) {
   // set the depth
   _getDepth();
 
   // find the root candidates
   vector<Node *> nlist;
-  findRootCandidates(nlist);
+  if (otulvl <= taxLevel)
+    otulvl = taxLevel + 1;
+  findRootCandidates(nlist, otulvl);
 
+  // do the rooting
   if (meth.compare("mdmp") == 0) {
     _mdmpTree(nlist);
   } else if (meth.compare("pmr") == 0) {
@@ -280,13 +283,12 @@ void Node::balanceTree(const string &meth, const string &otu) {
   } else if (meth.compare("mad") == 0) {
     _madTree(nlist);
   } else {
-    theInfo("Unkown rooting method: " + meth +
-            ", use the minimal ancestor deviation method");
+    theInfo("Unkown rooting method: " + meth + ", use MAD instead");
     _madTree(nlist);
   }
 };
 
-void Node::findRootCandidates(vector<Node *> &nlist) {
+void Node::findRootCandidates(vector<Node *> &nlist, size_t otulvl) {
   // set the front as the outgroup
   if (children.front()->taxLevel != taxLevel) {
     Node *tmp = children.back();
@@ -295,18 +297,18 @@ void Node::findRootCandidates(vector<Node *> &nlist) {
   }
 
   // get the candidate for outgroup
-  children.back()->otu = true;
   nlist.emplace_back(children.back());
-  children.front()->_findRootCandidates(nlist);
+  children.front()->_findRootCandidates(nlist, otulvl);
+  children.back()->_findRootCandidates(nlist, otulvl);
   theInfo("There are " + to_string(nlist.size()) + " root candidates");
 }
 
-void Node::_findRootCandidates(vector<Node *> &nlist) {
-  if (taxLevel == parent->taxLevel) {
+void Node::_findRootCandidates(vector<Node *> &nlist, size_t otulvl) {
+  if (taxLevel < otulvl) {
     for (auto nd : children) {
       nlist.emplace_back(nd);
-      if (!nd->isLeaf()) {
-        nd->_findRootCandidates(nlist);
+      if (!nd->isLeaf() && nd->nleaf>1) {
+        nd->_findRootCandidates(nlist, otulvl);
       } else {
         nd->otu = true;
       }
@@ -442,11 +444,11 @@ pair<double, double> Node::getMAD() {
   }
   double doi = sumx * 0.5 / sumy;
 
-  double doj2;  
-  if(doi < 0){
+  double doj2;
+  if (doi < 0) {
     doi = 0;
     doj2 = children.back()->length * 2;
-  }else if(doi > children.back()->length){
+  } else if (doi > children.back()->length) {
     doi = children.back()->length;
     doj2 = 0;
   } else {
@@ -618,18 +620,16 @@ void Node::_getDepth() {
   depth = 0;
   if (!isLeaf()) {
     for (auto &nd : children) {
-      if (nd->nleaf > 0) {
-        if (nd->isLeaf()) {
-          nd->depth = 0;
-          depth += nd->length;
-        } else {
-          if (std::isnan(nd->depth))
-            nd->_getDepth();
-          depth += ((nd->length + nd->depth) * nd->nleaf);
-        }
+      if (nd->isLeaf()) {
+        nd->depth = 0;
+        depth += nd->length;
+      } else {
+        if (std::isnan(nd->depth))
+          nd->_getDepth();
+        depth += ((nd->length + nd->depth) * (nd->nleaf + nd->nxleaf));
       }
     }
-    depth /= double(nleaf);
+    depth /= double(nleaf+nxleaf);
   }
 };
 

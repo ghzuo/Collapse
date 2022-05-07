@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-06 10:00:31
+ * @Last Modified Time: 2022-05-07 16:34:48
  */
 
 #ifndef COLLAPSE_H

@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-07 08:57:21
+ * @Last Modified Time: 2022-05-07 18:49:38
  */
 
 #include "collapse.h"
@@ -64,7 +64,10 @@ void collapse(int argc, char *argv[]) {
   } else {
     // rooting tree by taxonomy
     aTree = aTree->rootingByTaxa();
-    aTree->balanceTree(myargs.rootMeth, myargs.otuLevel);
+    size_t otulvl = 0;
+    if(!myargs.otuLevel.empty())
+      otulvl = rank->rankindex(myargs.otuLevel);
+    aTree->balanceTree(myargs.rootMeth, otulvl);
   }
 
   theInfo("Annotated all nodes of tree by lineages");
@@ -217,6 +220,10 @@ void RunArgs::usage() {
        << "                        default: set by program\n"
        << " [ -r DKPCOFGS ]        Abbreviations of output taxon rank,\n"
        << "                        default: set by program\n"
+       << " [ -a mad ]             Set the rooting method: mad, pmr, or mdmp\n"
+       << "                        default: mad\n"
+       << " [ -u <None> ]          Set the taxon level for OTU in rooting\n"
+       << "                        default: the top division taxon level\n"
        << " [ -C <None> ]          Collapse tree on the taxon level,\n"
        << "                        default: the top division taxon level\n"
        << " [ -O <Outgroup> ]      Set the outgroup for the unroot tree.\n"
