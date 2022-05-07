@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-04-01 11:04:13
+ * @Last Modified Time: 2022-05-07 08:56:36
  */
 
 #include "taxtree.h"
@@ -17,26 +17,30 @@ const size_t N_FORKS(2);
 /********* Member Functions For Node Class *************************/
 /*******************************************************************/
 Node::Node()
-    : name(""), id(0), length(NAN), parent(NULL), taxSize(0), taxLevel(0),
-      nleaf(0), nxleaf(0), unclassified(false), uploaded(false) {
+    : name(""), id(0), length(NAN), depth(NAN), parent(NULL), taxSize(0),
+      taxLevel(0), nleaf(0), nxleaf(0), unclassified(false), uploaded(false),
+      otu(false) {
   children.reserve(N_FORKS);
 };
 
 Node::Node(size_t n)
-    : name(""), id(n), length(NAN), parent(NULL), taxSize(0), taxLevel(0),
-      nleaf(0), nxleaf(0), unclassified(false), uploaded(false) {
+    : name(""), id(n), length(NAN), depth(NAN), parent(NULL), taxSize(0),
+      taxLevel(0), nleaf(0), nxleaf(0), unclassified(false), uploaded(false),
+      otu(false) {
   children.reserve(N_FORKS);
 };
 
 Node::Node(size_t n, const string &str)
-    : name(str), id(n), length(NAN), parent(NULL), taxSize(0), taxLevel(0),
-      nleaf(0), nxleaf(0), unclassified(false), uploaded(false) {
+    : name(str), id(n), length(NAN), depth(NAN), parent(NULL), taxSize(0),
+      taxLevel(0), nleaf(0), nxleaf(0), unclassified(false), uploaded(false),
+      otu(false) {
   children.reserve(N_FORKS);
 };
 
 Node::Node(size_t n, const vector<Node *> &vn)
-    : name(""), id(n), length(NAN), parent(NULL), children(vn), taxSize(0),
-      nleaf(0), nxleaf(0), unclassified(false), uploaded(false) {
+    : name(""), id(n), length(NAN), depth(NAN), parent(NULL), children(vn),
+      taxSize(0), nleaf(0), nxleaf(0), unclassified(false), uploaded(false),
+      otu(false) {
   children.reserve(2);
 };
 
@@ -93,8 +97,21 @@ void Node::getBranches(vector<Node *> &nodes) {
   }
 };
 
+void Node::swap(Node *ndx) {
+  // swap content of two node
+  Node tmp = *this;
+  *this = *ndx;
+  *ndx = tmp;
+
+  // update the parent of children
+  for (auto nd : children)
+    nd->parent = this;
+  for (auto nd : ndx->children)
+    nd->parent = ndx;
+}
+
 /********************************************************************************
- * @brief tools for set root of the unroot tree
+ * @brief tools for set root of the unroot tree by simple method
  *
  * @param str
  * @return Node*
@@ -128,6 +145,11 @@ Node *Node::rootingByOutgrp(const string &str) {
   return theTree;
 };
 
+/********************************************************************************
+ * @brief rooting tree by taxa
+ *
+ * @return Node*
+ ********************************************************************************/
 Node *Node::rootingByTaxa() {
 
   // preset the branch attraction
@@ -137,21 +159,16 @@ Node *Node::rootingByTaxa() {
   // find the candidate of outgroup
   vector<Node *> clades;
   for (auto &nd : theTree->children) {
-    nd->_getOutgrpCandidates(clades);
+    nd->_findOutgrpCandidates(clades);
   }
 
   // root the tree by the highest rank clade and length
   if (!clades.empty()) {
-    Node *outgrp(clades.back());
-    clades.pop_back();
 
-    for (auto &nd : clades) {
-      if (nd->taxLevel > outgrp->taxLevel ||
-          (outgrp->taxLevel == nd->taxLevel && nd->length > outgrp->length)) {
-        outgrp = nd;
-      }
-    }
-
+    // preselect the outgroup as the smallest branch
+    Node *outgrp =
+        *(min_element(clades.begin(), clades.end(),
+                      [](Node *a, Node *b) { return a->nleaf < b->nleaf; }));
     // record the change branch
     Node *chgBranch = outgrp->parent->parent;
     // rearrange the tree (still unroot tree)
@@ -162,17 +179,14 @@ Node *Node::rootingByTaxa() {
     // find a good outgroup (the last item of children)
     // by higest rank of common lineage or longest branch length
     size_t minComLev = nRanks(commonLineage(chgBranch->name, outgrp->name));
-    size_t minLevel = outgrp->taxLevel;
     auto outIter = theTree->children.rbegin();
     for (auto iter = theTree->children.rbegin() + 1;
          iter != theTree->children.rend(); ++iter) {
       if (*iter != chgBranch) {
         size_t comLev = nRanks(commonLineage(chgBranch->name, (*iter)->name));
-        if ((comLev < minComLev) ||
-            ((comLev == minComLev) && ((*iter)->taxLevel > minLevel))) {
+        if (comLev < minComLev) {
           outIter = iter;
           minComLev = comLev;
-          minLevel = (*iter)->taxLevel;
         }
       }
     }
@@ -198,7 +212,7 @@ Node *Node::rootingByTaxa() {
   return theTree;
 };
 
-bool Node::_getOutgrpCandidates(vector<Node *> &clades) {
+bool Node::_findOutgrpCandidates(vector<Node *> &clades) {
   if (unclassified) {
     return false;
   } else if (isLeaf() || nClade() > 0) {
@@ -207,7 +221,7 @@ bool Node::_getOutgrpCandidates(vector<Node *> &clades) {
     // the candidates are the nodes whose all siblings are clades
     bool isCandidate(true);
     for (auto nd : children) {
-      isCandidate = nd->_getOutgrpCandidates(clades) && isCandidate;
+      isCandidate = nd->_findOutgrpCandidates(clades) && isCandidate;
     }
     if (isCandidate) {
       clades.insert(clades.end(), children.begin(), children.end());
@@ -228,18 +242,403 @@ Node *Node::_forceRooting(Node *root) {
   Node *theRoot = new Node();
 
   // add the last child of node as the outgroup of theRoot
+  // add root to the super root (theRoot)
   Node *outgrp = root->children.back();
-  // the branch length are divided equally to two branch
-  outgrp->length *= 0.5;
   theRoot->addChild(outgrp); // outgrp at front
+  theRoot->addChild(root);
   root->children.pop_back();
 
-  // the origal node as another child of the Root
-  theRoot->addChild(root);
-  root->length = outgrp->length;
+  // set the branch lengths of the children of theRoot
+  if (outgrp->isLeaf()) {
+    root->length = 0.05 * outgrp->length;
+  } else {
+    root->length = 0.5 * outgrp->length;
+  }
+  outgrp->length -= root->length;
 
   return theRoot;
 };
+
+/********************************************************************************
+ * @brief option the tree for balance
+ *
+ * @param root
+ * @return Node*
+ ********************************************************************************/
+void Node::balanceTree(const string &meth, const string &otu) {
+  // set the depth
+  _getDepth();
+
+  // find the root candidates
+  vector<Node *> nlist;
+  findRootCandidates(nlist);
+
+  if (meth.compare("mdmp") == 0) {
+    _mdmpTree(nlist);
+  } else if (meth.compare("pmr") == 0) {
+    _pmrTree(nlist);
+  } else if (meth.compare("mad") == 0) {
+    _madTree(nlist);
+  } else {
+    theInfo("Unkown rooting method: " + meth +
+            ", use the minimal ancestor deviation method");
+    _madTree(nlist);
+  }
+};
+
+void Node::findRootCandidates(vector<Node *> &nlist) {
+  // set the front as the outgroup
+  if (children.front()->taxLevel != taxLevel) {
+    Node *tmp = children.back();
+    children.back() = children.front();
+    children.front() = tmp;
+  }
+
+  // get the candidate for outgroup
+  children.back()->otu = true;
+  nlist.emplace_back(children.back());
+  children.front()->_findRootCandidates(nlist);
+  theInfo("There are " + to_string(nlist.size()) + " root candidates");
+}
+
+void Node::_findRootCandidates(vector<Node *> &nlist) {
+  if (taxLevel == parent->taxLevel) {
+    for (auto nd : children) {
+      nlist.emplace_back(nd);
+      if (!nd->isLeaf()) {
+        nd->_findRootCandidates(nlist);
+      } else {
+        nd->otu = true;
+      }
+    }
+  } else {
+    otu = true;
+  }
+}
+
+void Node::_rearrangeOutgroup(Node *np) {
+  // check the outgroup if the root
+  if (np->parent == NULL)
+    return;
+
+  // get the out group
+  Node *outgrp = np;
+  Node *ogSib = outgrp->_sibling();
+
+  // check the outgroup is already the outgroup
+  if (np->parent->parent == NULL) {
+    outgrp->length += ogSib->length;
+    ogSib->length = 0;
+    return;
+  }
+
+  // relative nodes: from parent to the origal root
+  vector<Node *> nlist;
+  do {
+    nlist.emplace_back(np->parent);
+    np = np->parent;
+  } while (np->parent->parent != NULL);
+
+  // get the subroot
+  Node *subRoot = nlist.back();
+  nlist.pop_back();
+  if (subRoot != children.front()) {
+    children.front()->swap(children.back());
+    subRoot = children.front();
+  }
+
+  // set the length of rest and remove it from root
+  Node *rest = subRoot->_sibling();
+  rest->length += subRoot->length;
+  subRoot->length = 0;
+  deleteChild(rest);
+  // add outgroup to root
+  addChild(outgrp);
+
+  // reset the subroot
+  if (!nlist.empty()) {
+    // clear children and add sibling as a child
+    for (auto nd : nlist) {
+      nd->children.clear();
+      nd->addChild(nd->_sibling());
+    }
+
+    // add parent as a child
+    for (auto iter = nlist.rbegin() + 1; iter != nlist.rend(); ++iter) {
+      (*iter)->addChild((*iter)->parent);
+    }
+    nlist.back()->addChild(rest);
+
+    // update the status of serial nodes
+    for (auto iter = nlist.rbegin(); iter != nlist.rend(); ++iter) {
+      (*iter)->_setOneBranch();
+      (*iter)->_getDepth();
+    }
+
+    // set the top brache as rest
+    rest = nlist.front();
+  }
+
+  // reset the subroot
+  subRoot->children.clear();
+  subRoot->addChild(ogSib);
+  subRoot->addChild(rest);
+  subRoot->_setOneBranch();
+  subRoot->_getDepth();
+};
+
+Node *Node::_sibling() {
+  return parent->children.front() == this ? parent->children.back()
+                                          : parent->children.front();
+};
+
+/********************************************************************************
+ * @brief get minimal ancestor deviation tree
+ *
+ * @param nlist
+ ********************************************************************************/
+void Node::_madTree(const vector<Node *> &nlist) {
+  // find the minimal depth
+  pair<Node *, pair<double, double>> minMAD{
+      NULL, make_pair(0, numeric_limits<double>::max())};
+  for (auto nd : nlist) {
+    // rearrange the tree by set nd as the outgroup
+    _rearrangeOutgroup(nd);
+    pair<double, double> mad = getMAD();
+
+    // get max pmr
+    if (mad.second < minMAD.second.second) {
+      minMAD = make_pair(nd, mad);
+    }
+  }
+
+  // select the best tree
+  _rearrangeOutgroup(minMAD.first);
+  children.back()->length -= minMAD.second.first;
+  children.front()->length = minMAD.second.first;
+
+  theInfo("Rooting Tree by minimal ancestor deviation: " +
+          to_string(minMAD.second.second));
+}
+
+pair<double, double> Node::getMAD() {
+  // get depthes of all otu
+  double mad(0);
+  vector<double> backdep;
+  children.back()->_getOTUad(backdep, mad);
+  vector<double> frontdep;
+  children.front()->_getOTUad(frontdep, mad);
+
+  // obtian the break point
+  double sumx(0);
+  double sumy(0);
+  for (auto &nda : frontdep) {
+    for (auto &ndb : backdep) {
+      double dbc = 1 / (nda + ndb);
+      double ddbc = dbc * dbc;
+      sumx += (ndb - nda) * ddbc;
+      sumy += ddbc;
+    }
+  }
+  double doi = sumx * 0.5 / sumy;
+
+  double doj2;  
+  if(doi < 0){
+    doi = 0;
+    doj2 = children.back()->length * 2;
+  }else if(doi > children.back()->length){
+    doi = children.back()->length;
+    doj2 = 0;
+  } else {
+    doj2 = (children.back()->length - doi) * 2;
+  }
+
+  // add the sanddle ancestor deviation
+  for (auto &nda : frontdep) {
+    for (auto &ndb : backdep) {
+      double dev = (ndb - nda - doj2) / (nda + ndb);
+      mad += dev * dev;
+    }
+  }
+
+  return make_pair(doi, mad);
+}
+
+void Node::_getOTUad(vector<double> &theDepth, double &mad) {
+  if (otu) {
+    theDepth.emplace_back(depth + length);
+  } else {
+    size_t b = theDepth.size();
+    children.front()->_getOTUad(theDepth, mad);
+    size_t m = theDepth.size();
+    children.back()->_getOTUad(theDepth, mad);
+    size_t e = theDepth.size();
+
+    // add the ancestor deviation between intro OTU
+    for (size_t i = b; i < m; ++i) {
+      for (size_t j = m; j < e; ++j) {
+        double rbc = (theDepth[i] - theDepth[j]) / (theDepth[i] + theDepth[j]);
+        mad += rbc * rbc;
+      }
+    }
+
+    // update depth of the descendant OTU
+    for (size_t i = b; i < e; ++i) {
+      theDepth[i] += length;
+    }
+  }
+}
+
+/********************************************************************************
+ * @brief get the maximal relative pairwise midpoint root tree
+ *
+ * @param nlist
+ ********************************************************************************/
+void Node::_pmrTree(const vector<Node *> &nlist) {
+  // find the minimal depth
+  pair<Node *, double> maxPMR{NULL, numeric_limits<double>::min()};
+  for (auto nd : nlist) {
+    // rearrange the tree by set nd as the outgroup
+    _rearrangeOutgroup(nd);
+    double pmr = getPMR();
+
+    // get max pmr
+    if (pmr > maxPMR.second) {
+      maxPMR = make_pair(nd, pmr);
+    }
+  }
+
+  // select the best tree
+  _rearrangeOutgroup(maxPMR.first);
+  _setLengthByMidpoint();
+
+  stringstream buf;
+  buf << fixed << setprecision(1) << maxPMR.second * 100 << "%";
+  theInfo("Rooting Tree by pairwise midpoint root with percent: " + buf.str());
+}
+
+double Node::getPMR() {
+  // get depthes of all otu
+  vector<double> backdep;
+  children.back()->_getOTUdepth(backdep);
+  vector<double> frontdep;
+  children.front()->_getOTUdepth(frontdep);
+
+  // obtian the precent of PMR
+  int nPMR(0);
+  for (auto &nda : frontdep) {
+    for (auto &ndb : backdep) {
+      double dio = 0.5 * (ndb - nda);
+      if (dio > 0 && dio < children.back()->length) {
+        ++nPMR;
+      }
+    }
+  }
+
+  return double(nPMR) / (frontdep.size() * backdep.size());
+};
+
+void Node::_getOTUdepth(vector<double> &theDepth) {
+  if (otu) {
+    theDepth.emplace_back(depth + length);
+  } else {
+    size_t i = theDepth.size();
+    for (auto nd : children) {
+      nd->_getOTUdepth(theDepth);
+    }
+
+    for (; i < theDepth.size(); ++i) {
+      theDepth[i] += length;
+    }
+  }
+}
+
+/********************************************************************************
+ * @brief get the minimal depth tree with midpoint and positive length
+ *
+ * @param nlist
+ ********************************************************************************/
+void Node::_mdmpTree(const vector<Node *> &nlist) {
+  // find the minimal depth
+  pair<Node *, double> mindep{NULL, numeric_limits<double>::max()};
+  pair<Node *, double> mindepPlus{NULL, numeric_limits<double>::max()};
+  for (auto nd : nlist) {
+    // rearrange the tree by set nd as the outgroup
+    _rearrangeOutgroup(nd);
+    // reset the branch
+    _setLengthByMidpoint();
+
+    // get mindep
+    if (depth < mindep.second) {
+      mindep = make_pair(nd, depth);
+    }
+
+    // get mindepPlus
+    if (depth < mindepPlus.second && children.front()->length > 0 &&
+        children.back()->length > 0) {
+      mindepPlus = make_pair(nd, depth);
+    }
+  }
+
+  // select the best tree
+  if (mindepPlus.first == NULL) {
+    _rearrangeOutgroup(mindep.first);
+  } else {
+    _rearrangeOutgroup(mindepPlus.first);
+  }
+  _setLengthByMidpoint();
+
+  theInfo("Rooting Tree by minimal depth: " + to_string(depth));
+}
+
+void Node::_setLengthByMidpoint() {
+  // points to two branches
+  Node *deep = children.front();
+  Node *shallow = children.back();
+  if (deep->depth < shallow->depth) {
+    deep = children.back();
+    shallow = children.front();
+  }
+
+  // set new branch length (bigger than 0)
+  double lengthTotal = deep->length + shallow->length;
+  deep->length = 0.5 * (shallow->depth + lengthTotal - deep->depth);
+  if (deep->length < 0) {
+    deep->length = 0;
+    shallow->length = lengthTotal;
+  } else {
+    shallow->length = lengthTotal - deep->length;
+  }
+
+  // update the depth
+  _getDepth();
+}
+
+void Node::_getDepth() {
+  depth = 0;
+  if (!isLeaf()) {
+    for (auto &nd : children) {
+      if (nd->nleaf > 0) {
+        if (nd->isLeaf()) {
+          nd->depth = 0;
+          depth += nd->length;
+        } else {
+          if (std::isnan(nd->depth))
+            nd->_getDepth();
+          depth += ((nd->length + nd->depth) * nd->nleaf);
+        }
+      }
+    }
+    depth /= double(nleaf);
+  }
+};
+
+/********************************************************************************
+ * @brief reset rearrange the tree by change the outgroup for unroot tree
+ *
+ * @param str
+ * @return Node*
+ ********************************************************************************/
 
 Node *Node::resetroot(const string &str) {
   vector<Node *> leafs;

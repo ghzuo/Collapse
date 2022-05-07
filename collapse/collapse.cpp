@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-04-11 19:55:07
+ * @Last Modified Time: 2022-05-07 08:57:21
  */
 
 #include "collapse.h"
@@ -64,6 +64,7 @@ void collapse(int argc, char *argv[]) {
   } else {
     // rooting tree by taxonomy
     aTree = aTree->rootingByTaxa();
+    aTree->balanceTree(myargs.rootMeth, myargs.otuLevel);
   }
 
   theInfo("Annotated all nodes of tree by lineages");
@@ -94,7 +95,8 @@ void collapse(int argc, char *argv[]) {
 
 RunArgs::RunArgs(int argc, char **argv)
     : infile(""), taxrev(""), outgrp(""), taxfile(""), forWeb(false),
-      forApp(false), predict(false), itol(false), lngfile(""), clevel("") {
+      forApp(false), predict(false), itol(false), lngfile(""), clevel(""),
+      rootMeth("mad"), otuLevel("") {
 
   program = argv[0];
   string outname("collapsed");
@@ -102,7 +104,8 @@ RunArgs::RunArgs(int argc, char **argv)
   string kstr;
 
   char ch;
-  while ((ch = getopt(argc, argv, "i:d:D:o:m:t:s:T:R:O:L:l:C:IWPAJqh")) != -1) {
+  while ((ch = getopt(argc, argv, "i:d:D:o:m:r:t:s:T:R:O:L:l:C:a:u:IWPAJqh")) !=
+         -1) {
     switch (ch) {
     case 'i':
       infile = optarg;
@@ -136,6 +139,12 @@ RunArgs::RunArgs(int argc, char **argv)
       break;
     case 'C':
       clevel = optarg;
+      break;
+    case 'a':
+      rootMeth = toLower(optarg);
+      break;
+    case 'u':
+      otuLevel = toUpper(optarg);
       break;
     case 'I':
       itol = true;
@@ -250,7 +259,8 @@ void output(const LngData &lngs, Taxa &aTaxa, Node *aTree, RunArgs &myargs) {
     set<string> division;
     getDivision(aTaxa, myargs.clevel, division);
     if (division.size() > 1) {
-      theInfo("The phylogenetic tree will shown in " + to_string(division.size()) + " classes");
+      theInfo("The phylogenetic tree will shown in " +
+              to_string(division.size()) + " classes");
       outItolStrap(nodes, division, myargs.outPref + "-iToL_strap.txt");
       outItolCollapse(nodes, division, myargs.outPref + "-iToL_collapse.txt");
     }
@@ -373,7 +383,7 @@ void outItolNodes(const vector<Node *> &nodes, const string &file) {
          << "\t" << nd->name.substr(nd->name.find_first_of('|') + 1);
     } else {
       os << "I" << nd->id << "\t";
-      int nlvl = nRanks(nd->name) - nRanks(nd->parent->name);
+      int nlvl = nd->taxLevel - nd->parent->taxLevel;
       if (nd->nleaf > 0 && nlvl > 0) {
         string lngstr = nd->name;
         lngstr.erase(remove(lngstr.begin(), lngstr.end(), '|'), lngstr.end());
@@ -402,7 +412,7 @@ void outItolLabel(const vector<Node *> &nodes, const string &file) {
   for (auto &nd : nodes) {
     if (nd->isLeaf()) {
       os << nd->id << "\t" << lastNameNoRank(nd->name) << endl;
-    } else if (nRanks(nd->name) > nRanks(nd->parent->name)) {
+    } else if (nd->taxLevel > nd->parent->taxLevel) {
       os << "I" + to_string(nd->id) << "\t" << lastNameNoRank(nd->name) << endl;
     }
   }
@@ -421,7 +431,7 @@ void outItolPopup(const Taxa &aTaxa, const vector<Node *> &nodes,
     if (nd->isLeaf()) {
       os << nd->id << "\tSpecies information:\t" << itolPopusStr(nd, aTaxa)
          << endl;
-    } else if (nd->nleaf > 0 && nRanks(nd->name) > nRanks(nd->parent->name)) {
+    } else if (nd->nleaf > 0 && nd->taxLevel > nd->parent->taxLevel) {
       os << "I" + to_string(nd->id) << "\tClade information:\t"
          << itolPopusStr(nd, aTaxa) << endl;
     }
@@ -484,7 +494,7 @@ void outItolCollapse(const vector<Node *> &nodes, const set<string> &division,
   int theRank = nRanks(*division.begin());
   for (auto &nd : nodes) {
     if (!nd->isLeaf()) {
-      if ( nRanks(nd->parent->name) < theRank && nRanks(nd->name) >= theRank ) {
+      if (nd->parent->taxLevel < theRank && nd->taxLevel >= theRank) {
         os << "I" << nd->id << endl;
       }
     }
@@ -505,8 +515,7 @@ void outItolSymbol(const Taxa &aTaxa, const vector<Node *> &nodes,
   os << "DATA\n" << endl;
 
   for (auto &nd : nodes) {
-    if (!nd->isLeaf() && nd->nleaf > 0 &&
-        nRanks(nd->name) > nRanks(nd->parent->name)) {
+    if (!nd->isLeaf() && nd->nleaf > 0 && nd->taxLevel > nd->parent->taxLevel) {
       os << "I" << to_string(nd->id) << "\t" << 3 << "\t" << 30 << "\t"
          << "#999999"
          << "\t" << 1 << "\t" << 1.0 << endl;

@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-04-01 12:01:26
+ * @Last Modified Time: 2022-05-06 20:07:02
  */
 
 #ifndef TREE_H
@@ -17,8 +17,10 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <set>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -35,12 +37,13 @@ struct Node {
   size_t id;
   double length;
   double bootstrap;
+  double depth;
   Node *parent;
   Children children;
 
   size_t taxSize, taxLevel, nleaf, nxleaf,
       nUpLeaf; // nxleaf is the number of unclassfied leafs
-  bool unclassified, uploaded;
+  bool unclassified, uploaded, otu;
 
   Node();
   Node(size_t);
@@ -55,6 +58,7 @@ struct Node {
   void getBranches(vector<Node *> &);
   void getAllNodes(vector<Node *> &);
   bool isLeaf();
+  void swap(Node *);
 
   void checkUnclassified();
   void checkUploaded();
@@ -76,12 +80,31 @@ struct Node {
 
   Node *resetroot(const string &);
   Node *resetroot(Node *);
+
   void updateRootedTree();
   Node *rootingDirect();
   Node *rootingByOutgrp(const string &);
   Node *rootingByTaxa();
-  bool _getOutgrpCandidates(vector<Node *> &);
+  bool _findOutgrpCandidates(vector<Node *> &);
   Node *_forceRooting(Node *);
+
+  void balanceTree(const string &, const string &);
+  void findRootCandidates(vector<Node *> &);
+  void _findRootCandidates(vector<Node *> &);
+  void _rearrangeOutgroup(Node *);
+  Node *_sibling();
+
+  void _madTree(const vector<Node *> &);
+  pair<double, double> getMAD();
+  void _getOTUad(vector<double>&, double&);
+
+  void _pmrTree(const vector<Node *> &);
+  double getPMR();
+  void _getOTUdepth(vector<double> &);
+
+  void _mdmpTree(const vector<Node *> &);
+  void _setLengthByMidpoint();
+  void _getDepth();
 
   void _outnwk(ostream &);
   static function<string(Node *)> nwkname;

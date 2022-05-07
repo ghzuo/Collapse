@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-04-11 17:48:34
+ * @Last Modified Time: 2022-05-06 10:00:31
  */
 
 #ifndef COLLAPSE_H
@@ -32,6 +32,8 @@ struct RunArgs {
   string lngfile;
   string outgrp;
   string clevel;
+  string rootMeth;
+  string otuLevel;
   bool forWeb, forApp, predict;
   bool itol;
   // two hidden options for output for server and app
