@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-07 18:19:19
+ * @Last Modified Time: 2022-05-10 11:12:25
  */
 
 #include "taxtree.h"
@@ -266,14 +266,14 @@ Node *Node::_forceRooting(Node *root) {
  * @return Node*
  ********************************************************************************/
 void Node::balanceTree(const string &meth, size_t otulvl) {
-  // set the depth
-  _getDepth();
-
   // find the root candidates
   vector<Node *> nlist;
   if (otulvl <= taxLevel)
     otulvl = taxLevel + 1;
   findRootCandidates(nlist, otulvl);
+
+  // set the depth
+  _getDepth();
 
   // do the rooting
   if (meth.compare("mdmp") == 0) {
@@ -282,6 +282,8 @@ void Node::balanceTree(const string &meth, size_t otulvl) {
     _pmrTree(nlist);
   } else if (meth.compare("mad") == 0) {
     _madTree(nlist);
+  } else if (meth.compare("mp") == 0) {
+    _mpTree();
   } else {
     theInfo("Unkown rooting method: " + meth + ", use MAD instead");
     _madTree(nlist);
@@ -307,7 +309,7 @@ void Node::_findRootCandidates(vector<Node *> &nlist, size_t otulvl) {
   if (taxLevel < otulvl) {
     for (auto nd : children) {
       nlist.emplace_back(nd);
-      if (!nd->isLeaf() && nd->nleaf>1) {
+      if (!nd->isLeaf() && nd->nleaf > 1) {
         nd->_findRootCandidates(nlist, otulvl);
       } else {
         nd->otu = true;
@@ -629,9 +631,79 @@ void Node::_getDepth() {
         depth += ((nd->length + nd->depth) * (nd->nleaf + nd->nxleaf));
       }
     }
-    depth /= double(nleaf+nxleaf);
+    depth /= double(nleaf + nxleaf);
   }
 };
+
+/********************************************************************************
+ * @brief rooting tree by the midpoint the longest path
+ *
+ ********************************************************************************/
+void Node::_mpTree() {
+  pair<double, vector<Node *>> half;
+  half.first = 0;
+  pair<double, vector<Node *>> path;
+  path.first = 0;
+  _getMaxPath(path, half);
+
+  double halfDistance = 0.5 * path.first;
+  Node *theRoot;
+  double theLength = path.second.front()->depth;
+  for (auto nd : path.second) {
+    theLength += nd->length;
+    theRoot = nd;
+    if (theLength > halfDistance)
+      break;
+  }
+
+  // reset the root
+  _rearrangeOutgroup(theRoot);
+
+  // reset the top branch length
+  theLength -= halfDistance;
+  if (theLength < 0) {
+    children.front()->length = children.back()->length;
+    children.back()->length = 0;
+  } else if (theLength < children.back()->length) {
+    children.front()->length = children.back()->length - theLength;
+    children.back()->length = theLength;
+  }
+}
+
+void Node::_getMaxPath(pair<double, vector<Node *>> &maxPath,
+                       pair<double, vector<Node *>> &maxHalf) {
+
+  if (otu) {
+    maxHalf.first = depth + length;
+    maxHalf.second.emplace_back(this);
+  } else {
+    // get the max path and half path of the front brach
+    pair<double, vector<Node *>> frontHalf;
+    pair<double, vector<Node *>> frontPath;
+    children.front()->_getMaxPath(frontPath, frontHalf);
+
+    // get the max path and half path of the back brach
+    pair<double, vector<Node *>> backHalf;
+    pair<double, vector<Node *>> backPath;
+    children.back()->_getMaxPath(backPath, backHalf);
+
+    // get the max half path
+    maxHalf = frontHalf.first > backHalf.first ? frontHalf : backHalf;
+    maxHalf.first += length;
+    maxHalf.second.emplace_back(this);
+
+    // get the max path
+    double plusHalf = frontHalf.first + backHalf.first;
+    if (plusHalf > frontPath.first && plusHalf > backPath.first) {
+      maxPath.first = frontHalf.first + backHalf.first;
+      maxPath.second = frontHalf.second;
+      maxPath.second.insert(maxPath.second.end(), backHalf.second.rbegin(),
+                            backHalf.second.rend());
+    } else {
+      maxPath = frontPath.first > backPath.first ? frontPath : backPath;
+    }
+  }
+}
 
 /********************************************************************************
  * @brief reset rearrange the tree by change the outgroup for unroot tree

@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-07 18:49:38
+ * @Last Modified Time: 2022-05-10 11:36:09
  */
 
 #include "collapse.h"
@@ -220,7 +220,7 @@ void RunArgs::usage() {
        << "                        default: set by program\n"
        << " [ -r DKPCOFGS ]        Abbreviations of output taxon rank,\n"
        << "                        default: set by program\n"
-       << " [ -a mad ]             Set the rooting method: mad, pmr, or mdmp\n"
+       << " [ -a mad ]             Set rooting method: mad, md, pmr, or mdmp\n"
        << "                        default: mad\n"
        << " [ -u <None> ]          Set the taxon level for OTU in rooting\n"
        << "                        default: the top division taxon level\n"

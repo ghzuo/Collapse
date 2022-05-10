@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-07 16:33:38
+ * @Last Modified Time: 2022-05-10 10:51:01
  */
 
 #ifndef TREE_H
@@ -105,6 +105,9 @@ struct Node {
   void _mdmpTree(const vector<Node *> &);
   void _setLengthByMidpoint();
   void _getDepth();
+
+  void _mpTree();
+  void _getMaxPath(pair<double, vector<Node*>>&, pair<double, vector<Node*>>&);
 
   void _outnwk(ostream &);
   static function<string(Node *)> nwkname;
