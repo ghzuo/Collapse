@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-10 11:12:25
+ * @Last Modified Time: 2022-05-22 16:02:39
  */
 
 #include "taxtree.h"
@@ -17,30 +17,30 @@ const size_t N_FORKS(2);
 /********* Member Functions For Node Class *************************/
 /*******************************************************************/
 Node::Node()
-    : name(""), id(0), length(NAN), depth(NAN), parent(NULL), taxSize(0),
-      taxLevel(0), nleaf(0), nxleaf(0), unclassified(false), uploaded(false),
-      otu(false) {
+    : name(""), id(0), length(NAN), depth(NAN), varsum(NAN), parent(NULL),
+      taxSize(0), taxLevel(0), nleaf(0), nxleaf(0), unclassified(false),
+      uploaded(false), otu(false) {
   children.reserve(N_FORKS);
 };
 
 Node::Node(size_t n)
-    : name(""), id(n), length(NAN), depth(NAN), parent(NULL), taxSize(0),
-      taxLevel(0), nleaf(0), nxleaf(0), unclassified(false), uploaded(false),
-      otu(false) {
+    : name(""), id(n), length(NAN), depth(NAN), varsum(NAN), parent(NULL),
+      taxSize(0), taxLevel(0), nleaf(0), nxleaf(0), unclassified(false),
+      uploaded(false), otu(false) {
   children.reserve(N_FORKS);
 };
 
 Node::Node(size_t n, const string &str)
-    : name(str), id(n), length(NAN), depth(NAN), parent(NULL), taxSize(0),
-      taxLevel(0), nleaf(0), nxleaf(0), unclassified(false), uploaded(false),
-      otu(false) {
+    : name(str), id(n), length(NAN), depth(NAN), varsum(NAN), parent(NULL),
+      taxSize(0), taxLevel(0), nleaf(0), nxleaf(0), unclassified(false),
+      uploaded(false), otu(false) {
   children.reserve(N_FORKS);
 };
 
 Node::Node(size_t n, const vector<Node *> &vn)
-    : name(""), id(n), length(NAN), depth(NAN), parent(NULL), children(vn),
-      taxSize(0), nleaf(0), nxleaf(0), unclassified(false), uploaded(false),
-      otu(false) {
+    : name(""), id(n), length(NAN), depth(NAN), varsum(NAN), parent(NULL),
+      children(vn), taxSize(0), nleaf(0), nxleaf(0), unclassified(false),
+      uploaded(false), otu(false) {
   children.reserve(2);
 };
 
@@ -276,14 +276,16 @@ void Node::balanceTree(const string &meth, size_t otulvl) {
   _getDepth();
 
   // do the rooting
-  if (meth.compare("mdmp") == 0) {
-    _mdmpTree(nlist);
-  } else if (meth.compare("pmr") == 0) {
-    _pmrTree(nlist);
-  } else if (meth.compare("mad") == 0) {
+  if (meth.compare("mad") == 0) {
     _madTree(nlist);
+  } else if (meth.compare("mv") == 0) {
+    _mvTree(nlist);
   } else if (meth.compare("mp") == 0) {
     _mpTree();
+  } else if (meth.compare("pmr") == 0) {
+    _pmrTree(nlist);
+  } else if (meth.compare("md") == 0) {
+    _mdTree(nlist);
   } else {
     theInfo("Unkown rooting method: " + meth + ", use MAD instead");
     _madTree(nlist);
@@ -377,6 +379,7 @@ void Node::_rearrangeOutgroup(Node *np) {
     for (auto iter = nlist.rbegin(); iter != nlist.rend(); ++iter) {
       (*iter)->_setOneBranch();
       (*iter)->_getDepth();
+      (*iter)->varsum = NAN;
     }
 
     // set the top brache as rest
@@ -389,6 +392,7 @@ void Node::_rearrangeOutgroup(Node *np) {
   subRoot->addChild(rest);
   subRoot->_setOneBranch();
   subRoot->_getDepth();
+  subRoot->varsum = NAN;
 };
 
 Node *Node::_sibling() {
@@ -562,7 +566,7 @@ void Node::_getOTUdepth(vector<double> &theDepth) {
  *
  * @param nlist
  ********************************************************************************/
-void Node::_mdmpTree(const vector<Node *> &nlist) {
+void Node::_mdTree(const vector<Node *> &nlist) {
   // find the minimal depth
   pair<Node *, double> mindep{NULL, numeric_limits<double>::max()};
   pair<Node *, double> mindepPlus{NULL, numeric_limits<double>::max()};
@@ -705,6 +709,60 @@ void Node::_getMaxPath(pair<double, vector<Node *>> &maxPath,
   }
 }
 
+/********************************************************************************
+ * @brief rooting tree by the minimum variation from root to leafs
+ *
+ ********************************************************************************/
+void Node::_mvTree(const vector<Node *> &nlist) {
+  // find the minimal depth
+  pair<Node *, double> minvar{NULL, numeric_limits<double>::max()};
+  pair<Node *, double> minvarPlus{NULL, numeric_limits<double>::max()};
+  for (auto nd : nlist) {
+    // rearrange the tree by set nd as the outgroup
+    _rearrangeOutgroup(nd);
+    // reset the branch
+    _setLengthByMidpoint();
+    // get the variation summary
+    _getVarSum();
+
+    // get minvar
+    if (varsum < minvar.second) {
+      minvar = make_pair(nd, varsum);
+    }
+
+    // get minvarPlus
+    if (varsum < minvarPlus.second && children.front()->length > 0 &&
+        children.back()->length > 0) {
+      minvarPlus = make_pair(nd, varsum);
+    }
+  }
+
+  // select the best tree
+  if (minvarPlus.first == NULL) {
+    _rearrangeOutgroup(minvar.first);
+    varsum = minvar.second;
+  } else {
+    _rearrangeOutgroup(minvarPlus.first);
+    varsum = minvarPlus.second;
+  }
+  _setLengthByMidpoint();
+
+  theInfo("Rooting Tree by minimal variation: " +
+          to_string(varsum / (nleaf + nxleaf)));
+};
+
+void Node::_getVarSum() {
+  varsum = 0;
+  if (!isLeaf()) {
+    for (auto &nd : children) {
+      if (std::isnan(nd->varsum))
+        nd->_getVarSum();
+      double delta = depth - nd->depth - nd->length;
+      varsum += nd->varsum;
+      varsum += (nd->nleaf + nd->nxleaf) * delta * delta;
+    }
+  }
+};
 /********************************************************************************
  * @brief reset rearrange the tree by change the outgroup for unroot tree
  *

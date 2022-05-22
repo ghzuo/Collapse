@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-10 10:51:01
+ * @Last Modified Time: 2022-05-22 15:59:03
  */
 
 #ifndef TREE_H
@@ -38,6 +38,7 @@ struct Node {
   double length;
   double bootstrap;
   double depth;
+  double varsum;
   Node *parent;
   Children children;
 
@@ -102,12 +103,15 @@ struct Node {
   double getPMR();
   void _getOTUdepth(vector<double> &);
 
-  void _mdmpTree(const vector<Node *> &);
+  void _mdTree(const vector<Node *> &);
   void _setLengthByMidpoint();
   void _getDepth();
 
   void _mpTree();
   void _getMaxPath(pair<double, vector<Node*>>&, pair<double, vector<Node*>>&);
+
+  void _mvTree(const vector<Node *> &);
+  void _getVarSum();
 
   void _outnwk(ostream &);
   static function<string(Node *)> nwkname;
