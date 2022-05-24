@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-22 16:02:39
+ * @Last Modified Time: 2022-05-24 22:41:31
  */
 
 #include "taxtree.h"
@@ -427,6 +427,13 @@ void Node::_madTree(const vector<Node *> &nlist) {
 
   theInfo("Rooting Tree by minimal ancestor deviation: " +
           to_string(minMAD.second.second));
+  if (children.front()->length == 0 || children.back()->length == 0) {
+    theInfo("The out group of the tree is: " + minMAD.first->name +
+            " with zero branch");
+  } else {
+    theInfo("The out group of the tree is: " + minMAD.first->name +
+            " with balance");
+  }
 }
 
 pair<double, double> Node::getMAD() {
@@ -523,6 +530,13 @@ void Node::_pmrTree(const vector<Node *> &nlist) {
   stringstream buf;
   buf << fixed << setprecision(1) << maxPMR.second * 100 << "%";
   theInfo("Rooting Tree by pairwise midpoint root with percent: " + buf.str());
+  if (children.front()->length == 0 || children.back()->length == 0) {
+    theInfo("The out group of the tree is: " + maxPMR.first->name +
+            " with zero branch");
+  } else {
+    theInfo("The out group of the tree is: " + maxPMR.first->name +
+            " with balance");
+  }
 }
 
 double Node::getPMR() {
@@ -591,8 +605,12 @@ void Node::_mdTree(const vector<Node *> &nlist) {
   // select the best tree
   if (mindepPlus.first == NULL) {
     _rearrangeOutgroup(mindep.first);
+    theInfo("The out group of the tree is: " + mindep.first->name +
+            " with zero branch");
   } else {
     _rearrangeOutgroup(mindepPlus.first);
+    theInfo("The out group of the tree is: " + mindepPlus.first->name +
+            " with balance");
   }
   _setLengthByMidpoint();
 
@@ -668,9 +686,16 @@ void Node::_mpTree() {
   if (theLength < 0) {
     children.front()->length = children.back()->length;
     children.back()->length = 0;
+    theInfo("The out group of the tree is: " + children.back()->name +
+            " with zero branch");
   } else if (theLength < children.back()->length) {
     children.front()->length = children.back()->length - theLength;
     children.back()->length = theLength;
+    theInfo("The out group of the tree is: " + children.back()->name +
+            " with zero branch");
+  } else {
+    theInfo("The out group of the tree is: " + children.back()->name +
+            " with balance");
   }
 }
 
@@ -741,9 +766,13 @@ void Node::_mvTree(const vector<Node *> &nlist) {
   if (minvarPlus.first == NULL) {
     _rearrangeOutgroup(minvar.first);
     varsum = minvar.second;
+    theInfo("The out group of the tree is: " + minvar.first->name +
+            " with zero branch");
   } else {
     _rearrangeOutgroup(minvarPlus.first);
     varsum = minvarPlus.second;
+    theInfo("The out group of the tree is: " + minvarPlus.first->name +
+            " with balance");
   }
   _setLengthByMidpoint();
 

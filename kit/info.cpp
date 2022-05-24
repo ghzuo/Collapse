@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:28
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:19:14
+ * @Last Modified Time: 2022-05-24 19:31:49
  */
 
 #define THEINFO
@@ -38,7 +38,7 @@ Info::~Info() {
   //... destroy the lock
   if (!quiet)
     cerr << "*** ALL Section: Complete Program, Time Elapsed: "
-         << mytimer.elapsed() << " s" << endl;
+         << mytimer.elapsed() << " s\n" << endl;
 }
 
 void Info::operator()(const string &str, int idep) {

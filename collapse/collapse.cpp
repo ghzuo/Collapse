@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-22 16:00:17
+ * @Last Modified Time: 2022-05-24 18:47:17
  */
 
 #include "collapse.h"
@@ -32,7 +32,7 @@ void collapse(int argc, char *argv[]) {
   vector<Node *> allLeafs;
   aTree->getLeafs(allLeafs);
   theInfo("There are " + to_string(allLeafs.size()) +
-          " leafs in the phylogenetic tree");
+          " leafs in the phylogenetic tree: " + myargs.infile);
 
   // set lineage of leafs
   vector<string> nmlist;
@@ -183,7 +183,7 @@ RunArgs::RunArgs(int argc, char **argv)
 
   // the input lineage file
   if (taxfile.empty()) {
-    taxfile = supdir + "Lineage.lsn";
+    taxfile = supdir + "Lineage.lns";
     if (!fileExists(taxfile))
       taxfile = supdir + "Lineage.csv";
   }
@@ -272,7 +272,7 @@ void output(const LngData &lngs, Taxa &aTaxa, Node *aTree, RunArgs &myargs) {
       outItolCollapse(nodes, division, myargs.outPref + "-iToL_collapse.txt");
     }
   } else {
-    aTree->outnwk(myargs.outPref + ".nwk");
+    aTree->outnwk(myargs.outPref + "-annotated.nwk");
   }
 
   // for undefined items
