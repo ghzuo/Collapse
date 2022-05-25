@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:28:15
+ * @Last Modified Time: 2022-05-25 01:49:26
  */
 
 #ifndef REVISELIST_H
@@ -29,8 +29,8 @@ struct Revision {
 
   Revision(const string &);
   bool empty() const;
-  void revise(string &);
-  void revise(vector<string> &);
+  int revise(string &);
+  int revise(vector<string> &);
 };
 
 #endif

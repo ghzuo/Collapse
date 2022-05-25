@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-27 18:17:58
+ * @Last Modified Time: 2022-05-25 01:57:46
  */
 
 #include "lineage.h"
@@ -67,9 +67,13 @@ void LngData::getLineage(vector<string> &nmlist) {
   if (!revfile.empty()) {
     Revision rev(revfile);
     if (!rev.empty()) {
+      int nReplace(0);
       for (auto &lng : data) {
-        rev.revise(lng.name);
+        if (rev.revise(lng.name) > 0)
+          ++nReplace;
       }
+      theInfo("There are " + to_string(nReplace) +
+              " lineage had been changed by revision file");
     }
   }
 

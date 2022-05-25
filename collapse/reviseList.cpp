@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of Sciences.
- * See the accompanying Manual for the contributors and the way to cite this work.
- * Comments and suggestions welcome. Please contact
- * Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
- * 
+ * Copyright (c) 2022  Wenzhou Institute, University of Chinese Academy of
+ * Sciences. See the accompanying Manual for the contributors and the way to
+ * cite this work. Comments and suggestions welcome. Please contact Dr.
+ * Guanghong Zuo <ghzuo@ucas.ac.cn>
+ *
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:28:26
+ * @Last Modified Time: 2022-05-25 01:58:58
  */
 
 #include "reviseList.h"
@@ -57,13 +57,31 @@ Revision::Revision(const string &file) {
 
 bool Revision::empty() const { return chglist.empty(); };
 
-void Revision::revise(vector<string> &nmlist) {
-  for (str2str &p : chglist)
-    for (auto &nm : nmlist)
-      nm = regex_replace(nm, regex(p.first), p.second);
+int Revision::revise(vector<string> &nmlist) {
+  int nReplace(0);
+  for (str2str &p : chglist) {
+    regex reg(p.first);
+    for (auto &nm : nmlist) {
+      string out = regex_replace(nm, reg, p.second);
+      if (nm.compare(out) != 0) {
+        ++nReplace;
+        nm = out;
+      }
+    }
+  }
+  theInfo("There are " + to_string(nReplace) +
+          "items had been replaced by revision file");
+  return nReplace;
 }
 
-void Revision::revise(string &nm) {
-  for (str2str &p : chglist)
-    nm = regex_replace(nm, regex(p.first), p.second);
+int Revision::revise(string &nm) {
+  int nReplace(0);
+  for (str2str &p : chglist) {
+    string out = regex_replace(nm, regex(p.first), p.second);
+    if (nm.compare(out) != 0) {
+      ++nReplace;
+      nm = out;
+    }
+  }
+  return nReplace;
 }
