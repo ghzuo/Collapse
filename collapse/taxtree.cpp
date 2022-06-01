@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-24 22:41:31
+ * @Last Modified Time: 2022-06-01 10:18:35
  */
 
 #include "taxtree.h"
@@ -18,28 +18,28 @@ const size_t N_FORKS(2);
 /*******************************************************************/
 Node::Node()
     : name(""), id(0), length(NAN), depth(NAN), varsum(NAN), parent(NULL),
-      taxSize(0), taxLevel(0), nleaf(0), nxleaf(0), unclassified(false),
+      taxSize(0), taxLevel(0), nleaf(1), nxleaf(0), unclassified(false),
       uploaded(false), otu(false) {
   children.reserve(N_FORKS);
 };
 
 Node::Node(size_t n)
     : name(""), id(n), length(NAN), depth(NAN), varsum(NAN), parent(NULL),
-      taxSize(0), taxLevel(0), nleaf(0), nxleaf(0), unclassified(false),
+      taxSize(0), taxLevel(0), nleaf(1), nxleaf(0), unclassified(false),
       uploaded(false), otu(false) {
   children.reserve(N_FORKS);
 };
 
 Node::Node(size_t n, const string &str)
     : name(str), id(n), length(NAN), depth(NAN), varsum(NAN), parent(NULL),
-      taxSize(0), taxLevel(0), nleaf(0), nxleaf(0), unclassified(false),
+      taxSize(0), taxLevel(0), nleaf(1), nxleaf(0), unclassified(false),
       uploaded(false), otu(false) {
   children.reserve(N_FORKS);
 };
 
 Node::Node(size_t n, const vector<Node *> &vn)
     : name(""), id(n), length(NAN), depth(NAN), varsum(NAN), parent(NULL),
-      children(vn), taxSize(0), nleaf(0), nxleaf(0), unclassified(false),
+      children(vn), taxSize(0), nleaf(1), nxleaf(0), unclassified(false),
       uploaded(false), otu(false) {
   children.reserve(2);
 };
@@ -116,16 +116,13 @@ void Node::swap(Node *ndx) {
  * @param str
  * @return Node*
  ********************************************************************************/
-void Node::updateRootedTree() {
-  theInfo("This tree is a rooted treee, keep as it is");
-
+void Node::annotateRootedTree() {
   // set branch lineage: type, fullname,  taxLevel
   setAllBranches();
 }
 
 Node *Node::rootingDirect() {
   Node *theTree = _forceRooting(this);
-  theTree->setAllBranches();
   return theTree;
 };
 
@@ -139,9 +136,6 @@ Node *Node::rootingByOutgrp(const string &str) {
 
   // rooting the tree
   theTree = _forceRooting(theTree);
-
-  // set branch lineage: type, fullname,  taxLevel
-  theTree->setAllBranches();
   return theTree;
 };
 
@@ -244,9 +238,9 @@ Node *Node::_forceRooting(Node *root) {
   // add the last child of node as the outgroup of theRoot
   // add root to the super root (theRoot)
   Node *outgrp = root->children.back();
-  theRoot->addChild(outgrp); // outgrp at front
   theRoot->addChild(root);
   root->children.pop_back();
+  theRoot->addChild(outgrp); // outgrp at back
 
   // set the branch lengths of the children of theRoot
   if (outgrp->isLeaf()) {
@@ -260,19 +254,31 @@ Node *Node::_forceRooting(Node *root) {
 };
 
 /********************************************************************************
- * @brief option the tree for balance
+ * @brief rooting tree by length
  *
- * @param root
- * @return Node*
  ********************************************************************************/
-void Node::balanceTree(const string &meth, size_t otulvl) {
-  // find the root candidates
-  vector<Node *> nlist;
-  if (otulvl <= taxLevel)
-    otulvl = taxLevel + 1;
-  findRootCandidates(nlist, otulvl);
+Node *Node::rootingByLength(const string &meth) {
+  // force rooting the tree
+  Node *theRoot = _forceRooting(this);
+  theRoot->_getDepth();
 
-  // set the depth
+  // find all nodes as the candidate
+  vector<Node *> nlist;
+  nlist.emplace_back(theRoot->children.back());
+  theRoot->children.front()->_findRootCandidates(nlist, 1);
+  theRoot->children.back()->_findRootCandidates(nlist, 1);
+  theInfo("There are " + to_string(nlist.size()) +
+          " branches as root candidates");
+
+  // balance the tree
+  theRoot->_rootingTreeByLength(meth, nlist);
+
+  return theRoot;
+};
+
+void Node::_rootingTreeByLength(const string &meth,
+                                const vector<Node *> &nlist) {
+  // get the depth of nodes
   _getDepth();
 
   // do the rooting
@@ -292,6 +298,35 @@ void Node::balanceTree(const string &meth, size_t otulvl) {
   }
 };
 
+/********************************************************************************
+ * @brief option the tree for balance
+ *
+ * @param root
+ * @return Node*
+ ********************************************************************************/
+void Node::balanceTree(const string &meth, size_t otulvl) {
+  // find the root candidates
+  vector<Node *> nlist;
+  if (otulvl <= taxLevel)
+    otulvl = taxLevel + 1;
+  findRootCandidates(nlist, otulvl);
+
+  // rooting tree by length
+  _rootingTreeByLength(meth, nlist);
+};
+
+void Node::infoTree() {
+  // output the root info
+  stringstream buf;
+  auto iter = children.begin();
+  buf << (*iter)->name << "(" << (*iter)->nleaf << "," << (*iter)->length
+      << ")";
+  for (++iter; iter != children.end(); ++iter)
+    buf << ", " << (*iter)->name << "(" << (*iter)->nleaf << ","
+        << (*iter)->length << ")";
+  theInfo("The root braches are: " + buf.str());
+}
+
 void Node::findRootCandidates(vector<Node *> &nlist, size_t otulvl) {
   // set the front as the outgroup
   if (children.front()->taxLevel != taxLevel) {
@@ -308,7 +343,9 @@ void Node::findRootCandidates(vector<Node *> &nlist, size_t otulvl) {
 }
 
 void Node::_findRootCandidates(vector<Node *> &nlist, size_t otulvl) {
-  if (taxLevel < otulvl) {
+  if (isLeaf()) {
+    otu = true;
+  } else if (taxLevel < otulvl) {
     for (auto nd : children) {
       nlist.emplace_back(nd);
       if (!nd->isLeaf() && nd->nleaf > 1) {
@@ -322,10 +359,13 @@ void Node::_findRootCandidates(vector<Node *> &nlist, size_t otulvl) {
   }
 }
 
-void Node::_rearrangeOutgroup(Node *np) {
+vector<Node *> Node::_rearrangeOutgroup(Node *np) {
+  // the change nodes
+  vector<Node *> chgNodes;
+
   // check the outgroup if the root
   if (np->parent == NULL)
-    return;
+    return move(chgNodes);
 
   // get the out group
   Node *outgrp = np;
@@ -335,7 +375,7 @@ void Node::_rearrangeOutgroup(Node *np) {
   if (np->parent->parent == NULL) {
     outgrp->length += ogSib->length;
     ogSib->length = 0;
-    return;
+    return move(chgNodes);
   }
 
   // relative nodes: from parent to the origal root
@@ -377,9 +417,7 @@ void Node::_rearrangeOutgroup(Node *np) {
 
     // update the status of serial nodes
     for (auto iter = nlist.rbegin(); iter != nlist.rend(); ++iter) {
-      (*iter)->_setOneBranch();
-      (*iter)->_getDepth();
-      (*iter)->varsum = NAN;
+      chgNodes.emplace_back(*iter);
     }
 
     // set the top brache as rest
@@ -390,9 +428,9 @@ void Node::_rearrangeOutgroup(Node *np) {
   subRoot->children.clear();
   subRoot->addChild(ogSib);
   subRoot->addChild(rest);
-  subRoot->_setOneBranch();
-  subRoot->_getDepth();
-  subRoot->varsum = NAN;
+  chgNodes.emplace_back(subRoot);
+
+  return move(chgNodes);
 };
 
 Node *Node::_sibling() {
@@ -422,18 +460,12 @@ void Node::_madTree(const vector<Node *> &nlist) {
 
   // select the best tree
   _rearrangeOutgroup(minMAD.first);
+
   children.back()->length -= minMAD.second.first;
   children.front()->length = minMAD.second.first;
 
   theInfo("Rooting Tree by minimal ancestor deviation: " +
           to_string(minMAD.second.second));
-  if (children.front()->length == 0 || children.back()->length == 0) {
-    theInfo("The out group of the tree is: " + minMAD.first->name +
-            " with zero branch");
-  } else {
-    theInfo("The out group of the tree is: " + minMAD.first->name +
-            " with balance");
-  }
 }
 
 pair<double, double> Node::getMAD() {
@@ -492,8 +524,11 @@ void Node::_getOTUad(vector<double> &theDepth, double &mad) {
     // add the ancestor deviation between intro OTU
     for (size_t i = b; i < m; ++i) {
       for (size_t j = m; j < e; ++j) {
-        double rbc = (theDepth[i] - theDepth[j]) / (theDepth[i] + theDepth[j]);
-        mad += rbc * rbc;
+        double lenPath = theDepth[i] + theDepth[j];
+        if (lenPath > 0) {
+          double rbc = (theDepth[i] - theDepth[j]) / lenPath;
+          mad += rbc * rbc;
+        }
       }
     }
 
@@ -510,36 +545,31 @@ void Node::_getOTUad(vector<double> &theDepth, double &mad) {
  * @param nlist
  ********************************************************************************/
 void Node::_pmrTree(const vector<Node *> &nlist) {
-  // find the minimal depth
-  pair<Node *, double> maxPMR{NULL, numeric_limits<double>::min()};
+  // find the maximal relatvie pairwise
+  pair<Node *, pair<double, double>> maxPMR{
+      NULL, make_pair(0, numeric_limits<double>::min())};
   for (auto nd : nlist) {
     // rearrange the tree by set nd as the outgroup
     _rearrangeOutgroup(nd);
-    double pmr = getPMR();
+    pair<double, double> pmr = getPMR();
 
     // get max pmr
-    if (pmr > maxPMR.second) {
+    if (pmr.second > maxPMR.second.second) {
       maxPMR = make_pair(nd, pmr);
     }
   }
 
   // select the best tree
   _rearrangeOutgroup(maxPMR.first);
-  _setLengthByMidpoint();
+  children.back()->length -= maxPMR.second.first;
+  children.front()->length = maxPMR.second.first;
 
   stringstream buf;
-  buf << fixed << setprecision(1) << maxPMR.second * 100 << "%";
+  buf << fixed << setprecision(1) << maxPMR.second.second * 100 << "%";
   theInfo("Rooting Tree by pairwise midpoint root with percent: " + buf.str());
-  if (children.front()->length == 0 || children.back()->length == 0) {
-    theInfo("The out group of the tree is: " + maxPMR.first->name +
-            " with zero branch");
-  } else {
-    theInfo("The out group of the tree is: " + maxPMR.first->name +
-            " with balance");
-  }
 }
 
-double Node::getPMR() {
+pair<double, double> Node::getPMR() {
   // get depthes of all otu
   vector<double> backdep;
   children.back()->_getOTUdepth(backdep);
@@ -548,16 +578,19 @@ double Node::getPMR() {
 
   // obtian the precent of PMR
   int nPMR(0);
+  double sum(0);
   for (auto &nda : frontdep) {
     for (auto &ndb : backdep) {
       double dio = 0.5 * (ndb - nda);
       if (dio > 0 && dio < children.back()->length) {
         ++nPMR;
+        sum += dio;
       }
     }
   }
 
-  return double(nPMR) / (frontdep.size() * backdep.size());
+  return make_pair(sum / nPMR,
+                   double(nPMR) / (frontdep.size() * backdep.size()));
 };
 
 void Node::_getOTUdepth(vector<double> &theDepth) {
@@ -586,8 +619,11 @@ void Node::_mdTree(const vector<Node *> &nlist) {
   pair<Node *, double> mindepPlus{NULL, numeric_limits<double>::max()};
   for (auto nd : nlist) {
     // rearrange the tree by set nd as the outgroup
-    _rearrangeOutgroup(nd);
+    vector<Node *> chgNodes = _rearrangeOutgroup(nd);
+
     // reset the branch
+    for (auto nd : chgNodes)
+      nd->_getDepth();
     _setLengthByMidpoint();
 
     // get mindep
@@ -603,15 +639,16 @@ void Node::_mdTree(const vector<Node *> &nlist) {
   }
 
   // select the best tree
+  vector<Node *> chgNodes;
   if (mindepPlus.first == NULL) {
-    _rearrangeOutgroup(mindep.first);
-    theInfo("The out group of the tree is: " + mindep.first->name +
-            " with zero branch");
+    chgNodes = _rearrangeOutgroup(mindep.first);
   } else {
-    _rearrangeOutgroup(mindepPlus.first);
-    theInfo("The out group of the tree is: " + mindepPlus.first->name +
-            " with balance");
+    chgNodes = _rearrangeOutgroup(mindepPlus.first);
   }
+
+  // update data
+  for (auto nd : chgNodes)
+    nd->_getDepth();
   _setLengthByMidpoint();
 
   theInfo("Rooting Tree by minimal depth: " + to_string(depth));
@@ -643,17 +680,20 @@ void Node::_setLengthByMidpoint() {
 void Node::_getDepth() {
   depth = 0;
   if (!isLeaf()) {
+    nleaf = 0;
     for (auto &nd : children) {
       if (nd->isLeaf()) {
         nd->depth = 0;
         depth += nd->length;
+        nleaf++;
       } else {
         if (std::isnan(nd->depth))
           nd->_getDepth();
-        depth += ((nd->length + nd->depth) * (nd->nleaf + nd->nxleaf));
+        nleaf += nd->nleaf;
+        depth += ((nd->length + nd->depth) * nd->nleaf);
       }
     }
-    depth /= double(nleaf + nxleaf);
+    depth /= double(nleaf);
   }
 };
 
@@ -686,17 +726,12 @@ void Node::_mpTree() {
   if (theLength < 0) {
     children.front()->length = children.back()->length;
     children.back()->length = 0;
-    theInfo("The out group of the tree is: " + children.back()->name +
-            " with zero branch");
   } else if (theLength < children.back()->length) {
     children.front()->length = children.back()->length - theLength;
     children.back()->length = theLength;
-    theInfo("The out group of the tree is: " + children.back()->name +
-            " with zero branch");
-  } else {
-    theInfo("The out group of the tree is: " + children.back()->name +
-            " with balance");
   }
+
+  theInfo("Rooting Tree by midpoint of longest path: " + to_string(path.first));
 }
 
 void Node::_getMaxPath(pair<double, vector<Node *>> &maxPath,
@@ -740,14 +775,18 @@ void Node::_getMaxPath(pair<double, vector<Node *>> &maxPath,
  ********************************************************************************/
 void Node::_mvTree(const vector<Node *> &nlist) {
   // find the minimal depth
+  _getVarSum();
   pair<Node *, double> minvar{NULL, numeric_limits<double>::max()};
   pair<Node *, double> minvarPlus{NULL, numeric_limits<double>::max()};
   for (auto nd : nlist) {
     // rearrange the tree by set nd as the outgroup
-    _rearrangeOutgroup(nd);
+    vector<Node *> chgNodes = _rearrangeOutgroup(nd);
+    for (auto nd : chgNodes) {
+      nd->_getDepth();
+      nd->_getVarSum();
+    }
     // reset the branch
     _setLengthByMidpoint();
-    // get the variation summary
     _getVarSum();
 
     // get minvar
@@ -763,21 +802,21 @@ void Node::_mvTree(const vector<Node *> &nlist) {
   }
 
   // select the best tree
+  vector<Node *> chgNodes;
   if (minvarPlus.first == NULL) {
-    _rearrangeOutgroup(minvar.first);
+    chgNodes = _rearrangeOutgroup(minvar.first);
     varsum = minvar.second;
-    theInfo("The out group of the tree is: " + minvar.first->name +
-            " with zero branch");
   } else {
-    _rearrangeOutgroup(minvarPlus.first);
+    chgNodes = _rearrangeOutgroup(minvarPlus.first);
     varsum = minvarPlus.second;
-    theInfo("The out group of the tree is: " + minvarPlus.first->name +
-            " with balance");
   }
+
+  // set the branch length of root children
+  for (auto nd : chgNodes)
+    nd->_getDepth();
   _setLengthByMidpoint();
 
-  theInfo("Rooting Tree by minimal variation: " +
-          to_string(varsum / (nleaf + nxleaf)));
+  theInfo("Rooting Tree by minimal variation: " + to_string(varsum / nleaf));
 };
 
 void Node::_getVarSum() {
@@ -788,7 +827,7 @@ void Node::_getVarSum() {
         nd->_getVarSum();
       double delta = depth - nd->depth - nd->length;
       varsum += nd->varsum;
-      varsum += (nd->nleaf + nd->nxleaf) * delta * delta;
+      varsum += nd->nleaf * delta * delta;
     }
   }
 };
@@ -995,9 +1034,11 @@ void Node::innwk(const string &file) {
 void Node::checkUnclassified() {
   if (isLeaf()) {
     if (unclassified) {
+      nleaf = 0;
       nxleaf = 1;
     } else {
       nleaf = 1;
+      nxleaf = 0;
     }
   } else {
     nxleaf = 0;
@@ -1352,8 +1393,10 @@ void Node::getUndefineNames(vector<string> &names) {
 void Node::setOneLeaf(const string &nm, bool def) {
   if (def) {
     nleaf = 1;
+    nxleaf = 0;
     unclassified = false;
   } else {
+    nleaf = 0;
     nxleaf = 1;
     unclassified = true;
   }

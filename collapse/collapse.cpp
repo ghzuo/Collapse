@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-24 18:47:17
+ * @Last Modified Time: 2022-06-01 15:36:45
  */
 
 #include "collapse.h"
@@ -18,9 +18,25 @@ void collapse(int argc, char *argv[]) {
   RunArgs myargs(argc, argv);
 
   /************************************************************************
-   ******* read the tree and checked *************************************/
+   ******* read the tree and rooting by topology and branch ***************/
   Node *aTree = new Node;
   aTree->innwk(myargs.infile);
+
+  // rooting the tree by outgroup and branch length
+  if (aTree->children.size() == 2) {
+    theInfo("This tree is a rooted tree, keep as it is");
+  } else if (myargs.byBranch) {
+    aTree = aTree->rootingByLength(myargs.rootMeth);
+  } else if (!myargs.outgrp.empty()) {
+    // root the unrooted tree by input outgroup name
+    Node *result = aTree->rootingByOutgrp(myargs.outgrp);
+    if (result == NULL) {
+      theInfo("Rooting the tree by branch length");
+      aTree = aTree->rootingByLength(myargs.rootMeth);
+    } else {
+      aTree = result;
+    }
+  }
 
   /**********************************************************************
    ********* set for the lineage system and get lineage *****************/
@@ -48,29 +64,20 @@ void collapse(int argc, char *argv[]) {
     allLeafs[i]->setOneLeaf(lngs[i].name, lngs[i].def);
   }
 
-  // annotate the branches
-  if (aTree->children.size() == 2) {
-    // update the rooted tree
-    aTree->updateRootedTree();
-  } else if (!myargs.outgrp.empty()) {
-    // root the unrooted tree by input outgroup name
-    Node *result = aTree->rootingByOutgrp(myargs.outgrp);
-    if (result == NULL) {
-      theInfo("Rooting the tree by taxonomy");
-      aTree = aTree->rootingByTaxa();
-    } else {
-      aTree = result;
-    }
-  } else {
+  // rooting the tree by taxonomy
+  if (aTree->children.size() > 2) {
     // rooting tree by taxonomy
     aTree = aTree->rootingByTaxa();
     size_t otulvl = 0;
-    if(!myargs.otuLevel.empty())
+    if (!myargs.otuLevel.empty())
       otulvl = rank->rankindex(myargs.otuLevel);
     aTree->balanceTree(myargs.rootMeth, otulvl);
   }
 
+  // finaly annotate the rooted tree by lineage
+  aTree->annotateRootedTree();
   theInfo("Annotated all nodes of tree by lineages");
+  aTree->infoTree();
 
   /**************************************************************************
    ************ get the statistic of Taxonomy and annotate tree *************/
@@ -98,8 +105,8 @@ void collapse(int argc, char *argv[]) {
 
 RunArgs::RunArgs(int argc, char **argv)
     : infile(""), taxrev(""), outgrp(""), taxfile(""), forWeb(false),
-      forApp(false), predict(false), itol(false), lngfile(""), clevel(""),
-      rootMeth("mad"), otuLevel("") {
+      forApp(false), predict(false), itol(false), byBranch(false), lngfile(""),
+      clevel(""), rootMeth("mv"), otuLevel("") {
 
   program = argv[0];
   string outname("collapsed");
@@ -107,8 +114,8 @@ RunArgs::RunArgs(int argc, char **argv)
   string kstr;
 
   char ch;
-  while ((ch = getopt(argc, argv, "i:d:D:o:m:r:t:s:T:R:O:L:l:C:a:u:IWPAJqh")) !=
-         -1) {
+  while ((ch = getopt(argc, argv,
+                      "i:d:D:o:S:r:t:s:T:R:O:L:l:C:m:u:BIWPAJqh")) != -1) {
     switch (ch) {
     case 'i':
       infile = optarg;
@@ -122,7 +129,7 @@ RunArgs::RunArgs(int argc, char **argv)
     case 'o':
       outname = optarg;
       break;
-    case 'm':
+    case 'S':
       taxrev = optarg;
       break;
     case 'r':
@@ -143,11 +150,14 @@ RunArgs::RunArgs(int argc, char **argv)
     case 'C':
       clevel = optarg;
       break;
-    case 'a':
+    case 'm':
       rootMeth = toLower(optarg);
       break;
     case 'u':
       otuLevel = toUpper(optarg);
+      break;
+    case 'B':
+      byBranch = true;
       break;
     case 'I':
       itol = true;
@@ -204,36 +214,39 @@ RunArgs::RunArgs(int argc, char **argv)
 }
 
 void RunArgs::usage() {
-  cerr << "\nProgram Usage: \n\n"
-       << program << "\n"
-       << " [ -D ./ ]              The work directory, default: ./\n"
-       << " [ -i Tree.nwk ]        Input newick tree, default: Tree.nwk\n"
-       << " [ -o collapsed ]       Set prefix name of output files, \n"
-       << "                        default: collapsed\n"
-       << " [ -m <Revision.txt> ]  Lineage revision file for batch edit,\n"
-       << "                        default: None\n"
-       << " [ -l Lineage.txt ]     Input lineage file for leaves of tree, \n"
-       << "                        default: Lineage.txt or Lineage.csv\n"
-       << " [ -d taxadb.gz ]       Taxonomy data file or directory,\n"
-       << "                        default: taxadb.gz or taxdump.tar.gz\n"
-       << " [ -R <None> ]          List of rank names and abbravitions,\n"
-       << "                        default: set by program\n"
-       << " [ -r DKPCOFGS ]        Abbreviations of output taxon rank,\n"
-       << "                        default: set by program\n"
-       << " [ -a mad ]             Set rooting method: mad, mv, mp, pmr, or md\n"
-       << "                        default: mad\n"
-       << " [ -u <None> ]          Set the taxon level for OTU in rooting\n"
-       << "                        default: the top division taxon level\n"
-       << " [ -C <None> ]          Collapse tree on the taxon level,\n"
-       << "                        default: the top division taxon level\n"
-       << " [ -O <Outgroup> ]      Set the outgroup for the unroot tree.\n"
-       << "                        default: None, rearranged by taxonomy\n"
-       << " [ -I ]                 Output newick and annotate files for itol\n"
-       << "                        default: No\n"
-       << " [ -P ]                 Output prediction for undefined leafs\n"
-       << " [ -q ]                 Run command in quiet mode\n"
-       << " [ -h ]                 Display this information\n"
-       << endl;
+  cerr
+      << "\nProgram Usage: \n\n"
+      << program << "\n"
+      << " [ -D ./ ]              The work directory, default: ./\n"
+      << " [ -i Tree.nwk ]        Input newick tree, default: Tree.nwk\n"
+      << " [ -o collapsed ]       Set prefix name of output files, \n"
+      << "                        default: collapsed\n"
+      << " [ -S <None> ]          Set batch lineage substitute file,\n"
+      << "                        default: None\n"
+      << " [ -l Lineage.txt ]     Input lineage file for leaves of tree, \n"
+      << "                        default: Lineage.txt or Lineage.csv\n"
+      << " [ -d taxadb.gz ]       Taxonomy data file or directory,\n"
+      << "                        default: taxadb.gz or taxdump.tar.gz\n"
+      << " [ -R <None> ]          List of rank names and abbrivations,\n"
+      << "                        default: set by program\n"
+      << " [ -r DKPCOFGS ]        Abbreviations of output taxon rank,\n"
+      << "                        default: set by program\n"
+      << " [ -m mv ]              Set rooting method: mv, mad, mp, pmr, or md\n"
+      << "                        default: mv\n"
+      << " [ -u <None> ]          Set the taxon level for OTU for rooting\n"
+      << "                        default: the top division taxon level\n"
+      << " [ -B ]                 Rooting phylogenetic tree by branch length\n"
+      << "                        default: No, rooting by taxonomy\n"
+      << " [ -O <Outgroup> ]      Rooting phylogenetic tree by outgroup.\n"
+      << "                        default: None, rooting by taxonomy\n"
+      << " [ -I ]                 Output newick and annotate files for itol\n"
+      << "                        default: No\n"
+      << " [ -C <None> ]          Collapse on the taxon level for itol,\n"
+      << "                        default: the top division taxon level\n"
+      << " [ -P ]                 Output prediction for undefined leafs\n"
+      << " [ -q ]                 Run command in quiet mode\n"
+      << " [ -h ]                 Display this information\n"
+      << endl;
   exit(1);
 }
 

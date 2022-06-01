@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-07 16:34:48
+ * @Last Modified Time: 2022-05-31 15:02:41
  */
 
 #ifndef COLLAPSE_H
@@ -35,7 +35,7 @@ struct RunArgs {
   string rootMeth;
   string otuLevel;
   bool forWeb, forApp, predict;
-  bool itol;
+  bool itol, byBranch;
   // two hidden options for output for server and app
 
   RunArgs(int, char **);

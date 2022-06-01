@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-22 15:59:03
+ * @Last Modified Time: 2022-06-01 09:22:26
  */
 
 #ifndef TREE_H
@@ -82,25 +82,28 @@ struct Node {
   Node *resetroot(const string &);
   Node *resetroot(Node *);
 
-  void updateRootedTree();
+  void annotateRootedTree();
   Node *rootingDirect();
   Node *rootingByOutgrp(const string &);
   Node *rootingByTaxa();
+  Node *rootingByLength(const string &);
   bool _findOutgrpCandidates(vector<Node *> &);
   Node *_forceRooting(Node *);
 
   void balanceTree(const string &, size_t);
   void findRootCandidates(vector<Node *> &, size_t);
   void _findRootCandidates(vector<Node *> &, size_t);
-  void _rearrangeOutgroup(Node *);
+  void _rootingTreeByLength(const string &, const vector<Node *> &);
+  vector<Node *> _rearrangeOutgroup(Node *);
   Node *_sibling();
+  void infoTree();
 
   void _madTree(const vector<Node *> &);
   pair<double, double> getMAD();
-  void _getOTUad(vector<double>&, double&);
+  void _getOTUad(vector<double> &, double &);
 
   void _pmrTree(const vector<Node *> &);
-  double getPMR();
+  pair<double, double> getPMR();
   void _getOTUdepth(vector<double> &);
 
   void _mdTree(const vector<Node *> &);
@@ -108,7 +111,8 @@ struct Node {
   void _getDepth();
 
   void _mpTree();
-  void _getMaxPath(pair<double, vector<Node*>>&, pair<double, vector<Node*>>&);
+  void _getMaxPath(pair<double, vector<Node *>> &,
+                   pair<double, vector<Node *>> &);
 
   void _mvTree(const vector<Node *> &);
   void _getVarSum();
