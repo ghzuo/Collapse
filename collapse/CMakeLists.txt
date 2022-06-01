@@ -7,7 +7,7 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2017-09-01 15:54:30
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2022-03-23 17:03:05
+# @Last Modified Time: 2022-06-01 16:36:48
 ###
 
 INCLUDE_DIRECTORIES("../kit")
@@ -34,6 +34,7 @@ SET(LIBCLTREE_SRC
   getLeafName.cpp    getLeafName.h
   getRank.cpp        getRank.h
   searchLineage.cpp  searchLineage.h
+  rooting.cpp        rooting.h
 )
 
 SET(CLTREEHEADS collapse.h queryLineage.h

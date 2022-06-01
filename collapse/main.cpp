@@ -7,10 +7,11 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-26 14:08:23
+ * @Last Modified Time: 2022-06-01 16:35:06
  */
 
 #include "collapse.h"
+#include "rooting.h"
 #include "getLeafName.h"
 #include "getRank.h"
 #include "getTaxaDB.h"
@@ -24,6 +25,7 @@ void usage(string &program) {
        << " Available Tokens:\n"
        << "   run       All-in-one command: search lineage of leavies,\n"
        << "             annotate phylogenetic tree, and do comparation.\n"
+       << "   root      rooting a phylogenetic tree.\n"
        << "   leaf      Obtain species name list of phylogenetic tree\n"
        << "   cache     Make NCBI database cache from taxdump.tar.gz\n"
        << "   rank      Output taxon rank names and abbreviations\n"
@@ -73,6 +75,8 @@ int main(int argc, char *argv[]) {
     // run the task
     if (task.compare("run") == 0) {
       collapse(argc, argv);
+    } else if(task.compare("root") == 0){
+      rooting(argc,argv);
     } else if (task.compare("query") == 0) {
       queryLineage(argc, argv);
     } else if (task.compare("cache") == 0) {
