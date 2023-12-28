@@ -10,7 +10,7 @@
 # @Last Modified Time: 2022-03-16 16:41:51
 ###
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.6)
 #cmake_policy(SET CMP0012 NEW)
 project (CLTree)
 enable_language(CXX)
