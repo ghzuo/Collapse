@@ -14,7 +14,6 @@ INCLUDE_DIRECTORIES("../kit")
 LINK_LIBRARIES(libkit.a)
 LINK_LIBRARIES(libtaxsys.a)
 LINK_LIBRARIES(libcltr.a)
-LINK_LIBRARIES(z)
 
 SET(LIBTAXSYS_SRC 
     taxsys.cpp taxsys.h
