@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:19:42
+ * @Last Modified Time: 2024-05-12 16:45:14
  */
 
 #include "fileOpt.h"
@@ -77,6 +77,7 @@ void readNameMap(const string &file, vector<string> &nmlist,
   }
 
   for (string line; getline(infile, line);) {
+    line = trim(line);
     if (!line.empty()) {
       vector<string> items;
       separateWord(items, line);
@@ -87,3 +88,36 @@ void readNameMap(const string &file, vector<string> &nmlist,
     }
   }
 };
+
+// make path recursively
+void mkpath(const string &nm) {
+  size_t npos = 0;
+  while ((npos = nm.find("/", npos)) != std::string::npos) {
+    string dir = nm.substr(0, npos);
+#ifdef _WIN32
+    mkdir(dir.c_str());
+#else
+    mkdir(dir.c_str(), 0755);
+#endif
+    npos++;
+  }
+}
+
+// replace $ with k value in file name
+string nameWithK(const string &str, size_t k) {
+
+  string kstr = to_string(k);
+  // if (str.empty())
+  //   return kstr;
+
+  // if (str.find("$", 0) == std::string::npos)
+  //   return str + "$";
+
+  string sstr = str;
+  size_t npos = 0;
+  while ((npos = sstr.find("$", npos)) != std::string::npos) {
+    sstr.replace(npos, 1, kstr);
+    npos += kstr.length();
+  }
+  return sstr;
+}

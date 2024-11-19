@@ -7,7 +7,7 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2020-12-07 09:06:29
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2022-03-22 22:49:21
+# @Last Modified Time: 2024-11-19 13:37:48
 ###
 
 
@@ -18,7 +18,7 @@ LABEL Version=0.1 \
   description="Docker image for Collapse" 
 
 ## for develop environment
-RUN apk --update add --no-cache g++ make cmake zlib-dev
+RUN apk --update add --no-cache g++ make cmake zlib-dev zlib-static
 RUN apk --update add --no-cache nlohmann-json --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
 
 ## Build cltree
@@ -35,3 +35,4 @@ RUN apk --update add --no-cache libstdc++
 
 ## for workplace
 WORKDIR /root/data
+ENTRYPOINT ["cltree"]

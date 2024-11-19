@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:28
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-24 19:31:49
+ * @Last Modified Time: 2022-11-24 00:27:58
  */
 
 #define THEINFO
@@ -60,3 +60,7 @@ void Info::operator()(const string &str, int idep) {
          << endl;
   }
 };
+
+void Info::indent(int n){
+  dep += n;
+}

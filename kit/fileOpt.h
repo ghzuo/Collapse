@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:19:28
+ * @Last Modified Time: 2024-04-23 21:32:43
  */
 
 #ifndef FILEOPT_H
@@ -56,10 +56,15 @@ void tgzReadFile(gzFile&, size_t, string&);
 int gzline(gzFile &, string &);
 
 // check gzip file empty
-
 bool gzvalid(const string&);
 
 // read list file for list and name map
 void readNameMap(const string&, vector<string>&, map<string,string>&);
+
+// make path void recursively
+void mkpath(const string&);
+
+// replace $ with k value in file name
+string nameWithK(const string &, size_t);
 
 #endif // FILEOPT_H

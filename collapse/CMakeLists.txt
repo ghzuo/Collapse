@@ -7,13 +7,10 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2017-09-01 15:54:30
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2022-06-01 16:36:48
+# @Last Modified Time: 2024-11-19 17:35:33
 ###
 
 INCLUDE_DIRECTORIES("../kit")
-LINK_LIBRARIES(libkit.a)
-LINK_LIBRARIES(libtaxsys.a)
-LINK_LIBRARIES(libcltr.a)
 
 SET(LIBTAXSYS_SRC 
     taxsys.cpp taxsys.h
@@ -49,6 +46,6 @@ ADD_LIBRARY(taxsys STATIC ${LIBTAXSYS_SRC})
 ADD_LIBRARY(cltr   STATIC ${LIBCLTREE_SRC})
 
 ADD_EXECUTABLE(cltree ${CLTREE_SRC})
-TARGET_LINK_LIBRARIES(cltree kit taxsys cltr)
+TARGET_LINK_LIBRARIES(cltree cltr taxsys kit)
 
 INSTALL(TARGETS cltree RUNTIME DESTINATION bin)

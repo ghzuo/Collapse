@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:28
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-04-01 23:51:34
+ * @Last Modified Time: 2024-05-06 19:02:23
  */
 
 #ifndef STRINGOPT_H
@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <vector>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 using namespace std;
 
@@ -75,7 +76,10 @@ string addsuffix(const string&, const string&);
 string chgsuffix(const string &, const string &);
 string getsuffix(const string &);
 string delsuffix(const string &);
+string addnamelabel(const string&, const string&, char sep = '-');
 bool hasSuffix(const string&, const string&);
+string getFileName(const string&);
+string getDirName(const string&);
 
 /********************************************************************************
  * @brief option on convert string to number
@@ -90,6 +94,7 @@ template <class T> void str2number(const string &str, T &v) {
   iss >> v;
 };
 
+string int2lenStr(int, size_t, char c='0');
 /********************************************************************************
  * @brief options on read columns file
  * 

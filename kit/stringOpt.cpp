@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-04-01 23:17:46
+ * @Last Modified Time: 2024-05-06 19:04:09
  */
 
 #include "stringOpt.h"
@@ -116,8 +116,27 @@ string addsuffix(const string &str, const string &suff) {
   }
 };
 
+string addnamelabel(const string &name, const string &lab, char sep) {
+  string suffix = getsuffix(name);
+  string str = delsuffix(name);
+  if(lab[0] != sep)
+    str += '-';
+  str += lab;
+  str += ".";
+  str += suffix;
+  return str;
+};
+
 bool hasSuffix(const string &filename, const string &suffix) {
   return filename.rfind(suffix) + suffix.size() == filename.size();
+};
+
+string getFileName(const string& path){
+  return path.substr(path.find_last_of('/') + 1);
+};
+
+string getDirName(const string& path){
+  return path.substr(0, path.find_last_of('/'));
 };
 
 /********************************************************************************
@@ -130,6 +149,13 @@ float str2float(const string &str) { return stof(trim(str)); }
 
 double str2double(const string &str) { return stod(trim(str)); }
 
+string int2lenStr(int n, size_t w, char c) {
+  string str = to_string(n);
+  while (str.size() < w) {
+    str.insert(0, 1, c);
+  }
+  return str;
+}
 /********************************************************************************
  * @brief options on read file
  *
@@ -187,7 +213,7 @@ void hsv2rgb(vector<int> &cv) {
   float S = (float)(cv[1]) / 100.0;
   float V = (float)(cv[2]) / 100.0;
   float R, G, B;
-  
+
   if (S == 0) {
     R = V;
     G = V;
@@ -234,7 +260,7 @@ void hsv2rgb(vector<int> &cv) {
       break;
     }
   }
-  
+
   cv[0] = (int)(R * 255);
   cv[1] = (int)(G * 255);
   cv[2] = (int)(B * 255);

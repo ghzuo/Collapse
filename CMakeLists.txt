@@ -7,7 +7,7 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2021-01-22 15:47:25
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2022-03-16 16:41:51
+# @Last Modified Time: 2024-11-19 18:57:47
 ###
 
 cmake_minimum_required(VERSION 3.6)
@@ -22,8 +22,10 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 LINK_DIRECTORIES(${LIBRARY_OUTPUT_PATH})
 # SET(CMAKE_CXX_FLAGS "-Wall")
 SET(CMAKE_VERBOSE_MAKEFILE on)
-ADD_DEFINITIONS("-O3 -std=c++11")
-#set(CMAKE_FIND_LIBRARY_SUFFIXES .a .tbd .dylib .so)
+ADD_DEFINITIONS("-O3 -std=c++14")
+set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+set(CMAKE_EXE_LINKER_FLAGS "-static -static-libstdc++ -static-libgcc")
+
 
 ### use conda library
 if (NOT $ENV{CONDA_PREFIX} STREQUAL "")

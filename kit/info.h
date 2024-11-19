@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:28
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-03-16 12:19:00
+ * @Last Modified Time: 2022-11-24 00:26:47
  */
 
 #ifndef INFO_H
@@ -42,6 +42,7 @@ struct Info {
   ~Info();
 
   void operator()(const string&, int idep=0);
+  void indent(int n=1);
 };
 #endif
 
