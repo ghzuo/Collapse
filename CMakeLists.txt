@@ -7,7 +7,7 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2021-01-22 15:47:25
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2024-11-19 18:57:47
+# @Last Modified Time: 2024-11-24 10:35:24
 ###
 
 cmake_minimum_required(VERSION 3.6)
@@ -23,9 +23,14 @@ LINK_DIRECTORIES(${LIBRARY_OUTPUT_PATH})
 # SET(CMAKE_CXX_FLAGS "-Wall")
 SET(CMAKE_VERBOSE_MAKEFILE on)
 ADD_DEFINITIONS("-O3 -std=c++14")
-set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-set(CMAKE_EXE_LINKER_FLAGS "-static -static-libstdc++ -static-libgcc")
 
+## static option
+option(STATIC "Build as a static library" OFF)
+if(STATIC)
+  message(STATUS "Building with STATIC=ON")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libstdc++ -static-libgcc")
+endif()
 
 ### use conda library
 if (NOT $ENV{CONDA_PREFIX} STREQUAL "")
@@ -36,7 +41,9 @@ endif ()
 
 ### Check required LIABRARIES
 if(NOT EMSCRIPTEN)
-  SET(ZLIB_USE_STATIC_LIBS ON)
+  if(STATIC)
+   SET(ZLIB_USE_STATIC_LIBS ON)
+  endif()
   find_package(ZLIB)
   if(ZLIB_FOUND)
     include_directories(${ZLIB_INCLUDE_DIRS})
