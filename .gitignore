@@ -5,7 +5,6 @@ CMakeLists.txt.user
 .vstags
 .history
 cache
-example/collapse.*
 example/Rooted.nwk
 example/taxadb.gz
 example/taxdump.tar.gz
