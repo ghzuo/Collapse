@@ -7,7 +7,7 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2020-12-07 09:06:29
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2025-04-24 Thursday 17:23:23
+# @Last Modified Time: 2025-04-24 Thursday 18:00:30
 ###
 
 
@@ -23,9 +23,7 @@ RUN apk --update add --no-cache nlohmann-json --repository=http://dl-cdn.alpinel
 
 ## Build cltree
 WORKDIR /root
-COPY ../collapse /root/collapse/collapse
-COPY ../kit /root/collapse/kit
-COPY ../CMakeLists.txt /root/collapse/
+COPY ../src /root/collapse
 RUN mkdir collapse/build/ && cd collapse/build/ && cmake .. && make 
 
 ## Stage for run cvtree 

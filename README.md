@@ -29,7 +29,7 @@ All tasks are run by the program `cltree` with tasks. The available tasks are:
 
 1. unzip the package file and change into it
 2. mkdir build and change into it
-3. cmake .. or add some options you wanted
+3. cmake ../src or add some options you wanted
 4. make
 5. make install (_option_)
 

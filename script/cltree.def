@@ -7,7 +7,7 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2025-04-24 Thursday 16:52:39
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2025-04-24 Thursday 17:39:49
+# @Last Modified Time: 2025-04-24 Thursday 17:59:35
 ###
 
 Bootstrap: docker
@@ -15,9 +15,7 @@ From: alpine
 
 %files
     # copy source files 
-    ../collapse /root/collapse/collapse
-    ../kit /root/collapse/kit
-    ../CMakeLists.txt /root/collapse/
+    ../src /root/collapse
 
 %post
     # Install dependencies
