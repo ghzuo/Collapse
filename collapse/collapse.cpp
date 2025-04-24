@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-06-01 15:36:45
+ * @Last Modified Time: 2025-03-16 Sunday 12:30:05
  */
 
 #include "collapse.h"
@@ -276,16 +276,17 @@ void output(const LngData &lngs, Taxa &aTaxa, Node *aTree, RunArgs &myargs) {
     outItolSymbol(aTaxa, nodes, myargs.outPref + "-iToL_symbol.txt");
 
     // get division rank
-    set<string> division;
+    map<string, TaxonState> division;
     getDivision(aTaxa, myargs.clevel, division);
     if (division.size() > 1) {
       theInfo("The phylogenetic tree will shown in " +
               to_string(division.size()) + " classes");
       outItolStrap(nodes, division, myargs.outPref + "-iToL_strap.txt");
-      outItolCollapse(nodes, division, myargs.outPref + "-iToL_collapse.txt");
+      outItolCollapse(nodes, division, myargs.outPref);
     }
   } else {
     aTree->outnwk(myargs.outPref + "-annotated.nwk");
+    aTree->outnwk(myargs.outPref + "-rooted.nwk", false);
   }
 
   // for undefined items
@@ -460,7 +461,7 @@ void outItolPopup(const Taxa &aTaxa, const vector<Node *> &nodes,
   os.close();
 };
 
-void outItolStrap(const vector<Node *> &nodes, const set<string> &division,
+void outItolStrap(const vector<Node *> &nodes, const map<string, TaxonState> &division,
                   const string &file) {
   // the file header
   ofstream os(file);
@@ -476,14 +477,17 @@ void outItolStrap(const vector<Node *> &nodes, const set<string> &division,
   os << "DATA\n" << endl;
 
   // the color map
-  int theRank = nRanks(*division.begin()) - 1;
+  int theRank = nRanks(division.begin()->first) - 1;
   map<string, string> colorMap;
   for (auto &d : division) {
-    colorMap[d] = "X";
+    colorMap[d.first] = "X";
   }
   getColorMap(colorMap);
 
   for (auto &nd : nodes) {
+    if (nd->unclassified)
+      continue;
+
     string lngstr = nd->name;
     lngstr.erase(remove(lngstr.begin(), lngstr.end(), '|'), lngstr.end());
     vector<string> nmlist;
@@ -502,24 +506,43 @@ void outItolStrap(const vector<Node *> &nodes, const set<string> &division,
   os.close();
 };
 
-void outItolCollapse(const vector<Node *> &nodes, const set<string> &division,
-                     const string &file) {
-  // the file header
-  ofstream os(file);
-  itolHeader(os, file, "COLLAPSE");
+void outItolCollapse(const vector<Node *> &nodes, const map<string, TaxonState> &division,
+                     const string &prefix) {
+  // the file header of collapse file
+  string fcol = prefix + "-iToL_collapse.txt";
+  ofstream col(fcol);
+  itolHeader(col, fcol, "COLLAPSE");
+  col << "DATA\n" << endl;
 
-  // the data section
-  os << "DATA\n" << endl;
+  // the file header of label file
+  string flab = prefix + "-iToL_collapseLabel.txt";
+  ofstream lab(flab);
+  itolHeader(lab, flab, "LABELS");
+  lab << "DATA\n" << endl;
 
-  int theRank = nRanks(*division.begin());
+  int theRank = nRanks(division.begin()->first);
   for (auto &nd : nodes) {
-    if (!nd->isLeaf()) {
-      if (nd->parent->taxLevel < theRank && nd->taxLevel >= theRank) {
-        os << "I" << nd->id << endl;
+    if (nd->parent->taxLevel < theRank && nd->taxLevel >= theRank) {
+      if (!nd->isLeaf()) {
+        col << "I" << nd->id << endl;
+        lab << "I" << nd->id;
+      } else {
+        lab << nd->id;
       }
+
+      string lngstr = nd->name;
+      lngstr.erase(remove(lngstr.begin(), lngstr.end(), '|'), lngstr.end());
+      vector<string> nmlist;
+      parseLineage(lngstr, nmlist);
+      string taxName = nmlist[theRank - 1];
+      lab << "\t" << lastNameNoRank(taxName) << "{" << nd->nleaf;
+      size_t taxSize = division.find(nmlist[theRank - 1])->second.nStrain;
+      if (nd->nleaf > 0 && nd->nleaf < taxSize)
+        lab << "/" << taxSize;
+      lab << "}" << endl;
     }
   }
-  os.close();
+  col.close();
 };
 
 void outItolSymbol(const Taxa &aTaxa, const vector<Node *> &nodes,
@@ -556,7 +579,7 @@ void itolHeader(ostream &os, const string &file, const string &type) {
      << "SEPARATOR TAB\n";
 };
 
-void getDivision(const Taxa &aTaxa, const string &str, set<string> &division) {
+void getDivision(const Taxa &aTaxa, const string &str, map<string, TaxonState> &division) {
   int theRank = 0;
   if (!str.empty()) {
     theRank = aTaxa.rank->rankindex(str);
@@ -568,7 +591,7 @@ void getDivision(const Taxa &aTaxa, const string &str, set<string> &division) {
   if (theRank != 0) {
     for (auto &tax : aTaxa.def.state) {
       if (nRanks(tax.first) == theRank)
-        division.insert(tax.first);
+        division.insert(tax);
     }
   } else {
     theInfo("Use the top division rank level");
@@ -576,10 +599,10 @@ void getDivision(const Taxa &aTaxa, const string &str, set<string> &division) {
   }
 };
 
-void getTopDivision(const Taxa &aTaxa, set<string> &division) {
-  vector<set<string>> rankset(aTaxa.rank->outrank.size() + 1);
+void getTopDivision(const Taxa &aTaxa, map<string, TaxonState> &division) {
+  vector<map<string, TaxonState>> rankset(aTaxa.rank->outrank.size() + 1);
   for (auto &tax : aTaxa.def.state) {
-    rankset[nRanks(tax.first)].insert(tax.first);
+    rankset[nRanks(tax.first)].insert(tax);
   }
 
   for (auto &rk : rankset) {
@@ -631,11 +654,14 @@ string itolPopusStr(Node *nd, const Taxa &aTaxa) {
   for (size_t i = 0; i < nOutput; ++i) {
     buf << "<tr>"
         << "<th>" << aTaxa.rank->outrank[i].first << ": </th>"
-        << "<td>" << lastNameNoRank(nmlist[i]);
+        << "<td>" << lastNameNoRank(nmlist[i]) << "{";
 
     auto iter = aTaxa.def.state.find(nmlist[i]);
-    buf << "{" << iter->second.nStrain << ", " << iter->second.distract.size()
-        << "}</td></tr>";
+    if (iter != aTaxa.def.state.end())
+      buf << iter->second.nStrain << ", " << iter->second.distract.size();
+    else
+      buf << "-, -";
+    buf << "}</td></tr>";
   }
   buf << "</table>";
 

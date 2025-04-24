@@ -1,0 +1,48 @@
+###
+# Copyright (c) 2025
+# See the accompanying Manual for the contributors and the way to
+# cite this work. Comments and suggestions welcome. Please contact
+# Dr. Guanghong Zuo <ghzuo@ucas.ac.cn>
+# 
+# @Author: Dr. Guanghong Zuo
+# @Date: 2025-04-24 Thursday 16:52:39
+# @Last Modified By: Dr. Guanghong Zuo
+# @Last Modified Time: 2025-04-24 Thursday 17:39:49
+###
+
+Bootstrap: docker
+From: alpine
+
+%files
+    # copy source files 
+    ../collapse /root/collapse/collapse
+    ../kit /root/collapse/kit
+    ../CMakeLists.txt /root/collapse/
+
+%post
+    # Install dependencies
+    apk update
+    apk add --no-cache g++ make cmake zlib-dev zlib-static
+    apk add --no-cache nlohmann-json --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
+    apk add --no-cache libstdc++
+
+    # build the project
+    cd /root/collapse
+    mkdir -p build
+    cd build
+    cmake ..
+    make
+    make install
+
+    # delete the build directory and cache files
+    apk del --no-cache g++ make cmake zlib-dev zlib-static nlohmann-json
+    rm -rf /root/collapse
+    rm -rf /var/cache/apk/*
+
+%runscript
+    cltree "$@"
+
+%labels
+    Version 1.0
+    MAINTAINER Guanghong Zuo<ghzuo@ucas.ac.cn>
+    description "Singularity image for CLTree"

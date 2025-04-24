@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-05-31 15:02:41
+ * @Last Modified Time: 2025-03-16 Sunday 12:07:17
  */
 
 #ifndef COLLAPSE_H
@@ -55,11 +55,11 @@ void outItolNodes(const vector<Node *>&, const string &);
 void outItolLabel(const vector<Node *>&, const string &);
 void outItolPopup(const Taxa &, const vector<Node *>&, const string &);
 void outItolSymbol(const Taxa &, const vector<Node *>&, const string &);
-void outItolStrap(const vector<Node *>&, const set<string>&, const string &);
-void outItolCollapse(const vector<Node*>&, const set<string>&, const string&);
+void outItolStrap(const vector<Node *>&, const map<string, TaxonState>&, const string &);
+void outItolCollapse(const vector<Node*>&, const map<string, TaxonState>&, const string&);
 void itolHeader(ostream&, const string&, const string&);
-void getDivision(const Taxa&, const string&, set<string>&);
-void getTopDivision(const Taxa &, set<string>&);
+void getDivision(const Taxa&, const string&, map<string, TaxonState>&);
+void getTopDivision(const Taxa &, map<string, TaxonState>&);
 void getColorMap(map<string,string>&);
 string itolPopusStr(Node*, const Taxa&);
 

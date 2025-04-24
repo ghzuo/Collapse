@@ -7,11 +7,10 @@
 # @Author: Dr. Guanghong Zuo
 # @Date: 2021-01-22 15:47:25
 # @Last Modified By: Dr. Guanghong Zuo
-# @Last Modified Time: 2024-11-24 10:35:24
+# @Last Modified Time: 2025-04-24 Thursday 17:32:17
 ###
 
-cmake_minimum_required(VERSION 3.6)
-#cmake_policy(SET CMP0012 NEW)
+cmake_minimum_required(VERSION 3.10)
 project (CLTree)
 enable_language(CXX)
 

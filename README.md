@@ -10,7 +10,7 @@ All tasks are run by the program `cltree` with tasks. The available tasks are:
 - run: the main program, annotate the tree (newick format) by the lineage of genomes,
   and statistics. It can be emitted.
 - cache: A tool to convert the NCBI taxonomy database dump file (download from:  
-  [NCBI Taxonomy dump](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz)
+  [NCBI Taxonomy dump](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz))
   to an input lineage string file
 - search: Query the lineage of genomes from the NCBI database and Lineage files.
 - leaf: Obtain the leaf name list of a phylogenetic tree (in Newick form).
@@ -21,7 +21,7 @@ All tasks are run by the program `cltree` with tasks. The available tasks are:
 
 #### Preparation
 
-- cmake >= 3.0
+- cmake >= 3.10
 - compiler supporting C++11 standard
 - require library: libz, nlohmann-json
 
@@ -33,26 +33,19 @@ All tasks are run by the program `cltree` with tasks. The available tasks are:
 4. make
 5. make install (_option_)
 
+### Run Programs in Singularity
+
+Singularity is a container technology developed by Lawrence Berkeley National Laboratory specifically for high-performance computing (HPC) scenarios. It employs virtualization entirely based on portability, offering a more lightweight solution with faster deployment. Currently, Singularity is widely adopted by various high-performance computing centers worldwide.
+
+1. Install singularity/apptainer, e.g., `sudo apt-get install singularity`
+2. Use the cltree.sif in script directly, Or Compile your CLTree singularity container by script/cltree.def with command:
+   `singularity  build --fakeroot cltree.sif cltree.def`
+3. More usage for singularity can reference [singularity document](https://sylabs.io/docs/).
+
 ### Run Programs in Docker
 
-Docker allows users preforming programs on both Windows and Linux/MacOS.
-You can download docker free and reference [docker document](https://docs.docker.com/install/)
-to install it. After installing docker, basic usages for CVTree are:
-
-1. Build/download docker image: `docker build -t="cltree-img" .`
-   or `docker pull ghzuo/cltree`. In this step, an image with cltree
-   programs will obtain. Here option "-t" sets the image name. After building
-   the image, you can delete the dangling images for build by `docker image prune`.
-2. Start container from the image in:
-   `docker run --rm -it -v $PWD/example:/root/data cltree-img`
-   In this step, you will enter the cltree container, and the "example" folder
-   in the host will be mounted on the "data" folder in the container. Change the path
-   to the data folder, and run `cltree`. You will get the result for genomes
-   in the "list" file. You can change the path "\$PWD/example" to your data directory.
-3. Exit and stop container: `exit` in docker terminal.
-4. Run cvtree in docker by one command in example folder:
-   `docker run --rm -v $PWD:/root/data cltree-img cltree`
-5. More usage for docker can reference [docker document](https://docs.docker.com/).
+We recommend utilizing Singularity for containerized execution of cltree. However, if you are accustomed to Docker, a Dockerfile is also provided in the script directory for compatibility,
+or pull from Docker Hub by `docker pull ghzuo/cltree`.
 
 ## Run Programs with Example
 
@@ -71,8 +64,8 @@ for handling tree on [iTOL](https://itol.embl.de/).
 
 ## Reference
 
-- Guanghong Zuo (2022) CLTree: Annotate Phylogenetic Tree by Lineage and
-  Measure their Consistency based on Shannon Entropy. In preparation.
+- Guanghong Zuo (2025) CLTree: Annotating, Rooting and Evaluating Phylogenetic
+  Tree based on Lineage of Genomes. In preparation.
 - Guanghong Zuo, Bailin Hao (2015) CVTree3 web server for
   whole-genome-based and alignment-free prokaryotic phylogeny and
   taxonomy, Genomics Proteomics & Bioinformatics, 13: 321-331

@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-06-01 10:18:35
+ * @Last Modified Time: 2025-03-14 Friday 10:45:27
  */
 
 #include "taxtree.h"
@@ -918,14 +918,35 @@ void Node::_outnwk(ostream &os) {
     os << ":" << fixed << setprecision(5) << length;
 };
 
-void Node::outnwk(const string &file) {
+void Node::_nwk(ostream &os) {
+  if (!isLeaf()) {
+    os << "(";
+    auto iter = children.begin();
+    (*iter)->_nwk(os);
+    for (++iter; iter != children.end(); ++iter) {
+      os << ",";
+      (*iter)->_nwk(os);
+    }
+    os << ")";
+  } else {
+    // output the name of node
+    string namestr = lastNameNoRank(name);
+    os << ((namestr.find(' ') == string::npos) ? namestr : ('"' + namestr + '"'));
+  }
+
+  // output the length of node
+  if (!std::isnan(length))
+    os << ":" << fixed << setprecision(5) << length;
+};
+
+void Node::outnwk(const string &file, bool annotated) {
   ofstream os(file);
   if (!os) {
     cerr << "Open " << file << " for write failed" << endl;
     exit(3);
   }
 
-  outnwk(os);
+  outnwk(os, annotated);
   os.close();
 };
 
@@ -951,8 +972,12 @@ void Node::outitol(const string &file) {
   os.close();
 };
 
-void Node::outnwk(ostream &os) {
-  _outnwk(os);
+void Node::outnwk(ostream &os, bool annotated) {
+  if (annotated) {
+    _outnwk(os);
+  } else {
+    _nwk(os);
+  }
   os << ";" << endl;
 };
 

@@ -7,7 +7,7 @@
  * @Author: Dr. Guanghong Zuo
  * @Date: 2022-03-16 12:10:27
  * @Last Modified By: Dr. Guanghong Zuo
- * @Last Modified Time: 2022-06-01 09:22:26
+ * @Last Modified Time: 2025-03-14 Friday 10:44:45
  */
 
 #ifndef TREE_H
@@ -117,10 +117,11 @@ struct Node {
   void _mvTree(const vector<Node *> &);
   void _getVarSum();
 
-  void _outnwk(ostream &);
+  void _outnwk(ostream &); // output annotated tree
+  void _nwk(ostream &); // output only leaf name
   static function<string(Node *)> nwkname;
-  void outnwk(ostream &);
-  void outnwk(const string &);
+  void outnwk(ostream &, bool annotated=true);
+  void outnwk(const string &, bool annotated=true);
   void outitol(const string &);
   void _innwk(istream &);
   void _nwkItem(const string &);
